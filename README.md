@@ -99,3 +99,5 @@ docs/               架构、部署、评测边界与人工审核说明
 - 实时工单、任务与审核结果按匿名会话隔离；过期会话由 Worker 清理。
 
 详见 `docs/architecture.md`、`docs/evaluation-boundary.md` 和 `docs/deployment.md`。
+
+首次启用真实 Dify 推理与独立人工抽检时，按 `docs/activation-checklist.md` 执行；真实密钥不得进入仓库。
