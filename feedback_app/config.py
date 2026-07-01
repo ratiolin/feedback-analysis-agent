@@ -15,6 +15,7 @@ class Settings(BaseSettings):
     allow_demo_analyzer: bool = True
     demo_session_ttl_hours: int = 24
     live_session_daily_limit: int = 5
+    live_ip_daily_limit: int = 10
     live_global_daily_limit: int = 100
     max_message_chars: int = 2_000
     max_csv_rows: int = 10
@@ -25,4 +26,3 @@ class Settings(BaseSettings):
 @lru_cache
 def get_settings() -> Settings:
     return Settings()
-

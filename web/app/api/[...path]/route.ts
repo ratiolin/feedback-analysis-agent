@@ -12,6 +12,9 @@ async function proxy(request: NextRequest, context: { params: Promise<{ path: st
   if (contentType) headers.set("content-type", contentType);
   const idempotency = request.headers.get("idempotency-key");
   if (idempotency) headers.set("idempotency-key", idempotency);
+  const forwarded = request.headers.get("x-forwarded-for");
+  const clientIp = forwarded?.split(",").at(-1)?.trim() ?? request.headers.get("x-real-ip");
+  if (clientIp) headers.set("x-demo-client", clientIp);
   const session = cookieStore.get("feedback_demo_session")?.value;
   if (session) headers.set("x-demo-session", session);
   const body = request.method === "GET" ? undefined : await request.arrayBuffer();
@@ -28,4 +31,3 @@ async function proxy(request: NextRequest, context: { params: Promise<{ path: st
 export const GET = proxy;
 export const POST = proxy;
 export const PATCH = proxy;
-

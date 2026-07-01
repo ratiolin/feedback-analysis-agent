@@ -26,7 +26,10 @@ class DemoSession(Base):
 
 class Ticket(Base):
     __tablename__ = "tickets"
-    __table_args__ = (UniqueConstraint("session_id", "external_id", name="uq_session_ticket"),)
+    __table_args__ = (
+        UniqueConstraint("session_id", "external_id", name="uq_session_ticket"),
+        UniqueConstraint("session_id", "idempotency_key", name="uq_session_idempotency"),
+    )
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
     external_id: Mapped[str] = mapped_column(String(64), index=True)
@@ -38,6 +41,7 @@ class Ticket(Base):
     ingested_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)
     current_status: Mapped[str] = mapped_column(String(32), default="open")
     input_hash: Mapped[str] = mapped_column(String(64), index=True)
+    idempotency_key: Mapped[str | None] = mapped_column(String(128), nullable=True)
     source: Mapped[str] = mapped_column(String(32), default="live")
 
 
@@ -66,6 +70,9 @@ class AnalysisJob(Base):
     status: Mapped[str] = mapped_column(String(24), default="queued", index=True)
     attempts: Mapped[int] = mapped_column(Integer, default=0)
     last_error: Mapped[str | None] = mapped_column(Text, nullable=True)
+    available_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=utc_now, index=True
+    )
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)
 

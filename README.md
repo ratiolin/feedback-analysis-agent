@@ -91,9 +91,11 @@ docs/               架构、部署、评测边界与人工审核说明
 - 数据全部为虚构合成样本。
 - 在线输入最长 2,000 字；CSV 最大 1 MB、10 行。
 - 邮箱、手机号和疑似密钥在持久化及模型调用前脱敏。
-- 公网实时分析限制为每会话每天 5 条、全站每天 100 条。
+- 公网实时分析限制为每会话每天 5 条、每来源每天 10 条、全站每天 100 条；刷新或清除 cookie 不能绕过来源限额。
 - API、Postgres 和 Worker 不暴露公网，仅 Next.js 通过 BFF 访问。
 - 密钥只允许放 `.env`，仓库只提供 `.env.example`。
+- `Idempotency-Key` 在数据库中按会话唯一，并处理并发插入竞争；重复请求返回原任务。
+- 仅对“工作流版本 + 脱敏后原文完全一致”的输入复用分析，避免 evidence offset 因空格或标点差异错位。
+- 实时工单、任务与审核结果按匿名会话隔离；过期会话由 Worker 清理。
 
 详见 `docs/architecture.md`、`docs/evaluation-boundary.md` 和 `docs/deployment.md`。
-

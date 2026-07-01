@@ -2,6 +2,7 @@ import csv
 import hashlib
 import io
 import json
+from contextlib import asynccontextmanager
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Annotated
@@ -10,7 +11,8 @@ from fastapi import Depends, FastAPI, File, Header, HTTPException, Request, Uplo
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, Response
 from prometheus_client import CONTENT_TYPE_LATEST, Counter, Gauge, Histogram, generate_latest
-from sqlalchemy import func, select, text
+from sqlalchemy import func, or_, select, text
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from .config import Settings, get_settings
@@ -29,17 +31,28 @@ from .models import (
 from .schemas import ReviewPatch, TicketInput
 from .service import (
     count_session_tickets_today,
-    create_demo_session,
+    create_or_reuse_demo_session,
     enqueue_ticket,
     require_active_session,
 )
 
-app = FastAPI(title="Customer Feedback Analysis API", version="0.1.0")
+
+@asynccontextmanager
+async def lifespan(_app: FastAPI):
+    init_db()
+    yield
+
+
+app = FastAPI(
+    title="Customer Feedback Analysis API",
+    version="0.1.0",
+    lifespan=lifespan,
+)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[],
     allow_methods=["GET", "POST", "PATCH"],
-    allow_headers=["Content-Type", "Idempotency-Key", "X-Demo-Session"],
+    allow_headers=["Content-Type", "Idempotency-Key", "X-Demo-Client", "X-Demo-Session"],
 )
 
 REQUESTS = Counter("feedback_api_requests_total", "API requests", ["route", "status"])
@@ -67,11 +80,6 @@ async def record_request(request: Request, call_next):
     return response
 
 
-@app.on_event("startup")
-def startup() -> None:
-    init_db()
-
-
 def _session_or_401(db: Session, session_id: str | None) -> DemoSession:
     if not session_id:
         raise HTTPException(status_code=401, detail="missing_demo_session")
@@ -81,10 +89,37 @@ def _session_or_401(db: Session, session_id: str | None) -> DemoSession:
         raise HTTPException(status_code=401, detail=str(exc)) from exc
 
 
+def _visible_ticket_or_404(
+    db: Session, ticket_id: str, session_id: str | None
+) -> Ticket:
+    ticket = db.get(Ticket, ticket_id)
+    if ticket is None:
+        raise HTTPException(status_code=404, detail="ticket_not_found")
+    if ticket.session_id is not None:
+        _session_or_401(db, session_id)
+        if ticket.session_id != session_id:
+            raise HTTPException(status_code=404, detail="ticket_not_found")
+    return ticket
+
+
 def _enforce_quota(db: Session, settings: Settings, session_id: str) -> None:
     if count_session_tickets_today(db, session_id) >= settings.live_session_daily_limit:
         raise HTTPException(status_code=429, detail="session_daily_limit_reached")
     start = datetime.now(UTC).replace(hour=0, minute=0, second=0, microsecond=0)
+    demo_session = db.get(DemoSession, session_id)
+    if demo_session and demo_session.ip_hash:
+        ip_count = db.scalar(
+            select(func.count())
+            .select_from(Ticket)
+            .join(DemoSession, DemoSession.id == Ticket.session_id)
+            .where(
+                DemoSession.ip_hash == demo_session.ip_hash,
+                Ticket.ingested_at >= start,
+                Ticket.source == "live",
+            )
+        ) or 0
+        if ip_count >= settings.live_ip_daily_limit:
+            raise HTTPException(status_code=429, detail="client_daily_limit_reached")
     global_count = db.scalar(
         select(func.count()).select_from(Ticket).where(
             Ticket.ingested_at >= start,
@@ -122,10 +157,18 @@ def new_demo_session(
     request: Request,
     db: Annotated[Session, Depends(get_db)],
     settings: Annotated[Settings, Depends(get_settings)],
+    x_demo_session: Annotated[str | None, Header()] = None,
+    x_demo_client: Annotated[str | None, Header()] = None,
 ) -> dict:
-    ip = request.client.host if request.client else ""
-    demo_session = create_demo_session(db, settings, hashlib.sha256(ip.encode()).hexdigest())
-    return {"session_id": demo_session.id, "expires_at": demo_session.expires_at}
+    ip = x_demo_client or (request.client.host if request.client else "")
+    demo_session = create_or_reuse_demo_session(
+        db, settings, x_demo_session, hashlib.sha256(ip.encode()).hexdigest()
+    )
+    return {
+        "session_id": demo_session.id,
+        "expires_at": demo_session.expires_at,
+        "reused": demo_session.id == x_demo_session,
+    }
 
 
 @app.post("/v1/tickets", status_code=202)
@@ -139,17 +182,46 @@ def create_ticket(
     _session_or_401(db, x_demo_session)
     if not idempotency_key:
         raise HTTPException(status_code=400, detail="missing_idempotency_key")
-    _enforce_quota(db, settings, x_demo_session)
+    if len(idempotency_key) > 128:
+        raise HTTPException(status_code=400, detail="idempotency_key_too_long")
     existing = db.scalar(
         select(Ticket).where(
             Ticket.session_id == x_demo_session,
-            Ticket.external_id == payload.ticket_id,
+            or_(
+                Ticket.external_id == payload.ticket_id,
+                Ticket.idempotency_key == idempotency_key,
+            ),
         )
     )
     if existing:
         job = db.scalar(select(AnalysisJob).where(AnalysisJob.ticket_id == existing.id))
         return {"ticket_id": existing.id, "job_id": job.id if job else None, "reused": True}
-    ticket, job = enqueue_ticket(db, settings, payload, x_demo_session)
+    _enforce_quota(db, settings, x_demo_session)
+    try:
+        ticket, job = enqueue_ticket(
+            db, settings, payload, x_demo_session, idempotency_key=idempotency_key
+        )
+    except IntegrityError:
+        db.rollback()
+        existing = db.scalar(
+            select(Ticket).where(
+                Ticket.session_id == x_demo_session,
+                or_(
+                    Ticket.external_id == payload.ticket_id,
+                    Ticket.idempotency_key == idempotency_key,
+                ),
+            )
+        )
+        if existing is None:
+            raise
+        existing_job = db.scalar(
+            select(AnalysisJob).where(AnalysisJob.ticket_id == existing.id)
+        )
+        return {
+            "ticket_id": existing.id,
+            "job_id": existing_job.id if existing_job else None,
+            "reused": True,
+        }
     LIVE_TICKETS.inc()
     return {"ticket_id": ticket.id, "job_id": job.id, "reused": False}
 
@@ -177,7 +249,6 @@ async def import_tickets(
         raise HTTPException(status_code=400, detail="csv_missing_required_columns")
     results = []
     for row in rows:
-        _enforce_quota(db, settings, x_demo_session)
         payload = TicketInput(
             ticket_id=row["ticket_id"],
             user_type=row.get("user_type") or "member",
@@ -194,17 +265,29 @@ async def import_tickets(
         )
         if existing:
             continue
-        ticket, job = enqueue_ticket(db, settings, payload, x_demo_session)
+        _enforce_quota(db, settings, x_demo_session)
+        ticket, job = enqueue_ticket(
+            db,
+            settings,
+            payload,
+            x_demo_session,
+            idempotency_key=f"csv:{payload.ticket_id}",
+        )
         results.append({"ticket_id": ticket.id, "job_id": job.id})
         LIVE_TICKETS.inc()
     return {"accepted": len(results), "jobs": results}
 
 
 @app.get("/v1/jobs/{job_id}")
-def get_job(job_id: str, db: Annotated[Session, Depends(get_db)]) -> dict:
+def get_job(
+    job_id: str,
+    db: Annotated[Session, Depends(get_db)],
+    x_demo_session: Annotated[str | None, Header()] = None,
+) -> dict:
     job = db.get(AnalysisJob, job_id)
     if job is None:
         raise HTTPException(status_code=404, detail="job_not_found")
+    _visible_ticket_or_404(db, job.ticket_id, x_demo_session)
     analysis = db.scalar(select(Analysis).where(Analysis.ticket_id == job.ticket_id))
     return {
         "job_id": job.id,
@@ -225,6 +308,7 @@ def list_tickets(
     limit = max(1, min(limit, 250))
     condition = Ticket.session_id.is_(None)
     if x_demo_session:
+        _session_or_401(db, x_demo_session)
         condition = condition | (Ticket.session_id == x_demo_session)
     rows = db.execute(
         select(Ticket, Analysis)
@@ -248,10 +332,12 @@ def list_tickets(
 
 
 @app.get("/v1/tickets/{ticket_id}")
-def ticket_detail(ticket_id: str, db: Annotated[Session, Depends(get_db)]) -> dict:
-    ticket = db.get(Ticket, ticket_id)
-    if ticket is None:
-        raise HTTPException(status_code=404, detail="ticket_not_found")
+def ticket_detail(
+    ticket_id: str,
+    db: Annotated[Session, Depends(get_db)],
+    x_demo_session: Annotated[str | None, Header()] = None,
+) -> dict:
+    ticket = _visible_ticket_or_404(db, ticket_id, x_demo_session)
     analysis = db.scalar(select(Analysis).where(Analysis.ticket_id == ticket.id))
     return {
         "id": ticket.id,
@@ -384,8 +470,7 @@ def review_ticket(
     x_demo_session: Annotated[str | None, Header()] = None,
 ) -> dict:
     _session_or_401(db, x_demo_session)
-    if db.get(Ticket, ticket_id) is None:
-        raise HTTPException(status_code=404, detail="ticket_not_found")
+    _visible_ticket_or_404(db, ticket_id, x_demo_session)
     review = db.scalar(
         select(TicketReview).where(
             TicketReview.session_id == x_demo_session,

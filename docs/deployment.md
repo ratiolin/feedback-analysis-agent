@@ -51,3 +51,12 @@ docker compose ps
 
 Nginx 修改必须先备份、运行 `nginx -t`，成功后再 reload。
 
+运行时迁移与回归检查：
+
+```bash
+docker compose exec feedback-api alembic current
+docker compose exec feedback-api alembic check
+curl -fsS http://127.0.0.1:18100/feedback/api/health
+```
+
+公网 BFF 会把 HttpOnly 会话 cookie 转成内部 `X-Demo-Session`，并将可信代理链末端地址传给 API 生成单向哈希。API 同时执行会话、来源和全站三级日限额；原始地址不持久化。

@@ -1,20 +1,31 @@
 import hashlib
+from copy import deepcopy
 from datetime import UTC, datetime, timedelta
 
-from sqlalchemy import func, select
+from sqlalchemy import delete, func, select, update
 from sqlalchemy.orm import Session
 
 from .analysis import finalize_analysis
 from .analyzers import AnalyzerError, DemoAnalyzer, DifyAnalyzer
 from .config import Settings
-from .models import Analysis, AnalysisJob, DemoSession, Ticket, utc_now
+from .models import (
+    Analysis,
+    AnalysisJob,
+    ClusterMember,
+    DemoSession,
+    SOPReview,
+    Ticket,
+    TicketReview,
+    utc_now,
+)
 from .privacy import sanitize_message
 from .schemas import TicketInput
 
 
 def input_hash(message: str, workflow_version: str) -> str:
-    normalized = " ".join(message.split()).casefold()
-    return hashlib.sha256(f"{workflow_version}\0{normalized}".encode()).hexdigest()
+    # Evidence offsets are tied to the exact persisted text. Cache only byte-for-byte
+    # equivalent sanitized messages so reused offsets cannot point at the wrong span.
+    return hashlib.sha256(f"{workflow_version}\0{message}".encode()).hexdigest()
 
 
 def create_demo_session(db: Session, settings: Settings, ip_hash: str = "") -> DemoSession:
@@ -28,9 +39,26 @@ def create_demo_session(db: Session, settings: Settings, ip_hash: str = "") -> D
     return session
 
 
+def create_or_reuse_demo_session(
+    db: Session,
+    settings: Settings,
+    existing_session_id: str | None,
+    ip_hash: str = "",
+) -> DemoSession:
+    if existing_session_id:
+        try:
+            return require_active_session(db, existing_session_id)
+        except ValueError:
+            pass
+    return create_demo_session(db, settings, ip_hash)
+
+
 def require_active_session(db: Session, session_id: str) -> DemoSession:
     demo_session = db.get(DemoSession, session_id)
-    if demo_session is None or demo_session.expires_at < datetime.now(UTC):
+    expires_at = demo_session.expires_at if demo_session else None
+    if expires_at is not None and expires_at.tzinfo is None:
+        expires_at = expires_at.replace(tzinfo=UTC)
+    if demo_session is None or expires_at is None or expires_at < datetime.now(UTC):
         raise ValueError("demo_session_expired")
     return demo_session
 
@@ -52,6 +80,7 @@ def enqueue_ticket(
     payload: TicketInput,
     session_id: str | None,
     source: str = "live",
+    idempotency_key: str | None = None,
 ) -> tuple[Ticket, AnalysisJob]:
     sanitized = sanitize_message(payload.message)
     ticket = Ticket(
@@ -63,6 +92,7 @@ def enqueue_ticket(
         created_at=payload.created_at,
         current_status=payload.current_status,
         input_hash=input_hash(sanitized, settings.workflow_version),
+        idempotency_key=idempotency_key,
         source=source,
     )
     db.add(ticket)
@@ -86,6 +116,43 @@ def process_job(db: Session, settings: Settings, job: AnalysisJob) -> Analysis:
         db.commit()
         return existing
 
+    cached = db.scalar(
+        select(Analysis)
+        .join(Ticket, Analysis.ticket_id == Ticket.id)
+        .where(
+            Ticket.input_hash == ticket.input_hash,
+            Ticket.id != ticket.id,
+            Analysis.workflow_version == settings.workflow_version,
+        )
+        .order_by(Analysis.created_at.desc())
+        .limit(1)
+    )
+    if cached:
+        payload = deepcopy(cached.payload)
+        origin_source = cached.analysis_source
+        while origin_source.startswith("cache:"):
+            origin_source = origin_source.removeprefix("cache:")
+        payload["analysis_source"] = f"cache:{origin_source}"[:32]
+        analysis = Analysis(
+            ticket_id=ticket.id,
+            payload=payload,
+            problem_type=cached.problem_type,
+            product_area=cached.product_area,
+            suggested_owner=cached.suggested_owner,
+            severity=cached.severity,
+            needs_escalation=cached.needs_escalation,
+            review_status=cached.review_status,
+            workflow_version=cached.workflow_version,
+            analysis_source=payload["analysis_source"],
+        )
+        db.add(analysis)
+        job.status = "completed" if cached.review_status != "needs_review" else "needs_review"
+        job.last_error = None
+        job.updated_at = utc_now()
+        db.commit()
+        db.refresh(analysis)
+        return analysis
+
     job.status = "processing"
     job.attempts += 1
     job.updated_at = utc_now()
@@ -106,6 +173,9 @@ def process_job(db: Session, settings: Settings, job: AnalysisJob) -> Analysis:
             job.status = "queued" if job.attempts < 3 else "failed"
             job.last_error = f"{type(exc).__name__}: {exc}"[:1000]
             job.updated_at = utc_now()
+            if job.status == "queued":
+                delay_seconds = 2 if job.attempts == 1 else 8
+                job.available_at = utc_now() + timedelta(seconds=delay_seconds)
             db.commit()
             raise AnalyzerError(job.last_error) from exc
         raw = DemoAnalyzer().analyze(ticket_payload)
@@ -130,3 +200,44 @@ def process_job(db: Session, settings: Settings, job: AnalysisJob) -> Analysis:
     db.commit()
     db.refresh(analysis)
     return analysis
+
+
+def cleanup_expired_sessions(db: Session) -> int:
+    expired_ids = list(
+        db.scalars(select(DemoSession.id).where(DemoSession.expires_at < utc_now())).all()
+    )
+    if not expired_ids:
+        return 0
+    ticket_ids = select(Ticket.id).where(Ticket.session_id.in_(expired_ids))
+    db.execute(
+        delete(TicketReview).where(
+            (TicketReview.session_id.in_(expired_ids)) | (TicketReview.ticket_id.in_(ticket_ids))
+        )
+    )
+    db.execute(delete(SOPReview).where(SOPReview.session_id.in_(expired_ids)))
+    db.execute(delete(ClusterMember).where(ClusterMember.ticket_id.in_(ticket_ids)))
+    db.execute(delete(Analysis).where(Analysis.ticket_id.in_(ticket_ids)))
+    db.execute(delete(AnalysisJob).where(AnalysisJob.ticket_id.in_(ticket_ids)))
+    db.execute(delete(Ticket).where(Ticket.session_id.in_(expired_ids)))
+    db.execute(delete(DemoSession).where(DemoSession.id.in_(expired_ids)))
+    db.commit()
+    return len(expired_ids)
+
+
+def recover_stale_jobs(db: Session, stale_after_seconds: int = 120) -> int:
+    stale_before = utc_now() - timedelta(seconds=stale_after_seconds)
+    result = db.execute(
+        update(AnalysisJob)
+        .where(
+            AnalysisJob.status == "processing",
+            AnalysisJob.updated_at < stale_before,
+        )
+        .values(
+            status="queued",
+            available_at=utc_now(),
+            last_error="recovered_stale_processing_job",
+            updated_at=utc_now(),
+        )
+    )
+    db.commit()
+    return result.rowcount or 0
