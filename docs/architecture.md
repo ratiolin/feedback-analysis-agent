@@ -1,0 +1,42 @@
+# 架构与数据流
+
+## 模块地图
+
+```text
+公网浏览器
+  │ /feedback
+  ▼
+云端 Nginx ── Tailscale Serve :8100 ── Next.js :18100
+                                           │ BFF（会话 cookie）
+                                           ▼
+                                      FastAPI :8101
+                                      ├─ PostgreSQL
+                                      ├─ Worker
+                                      ├─ Dify Workflow → DeepSeek
+                                      └─ BGE-small-zh-v1.5
+```
+
+云服务器只承担 TLS、公网入口和静态作品页；业务服务与数据库运行在 WSL2。
+
+## 权威边界
+
+| 能力 | 提议者 | 最终裁决 |
+|---|---|---|
+| 摘要、问题类型、产品区域 | LLM | Schema + 人工复核 |
+| evidence quote | LLM | 服务端 exact/NFKC 定位 |
+| start/end | 无 | 服务端写入 |
+| 责任方 | LLM 仅留 trace | 规则映射 |
+| 严重度、升级 | LLM 提取影响信号 | 规则映射 |
+| 根因 | 待确认假设 | 不进入事实结论 |
+| 聚类成员 | 向量相似度 | 冻结阈值 + 错误案例评测 |
+| SOP 发布 | LLM 可起草 | 仅人工会话审核；不发布正式库 |
+
+## 状态与失败
+
+分析任务状态：`queued → processing → completed | needs_review | failed`。
+
+- Dify/DeepSeek 未配置时，公开演示使用透明 `demo_rules`，结果字段明确标记来源。
+- Dify 超时或无效结构最多重试两次；仍失败不得伪造结果。
+- evidence 无法唯一、可映射地定位时进入 `needs_review`。
+- Worker 任务持久化在 PostgreSQL，重启后继续领取。
+

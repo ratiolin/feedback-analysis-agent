@@ -1,0 +1,485 @@
+{
+  "generated_at": "2026-07-01T08:23:38.521524+00:00",
+  "boundary": "Synthetic mechanism benchmark; not a real-business distribution.",
+  "structure": {
+    "analyzer": "demo",
+    "sample_count": 60,
+    "first_pass_schema_rate": 1.0,
+    "evidence_auto_location_rate": 1.0,
+    "problem_type": {
+      "labels": [
+        "bug",
+        "how_to",
+        "configuration",
+        "performance",
+        "integration",
+        "permission",
+        "data_consistency",
+        "feature_request"
+      ],
+      "matrix": [
+        [
+          8,
+          0,
+          0,
+          0,
+          0,
+          0,
+          2,
+          0
+        ],
+        [
+          4,
+          0,
+          2,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          4,
+          0,
+          2,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          6,
+          0,
+          2,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          3,
+          0,
+          0,
+          2,
+          2,
+          2,
+          0,
+          0
+        ],
+        [
+          5,
+          0,
+          0,
+          0,
+          0,
+          2,
+          0,
+          0
+        ],
+        [
+          3,
+          0,
+          0,
+          0,
+          0,
+          0,
+          4,
+          0
+        ],
+        [
+          3,
+          0,
+          0,
+          0,
+          0,
+          0,
+          2,
+          2
+        ]
+      ],
+      "report": {
+        "bug": {
+          "precision": 0.2222222222222222,
+          "recall": 0.8,
+          "f1-score": 0.34782608695652173,
+          "support": 10.0
+        },
+        "how_to": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1-score": 0.0,
+          "support": 6.0
+        },
+        "configuration": {
+          "precision": 0.3333333333333333,
+          "recall": 0.3333333333333333,
+          "f1-score": 0.3333333333333333,
+          "support": 6.0
+        },
+        "performance": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1-score": 0.0,
+          "support": 8.0
+        },
+        "integration": {
+          "precision": 1.0,
+          "recall": 0.2222222222222222,
+          "f1-score": 0.36363636363636365,
+          "support": 9.0
+        },
+        "permission": {
+          "precision": 0.5,
+          "recall": 0.2857142857142857,
+          "f1-score": 0.36363636363636365,
+          "support": 7.0
+        },
+        "data_consistency": {
+          "precision": 0.5,
+          "recall": 0.5714285714285714,
+          "f1-score": 0.5333333333333333,
+          "support": 7.0
+        },
+        "feature_request": {
+          "precision": 1.0,
+          "recall": 0.2857142857142857,
+          "f1-score": 0.4444444444444444,
+          "support": 7.0
+        },
+        "accuracy": 0.3333333333333333,
+        "macro avg": {
+          "precision": 0.4444444444444444,
+          "recall": 0.3123015873015873,
+          "f1-score": 0.298276240667545,
+          "support": 60.0
+        },
+        "weighted avg": {
+          "precision": 0.45370370370370366,
+          "recall": 0.3333333333333333,
+          "f1-score": 0.302348118869858,
+          "support": 60.0
+        }
+      }
+    },
+    "product_area": {
+      "labels": [
+        "project",
+        "task",
+        "member_permission",
+        "notification",
+        "file",
+        "import_export",
+        "open_api",
+        "account_subscription"
+      ],
+      "matrix": [
+        [
+          6,
+          2,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          6,
+          0,
+          0,
+          0,
+          0,
+          2,
+          0,
+          0
+        ],
+        [
+          5,
+          0,
+          4,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          2,
+          0,
+          0,
+          6,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          7,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          3,
+          0,
+          0,
+          0,
+          0,
+          6,
+          0,
+          0
+        ],
+        [
+          4,
+          0,
+          0,
+          0,
+          0,
+          0,
+          2,
+          0
+        ],
+        [
+          5,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      ],
+      "report": {
+        "project": {
+          "precision": 0.15789473684210525,
+          "recall": 0.75,
+          "f1-score": 0.2608695652173913,
+          "support": 8.0
+        },
+        "task": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1-score": 0.0,
+          "support": 8.0
+        },
+        "member_permission": {
+          "precision": 1.0,
+          "recall": 0.4444444444444444,
+          "f1-score": 0.6153846153846154,
+          "support": 9.0
+        },
+        "notification": {
+          "precision": 1.0,
+          "recall": 0.75,
+          "f1-score": 0.8571428571428571,
+          "support": 8.0
+        },
+        "file": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1-score": 0.0,
+          "support": 7.0
+        },
+        "import_export": {
+          "precision": 0.75,
+          "recall": 0.6666666666666666,
+          "f1-score": 0.7058823529411765,
+          "support": 9.0
+        },
+        "open_api": {
+          "precision": 1.0,
+          "recall": 0.3333333333333333,
+          "f1-score": 0.5,
+          "support": 6.0
+        },
+        "account_subscription": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1-score": 0.0,
+          "support": 5.0
+        },
+        "accuracy": 0.4,
+        "macro avg": {
+          "precision": 0.48848684210526316,
+          "recall": 0.3680555555555556,
+          "f1-score": 0.3674099238357551,
+          "support": 60.0
+        },
+        "weighted avg": {
+          "precision": 0.5168859649122807,
+          "recall": 0.4,
+          "f1-score": 0.39725836823023525,
+          "support": 60.0
+        }
+      }
+    },
+    "owner_policy_consistency": 0.4666666666666667,
+    "escalation_recall": 0.13793103448275862,
+    "errors": []
+  },
+  "clustering": {
+    "embedding_backend": "bge",
+    "development_count": 180,
+    "holdout_count": 60,
+    "frozen_threshold": 0.9,
+    "development_metrics": {
+      "pairwise": {
+        "precision": 0.886435331230284,
+        "recall": 0.5017857142857143,
+        "f1": 0.6408209806157356
+      },
+      "b_cubed": {
+        "precision": 0.8993827160493827,
+        "recall": 0.6125,
+        "f1": 0.7287230784934162
+      },
+      "purity": 0.9055555555555556
+    },
+    "holdout_metrics": {
+      "pairwise": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0
+      },
+      "b_cubed": {
+        "precision": 0.7833333333333333,
+        "recall": 0.6666666666666666,
+        "f1": 0.7203065134099615
+      },
+      "purity": 0.7833333333333333
+    },
+    "false_merge_examples": [
+      {
+        "left": "T0221",
+        "right": "T0229",
+        "left_family": "SINGLETON-021",
+        "right_family": "SINGLETON-029"
+      },
+      {
+        "left": "T0221",
+        "right": "T0237",
+        "left_family": "SINGLETON-021",
+        "right_family": "SINGLETON-037"
+      },
+      {
+        "left": "T0222",
+        "right": "T0223",
+        "left_family": "SINGLETON-022",
+        "right_family": "SINGLETON-023"
+      },
+      {
+        "left": "T0222",
+        "right": "T0230",
+        "left_family": "SINGLETON-022",
+        "right_family": "SINGLETON-030"
+      },
+      {
+        "left": "T0222",
+        "right": "T0231",
+        "left_family": "SINGLETON-022",
+        "right_family": "SINGLETON-031"
+      },
+      {
+        "left": "T0222",
+        "right": "T0238",
+        "left_family": "SINGLETON-022",
+        "right_family": "SINGLETON-038"
+      },
+      {
+        "left": "T0222",
+        "right": "T0239",
+        "left_family": "SINGLETON-022",
+        "right_family": "SINGLETON-039"
+      },
+      {
+        "left": "T0223",
+        "right": "T0230",
+        "left_family": "SINGLETON-023",
+        "right_family": "SINGLETON-030"
+      },
+      {
+        "left": "T0223",
+        "right": "T0231",
+        "left_family": "SINGLETON-023",
+        "right_family": "SINGLETON-031"
+      },
+      {
+        "left": "T0223",
+        "right": "T0238",
+        "left_family": "SINGLETON-023",
+        "right_family": "SINGLETON-038"
+      }
+    ],
+    "false_split_examples": [
+      {
+        "family": "ISSUE-001",
+        "predicted_cluster_count": 2
+      },
+      {
+        "family": "ISSUE-002",
+        "predicted_cluster_count": 2
+      },
+      {
+        "family": "ISSUE-003",
+        "predicted_cluster_count": 2
+      },
+      {
+        "family": "ISSUE-004",
+        "predicted_cluster_count": 2
+      },
+      {
+        "family": "ISSUE-005",
+        "predicted_cluster_count": 2
+      },
+      {
+        "family": "ISSUE-006",
+        "predicted_cluster_count": 2
+      },
+      {
+        "family": "ISSUE-007",
+        "predicted_cluster_count": 2
+      },
+      {
+        "family": "ISSUE-008",
+        "predicted_cluster_count": 2
+      },
+      {
+        "family": "ISSUE-009",
+        "predicted_cluster_count": 2
+      },
+      {
+        "family": "ISSUE-010",
+        "predicted_cluster_count": 2
+      }
+    ]
+  },
+  "holdout_support": {
+    "problem_type": {
+      "configuration": 6,
+      "performance": 8,
+      "permission": 7,
+      "data_consistency": 7,
+      "integration": 9,
+      "bug": 10,
+      "how_to": 6,
+      "feature_request": 7
+    },
+    "product_area": {
+      "notification": 8,
+      "member_permission": 9,
+      "import_export": 9,
+      "open_api": 6,
+      "project": 8,
+      "file": 7,
+      "task": 8,
+      "account_subscription": 5
+    }
+  }
+}
