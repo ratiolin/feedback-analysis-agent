@@ -1,46 +1,33 @@
-# 最后激活清单
+# v2 候选工作流激活清单
 
-以下两项需要项目所有者本人完成；自动化代理不能代替账户授权，也不能把模型生成的判断伪装成独立人工抽检。
+当前官方基线仍是已发布的 `客户反馈结构化-v1`。`v2` 处于候选状态，尚未运行模型评测，不得写成已提升或已达标。
 
-## 1. 激活 Dify 工作流
+## 需要项目所有者完成
 
 1. 打开 Dify 控制台，进入“工作室”。
-2. 选择“导入 DSL”，导入：
+2. 选择“导入 DSL 文件”，导入：
 
    ```text
-   D:\download\ratio\客户反馈项目\dify-workflows\feedback-structuring-v1.yml
+   D:\download\ratio\客户反馈项目\dify-workflows\feedback-structuring-v2-candidate.yml
    ```
 
-3. 确认 LLM 节点可使用 `deepseek-v4-pro`，然后发布工作流。
-4. 在该工作流的“访问 API”页面创建 API Key。
-5. 在 WSL 内编辑 `/srv/stack/feedback-analysis-agent/.env`，只在本机填写：
+3. 确认应用名为 `客户反馈结构化-v2-candidate`，LLM 节点使用 `deepseek-v4-pro`。
+4. 发布工作流，在“访问 API”创建该候选应用的 API Key。
+5. 在 WSL 的 `/srv/stack/feedback-analysis-agent/.env` 中，把 `DIFY_FEEDBACK_WORKFLOW_API_KEY` 替换为新候选应用的 Key。不要把真实 Key 写入聊天、GitHub 或作品材料。
+6. 只回复“v2 已导入并配置 Key”。后续真实回放、质量门判断、展示页更新和候选晋级由自动化继续执行。
 
-   ```dotenv
-   DIFY_FEEDBACK_WORKFLOW_API_KEY=app-你的真实密钥
-   ```
+## 已由自动化完成
 
-不要把真实密钥发到聊天、GitHub 或作品材料目录。完成后只需回复“Dify 已配置”。后续容器重启、真实工作流冒烟测试、N=60 回放评测和结果发布由自动化继续执行。
+- v2 候选 DSL 已冻结，SHA-256：`47bcd77f2aa5b0b472a6b2df51266875ce1329f31ca72a947555de8dddb77178`。
+- 新锁定集 `v4-frozen-candidate-holdout-20260702` 已生成，共 60 条、30 个问题族。
+- v4 已完成 60/60 条 AI 辅助一致性复核；它不是独立人工审计。
+- v4 尚未运行模型评测，且不得用于修改 v2 提示词。任何提示词变更都会导致哈希校验失败，必须生成新版本锁定集。
 
-## 2. 完成人工抽检
+## 导入后的自动化命令
 
-打开：
-
-```text
-D:\download\ratio\客户反馈项目\data\manual-audit\holdout-audit.csv
+```bash
+cd /srv/stack/feedback-analysis-agent
+./tools/run_candidate_evaluation.sh
 ```
 
-逐行检查 `message` 与 gold 标签是否语义一致，填写：
-
-- `audit_label_text_consistent`：`yes` 或 `no`；
-- `audit_notes`：不一致时说明问题；
-- `auditor`：审核者标识，可使用姓名缩写。
-
-必须审核全部 60 行。该步骤只检查合成样本与人工标签的一致性，不代表真实业务分布，也不能证明生产收益。完成后保存原文件并回复“人工抽检已完成”。
-
-## 自动化恢复后将执行
-
-- 校验 60 行均有人工结论，汇总不一致样本；
-- 对 Dify 工作流运行锁定 holdout，生成分类报告、混淆矩阵和聚类错误案例；
-- 检查 evidence 原文定位率、owner 规则一致率、升级召回率与聚类质量门；
-- 若质量门不通过，保留失败证据并迭代工作流，不发布虚假漂亮指标；
-- 重新生成评测页、部署、运行公网 E2E、提交 GitHub 并等待 CI。
+脚本会重建使用新 Key 的 API/Worker 容器，在 v4 锁定集上运行真实 Dify + BGE 评测，并输出到 `artifacts/evaluation-v2-candidate/`。只有所有已测质量门通过并完成结果复核后，候选结果才可晋级为公开基线。

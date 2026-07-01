@@ -1,0 +1,13 @@
+{
+  "workflow_state": "candidate_awaiting_import",
+  "workflow_name": "客户反馈结构化-v2-candidate",
+  "dsl_path": "dify-workflows/feedback-structuring-v2-candidate.yml",
+  "candidate_prompt_sha256": "47bcd77f2aa5b0b472a6b2df51266875ce1329f31ca72a947555de8dddb77178",
+  "dataset_version": "v4-frozen-candidate-holdout-20260702",
+  "holdout_rows": 60,
+  "audit_consistent": 60,
+  "audit_type": "AI-assisted consistency review; not an independent human audit",
+  "model_evaluation": "not_run",
+  "promotion_state": "not_eligible",
+  "boundary": "Import and publish the candidate DSL, configure its API key, then run the frozen holdout exactly once. Do not tune the prompt on v4 rows."
+}

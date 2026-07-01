@@ -462,6 +462,17 @@ def evaluation() -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+@app.get("/v1/evaluation/candidate")
+def candidate_evaluation() -> dict:
+    directory = Path("artifacts/evaluation-v2-candidate")
+    evaluation_path = directory / "evaluation.json"
+    status_path = directory / "status.json"
+    path = evaluation_path if evaluation_path.exists() else status_path
+    if not path.exists():
+        raise HTTPException(status_code=404, detail="candidate_evaluation_not_found")
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
 @app.patch("/v1/tickets/{ticket_id}/review")
 def review_ticket(
     ticket_id: str,

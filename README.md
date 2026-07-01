@@ -36,10 +36,12 @@ CSV / 在线工单
 产品区域：8
 初始 BGE 问题簇：63
 候选 SOP：2
-Python 自动测试：31
+Python 自动测试：37
 ```
 
-公开评测已切换为真实 `dify` 工作流与 BGE 回放（数据版本 `v3-natural-singletons`）。Schema、quote 定位、产品区域、升级召回与聚类指标通过当前门槛；问题类型 Macro-F1 为 0.647、责任路由策略一致率为 83.3%，未通过 0.80/0.85 门槛。因此只能声明机制已实现，不能声明整体分类质量达标。N=60 仅完成 AI 辅助一致性复核，不构成独立人工审计。
+当前公开基线来自已发布 `客户反馈结构化-v1` 的真实 Dify + BGE 回放（数据版本 `v3-natural-singletons`）。Schema、quote 定位、产品区域、升级召回与聚类指标通过门槛；问题类型 Macro-F1 为 0.647、责任路由策略一致率为 83.3%，未通过 0.80/0.85 门槛。因此只能声明机制已实现，不能声明整体分类质量达标。
+
+`客户反馈结构化-v2-candidate` 已冻结为候选 DSL，并配套全新 `v4-frozen-candidate-holdout-20260702` 锁定集。v4 已完成 60/60 条 AI 辅助一致性复核，但尚未运行模型评测；不得把候选状态写成质量提升。导入步骤见 `docs/activation-checklist.md`。
 
 ## 快速开始
 
@@ -64,14 +66,13 @@ docker run --rm -v "$PWD/web:/app" -w /app node:22-alpine \
   sh -lc 'npm ci && npm audit --audit-level=moderate && npm run lint && npm run build'
 ```
 
-模型评测：
+模型评测与候选激活：
 
 ```bash
 uv run python tools/evaluate.py --analyzer demo --embedding tfidf
 
-# Dify 工作流配置完成后
-DIFY_FEEDBACK_WORKFLOW_API_KEY='app-...' \
-uv run python tools/evaluate.py --analyzer dify --embedding bge
+# 导入并配置 v2 候选 Key 后，在 WSL 执行
+./tools/run_candidate_evaluation.sh
 ```
 
 ## 目录
@@ -79,7 +80,7 @@ uv run python tools/evaluate.py --analyzer dify --embedding bge
 ```text
 feedback_app/       FastAPI、Worker、规则、聚类和周报
 web/                Next.js 产品看板与匿名会话 BFF
-dify-workflows/     可导入 Dify 1.13.3 的结构化工作流 DSL
+dify-workflows/     已发布 v1 基线与可导入的 v2 候选 DSL
 tools/              数据生成、种子和离线评测
 tests/              规则、证据、数据、聚类和报告测试
 portfolio/          静态作品页
@@ -100,4 +101,4 @@ docs/               架构、部署、评测边界与人工审核说明
 
 详见 `docs/architecture.md`、`docs/evaluation-boundary.md` 和 `docs/deployment.md`。
 
-首次启用真实 Dify 推理与独立人工抽检时，按 `docs/activation-checklist.md` 执行；真实密钥不得进入仓库。
+激活 v2 候选时按 `docs/activation-checklist.md` 执行；真实密钥不得进入仓库。AI 辅助复核不等于独立人工审计。

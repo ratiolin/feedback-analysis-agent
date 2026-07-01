@@ -1,0 +1,30 @@
+{
+  "dataset_version": "v4-frozen-candidate-holdout-20260702",
+  "state": "candidate_unscored",
+  "generated_at": "2026-07-01T21:45:17.103208+00:00",
+  "row_count": 60,
+  "family_count": 30,
+  "candidate_prompt_path": "dify-workflows/feedback-structuring-v2-candidate.yml",
+  "candidate_prompt_sha256": "47bcd77f2aa5b0b472a6b2df51266875ce1329f31ca72a947555de8dddb77178",
+  "problem_type_support": {
+    "integration": 8,
+    "bug": 8,
+    "how_to": 8,
+    "configuration": 8,
+    "performance": 8,
+    "permission": 6,
+    "data_consistency": 8,
+    "feature_request": 6
+  },
+  "product_area_support": {
+    "open_api": 6,
+    "member_permission": 6,
+    "file": 8,
+    "project": 14,
+    "task": 10,
+    "notification": 6,
+    "account_subscription": 6,
+    "import_export": 4
+  },
+  "boundary": "Frozen synthetic candidate holdout. It must not be used to modify the v2 prompt. No model quality claim exists until the candidate workflow is imported and replayed."
+}

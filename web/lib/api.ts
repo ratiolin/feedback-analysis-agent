@@ -14,5 +14,5 @@ export const api = {
   sops: () => get<SOPCandidate[]>("/v1/sop-candidates"),
   report: () => get<{ payload: Record<string, unknown>; markdown: string }>("/v1/reports/weekly"),
   evaluation: () => get<Record<string, unknown>>("/v1/evaluation"),
+  candidateEvaluation: () => get<Record<string, unknown>>("/v1/evaluation/candidate"),
 };
-

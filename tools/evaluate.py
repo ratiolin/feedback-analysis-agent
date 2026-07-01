@@ -1,5 +1,6 @@
 import argparse
 import csv
+import hashlib
 import json
 from collections import Counter, defaultdict
 from datetime import datetime
@@ -20,8 +21,12 @@ def load_rows(path: Path) -> list[dict]:
         return list(csv.DictReader(handle))
 
 
-def load_audit_status(path: Path) -> dict:
+def load_audit_status(path: Path, expected_rows: list[dict]) -> dict:
     rows = load_rows(path)
+    expected = {(row["ticket_id"], row["message"]) for row in expected_rows}
+    audited = {(row["ticket_id"], row["message"]) for row in rows}
+    if audited != expected:
+        raise ValueError("audit rows do not match the selected holdout")
     labels = Counter(row.get("audit_label_text_consistent", "").strip().lower() for row in rows)
     auditors = sorted(
         {
@@ -30,7 +35,7 @@ def load_audit_status(path: Path) -> dict:
             if row.get("auditor", "").strip()
         }
     )
-    return {
+    status = {
         "review_type": "AI-assisted candidate consistency review",
         "independent_human_audit": False,
         "row_count": len(rows),
@@ -43,6 +48,22 @@ def load_audit_status(path: Path) -> dict:
             "does not establish real-business validity or replace independent human review."
         ),
     }
+    if status["unreviewed"]:
+        raise ValueError(f"audit has {status['unreviewed']} unreviewed rows")
+    return status
+
+
+def load_and_verify_manifest(path: Path) -> dict:
+    manifest = json.loads(path.read_text(encoding="utf-8"))
+    expected_hash = manifest.get("candidate_prompt_sha256")
+    prompt_path = manifest.get("candidate_prompt_path")
+    if expected_hash and prompt_path:
+        actual_hash = hashlib.sha256(Path(prompt_path).read_bytes()).hexdigest()
+        if actual_hash != expected_hash:
+            raise ValueError(
+                "candidate prompt changed after holdout freeze; create a new holdout version"
+            )
+    return manifest
 
 
 def as_ticket(row: dict) -> TicketInput:
@@ -214,6 +235,12 @@ def markdown_report(payload: dict) -> str:
             ),
             "",
             f"- 数据版本：`{payload['dataset_version']}`",
+            f"- 评测状态：`{payload['evaluation_state']}`",
+            *(
+                [f"- 候选提示词 SHA-256：`{payload['candidate_prompt_sha256']}`"]
+                if payload.get("candidate_prompt_sha256")
+                else []
+            ),
             (
                 f"- AI 辅助复核：{audit['consistent']}/{audit['row_count']} 一致，"
                 f"{audit['unreviewed']} 条未复核"
@@ -284,6 +311,8 @@ def quality_gate_results(payload: dict) -> dict:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--data", type=Path, default=Path("data/generated"))
+    parser.add_argument("--holdout", type=Path)
+    parser.add_argument("--manifest", type=Path)
     parser.add_argument("--out", type=Path, default=Path("artifacts/evaluation"))
     parser.add_argument(
         "--audit",
@@ -294,13 +323,18 @@ def main() -> None:
     parser.add_argument("--embedding", choices=["tfidf", "bge"], default="tfidf")
     args = parser.parse_args()
     development = load_rows(args.data / "tickets_development_with_gold.csv")
-    holdout = load_rows(args.data / "tickets_holdout_locked.csv")
-    manifest = json.loads((args.data / "dataset_manifest.json").read_text(encoding="utf-8"))
+    holdout_path = args.holdout or args.data / "tickets_holdout_locked.csv"
+    manifest_path = args.manifest or args.data / "dataset_manifest.json"
+    holdout = load_rows(holdout_path)
+    manifest = load_and_verify_manifest(manifest_path)
+    is_candidate = str(manifest.get("state", "")).startswith("candidate_")
     payload = {
         "generated_at": datetime.now().astimezone().isoformat(),
         "boundary": "Synthetic mechanism benchmark; not a real-business distribution.",
         "dataset_version": manifest["dataset_version"],
-        "audit": load_audit_status(args.audit),
+        "evaluation_state": "candidate_scored_unpromoted" if is_candidate else "official_baseline",
+        "candidate_prompt_sha256": manifest.get("candidate_prompt_sha256"),
+        "audit": load_audit_status(args.audit, holdout),
         "structure": structure_evaluation(holdout, args.analyzer),
         "clustering": clustering_evaluation(development, holdout, args.embedding),
         "holdout_support": {
