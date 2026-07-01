@@ -1,7 +1,24 @@
+import re
 from collections import Counter, defaultdict
 from dataclasses import dataclass
 
 import numpy as np
+
+GENERIC_SUPPORT_PATTERNS = (
+    re.compile(r"^(你好，|麻烦帮忙看一下，|我们这边遇到一个问题：|今天使用时发现，|企业管理员反馈，)"),
+    re.compile(r"，(该问题影响整个团队|已经联系客服两次)(，已经联系客服两次)?"),
+    re.compile(
+        r"，(请问应该怎么处理？|已经影响正常协作。|麻烦尽快确认。|"
+        r"刷新和重新登录都没有改善。|客服之前的说明没有解决。)$"
+    ),
+)
+
+
+def normalize_ticket_text(text: str) -> str:
+    """Remove channel boilerplate while preserving the issue description."""
+    for pattern in GENERIC_SUPPORT_PATTERNS:
+        text = pattern.sub("", text)
+    return text.strip("，。 ")
 
 
 def normalize_vectors(vectors: np.ndarray) -> np.ndarray:

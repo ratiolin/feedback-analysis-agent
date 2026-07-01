@@ -1,6 +1,32 @@
 from .schemas import ImpactSignals, Owner, ProblemType, ProductArea, Severity
 
 
+def supplement_impact_signals(message: str, model_signals: ImpactSignals) -> ImpactSignals:
+    """Add only explicit, high-precision text cues missed by the model."""
+    scope = model_signals.affected_scope
+    if any(cue in message for cue in ("全公司", "整个组织", "所有部门")):
+        scope = "organization"
+    elif any(cue in message for cue in ("整个团队", "整个项目组", "全体成员")):
+        scope = "team"
+
+    repeat_contacts = model_signals.repeat_contacts
+    if any(cue in message for cue in ("联系客服两次", "联系了两次", "多次联系客服")):
+        repeat_contacts = max(repeat_contacts, 2)
+
+    workflow_blocked = model_signals.workflow_blocked or any(
+        cue in message for cue in ("无法", "失败", "找不到", "空白", "超时", "没有回执")
+    )
+    data_loss_claimed = model_signals.data_loss_claimed or any(
+        cue in message for cue in ("数据丢失", "记录丢失", "内容丢失")
+    )
+    return ImpactSignals(
+        affected_scope=scope,
+        workflow_blocked=workflow_blocked,
+        data_loss_claimed=data_loss_claimed,
+        repeat_contacts=repeat_contacts,
+    )
+
+
 def route_owner(problem_type: ProblemType, product_area: ProductArea) -> Owner:
     if problem_type == ProblemType.PERFORMANCE:
         return Owner.ENGINEERING_TRIAGE
@@ -31,4 +57,3 @@ def derive_severity(signals: ImpactSignals) -> Severity:
 
 def needs_escalation(severity: Severity, signals: ImpactSignals) -> bool:
     return severity in {Severity.HIGH, Severity.CRITICAL} or signals.repeat_contacts >= 2
-

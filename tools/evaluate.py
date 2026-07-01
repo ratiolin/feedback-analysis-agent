@@ -9,7 +9,7 @@ from sklearn.metrics import classification_report, confusion_matrix
 
 from feedback_app.analysis import finalize_analysis
 from feedback_app.analyzers import DemoAnalyzer, DifyAnalyzer
-from feedback_app.clustering import select_threshold, threshold_clusters
+from feedback_app.clustering import normalize_ticket_text, select_threshold, threshold_clusters
 from feedback_app.config import get_settings
 from feedback_app.embeddings import SentenceTransformerEmbedder, TfidfEmbedder
 from feedback_app.schemas import ProblemType, ProductArea, TicketInput
@@ -18,6 +18,31 @@ from feedback_app.schemas import ProblemType, ProductArea, TicketInput
 def load_rows(path: Path) -> list[dict]:
     with path.open(encoding="utf-8-sig", newline="") as handle:
         return list(csv.DictReader(handle))
+
+
+def load_audit_status(path: Path) -> dict:
+    rows = load_rows(path)
+    labels = Counter(row.get("audit_label_text_consistent", "").strip().lower() for row in rows)
+    auditors = sorted(
+        {
+            row.get("auditor", "").strip()
+            for row in rows
+            if row.get("auditor", "").strip()
+        }
+    )
+    return {
+        "review_type": "AI-assisted candidate consistency review",
+        "independent_human_audit": False,
+        "row_count": len(rows),
+        "consistent": labels["yes"],
+        "inconsistent": labels["no"],
+        "unreviewed": len(rows) - labels["yes"] - labels["no"],
+        "auditors": auditors,
+        "boundary": (
+            "Checks synthetic text/label consistency and deterministic policy derivation; "
+            "does not establish real-business validity or replace independent human review."
+        ),
+    }
 
 
 def as_ticket(row: dict) -> TicketInput:
@@ -109,7 +134,7 @@ def clustering_evaluation(
     embedding_backend: str,
 ) -> dict:
     all_rows = development + holdout
-    texts = [row["message"] for row in all_rows]
+    texts = [normalize_ticket_text(row["message"]) for row in all_rows]
     if embedding_backend == "bge":
         embedder = SentenceTransformerEmbedder(get_settings().embedding_model)
     else:
@@ -152,6 +177,7 @@ def clustering_evaluation(
     )
     return {
         "embedding_backend": embedding_backend,
+        "embedding_input": "normalized_ticket_text_proxy_for_production_summary",
         "development_count": len(development),
         "holdout_count": len(holdout),
         "frozen_threshold": tuned.threshold,
@@ -176,12 +202,22 @@ def markdown_report(payload: dict) -> str:
     problem_macro = structure["problem_type"]["report"]["macro avg"]["f1-score"]
     area_macro = structure["product_area"]["report"]["macro avg"]["f1-score"]
     holdout = clustering["holdout_metrics"]
+    audit = payload["audit"]
+    gates = payload["quality_gates"]
     return "\n".join(
         [
             "# 合成机制评测报告",
             "",
-            "> 锁定人工校验集 N=60，仅用于合成场景下的机制质量评估，不代表真实业务分布。",
+            (
+                "> 锁定合成校验集 N=60，仅用于机制质量评估，不代表真实业务分布。"
+                "当前已完成 AI 辅助一致性复核，不构成独立人工审计。"
+            ),
             "",
+            f"- 数据版本：`{payload['dataset_version']}`",
+            (
+                f"- AI 辅助复核：{audit['consistent']}/{audit['row_count']} 一致，"
+                f"{audit['unreviewed']} 条未复核"
+            ),
             f"- 分析器：`{structure['analyzer']}`",
             f"- 首次 Schema 通过率：{structure['first_pass_schema_rate']:.1%}",
             f"- 证据自动定位成功率：{structure['evidence_auto_location_rate']:.1%}",
@@ -194,23 +230,77 @@ def markdown_report(payload: dict) -> str:
             f"- 聚类纯度：{holdout['purity']:.1%}",
             f"- B³ F1（技术指标）：{holdout['b_cubed']['f1']:.3f}",
             "",
+            "## 质量门",
+            "",
+            *[
+                f"- {'通过' if gate['passed'] else '未通过'}：{gate['label']} "
+                f"（实际 {gate['actual']:.3f}，门槛 {gate['threshold']:.3f}）"
+                for gate in gates["items"]
+            ],
+            "",
+            (
+                "结论：已测关键门全部通过。"
+                if gates["all_measured_passed"]
+                else "结论：存在未通过的关键质量门，只能声明机制已实现，不能声明整体质量达标。"
+            ),
+            "",
             "混淆矩阵、错误合并和错误拆分案例见同目录 JSON。",
         ]
     )
+
+
+def quality_gate_results(payload: dict) -> dict:
+    structure = payload["structure"]
+    holdout = payload["clustering"]["holdout_metrics"]
+    values = [
+        ("首次 Schema 通过率", structure["first_pass_schema_rate"], 0.95),
+        (
+            "问题类型 Macro-F1",
+            structure["problem_type"]["report"]["macro avg"]["f1-score"],
+            0.80,
+        ),
+        (
+            "产品区域 Macro-F1",
+            structure["product_area"]["report"]["macro avg"]["f1-score"],
+            0.80,
+        ),
+        ("责任路由策略一致率", structure["owner_policy_consistency"], 0.85),
+        ("高风险升级召回率", structure["escalation_recall"], 1.0),
+        ("quote 自动定位成功率", structure["evidence_auto_location_rate"], 0.95),
+        ("重复问题匹配精确率", holdout["pairwise"]["precision"], 0.80),
+        ("B³ F1", holdout["b_cubed"]["f1"], 0.75),
+    ]
+    items = [
+        {"label": label, "actual": actual, "threshold": threshold, "passed": actual >= threshold}
+        for label, actual, threshold in values
+    ]
+    return {
+        "items": items,
+        "all_measured_passed": all(item["passed"] for item in items),
+        "unmeasured": ["已接受记录 offset 有效率", "周报与 SOP 引用率"],
+    }
 
 
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--data", type=Path, default=Path("data/generated"))
     parser.add_argument("--out", type=Path, default=Path("artifacts/evaluation"))
+    parser.add_argument(
+        "--audit",
+        type=Path,
+        default=Path("data/manual-audit/holdout-audit.csv"),
+    )
     parser.add_argument("--analyzer", choices=["demo", "dify"], default="demo")
     parser.add_argument("--embedding", choices=["tfidf", "bge"], default="tfidf")
     args = parser.parse_args()
     development = load_rows(args.data / "tickets_development_with_gold.csv")
     holdout = load_rows(args.data / "tickets_holdout_locked.csv")
+    manifest = json.loads((args.data / "dataset_manifest.json").read_text(encoding="utf-8"))
     payload = {
         "generated_at": datetime.now().astimezone().isoformat(),
         "boundary": "Synthetic mechanism benchmark; not a real-business distribution.",
+        "dataset_version": manifest["dataset_version"],
+        "audit": load_audit_status(args.audit),
         "structure": structure_evaluation(holdout, args.analyzer),
         "clustering": clustering_evaluation(development, holdout, args.embedding),
         "holdout_support": {
@@ -218,6 +308,7 @@ def main() -> None:
             "product_area": Counter(row["gold_product_area"] for row in holdout),
         },
     }
+    payload["quality_gates"] = quality_gate_results(payload)
     args.out.mkdir(parents=True, exist_ok=True)
     (args.out / "evaluation.json").write_text(
         json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8"

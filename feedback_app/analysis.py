@@ -1,5 +1,5 @@
 from .evidence import locate_evidence
-from .routing import derive_severity, needs_escalation, route_owner
+from .routing import derive_severity, needs_escalation, route_owner, supplement_impact_signals
 from .schemas import FinalAnalysis, LLMAnalysis, ReviewStatus
 
 
@@ -10,7 +10,8 @@ def finalize_analysis(
     analysis_source: str,
 ) -> FinalAnalysis:
     evidence = locate_evidence(message, llm_analysis.evidence_spans)
-    severity = derive_severity(llm_analysis.impact_signals)
+    impact_signals = supplement_impact_signals(message, llm_analysis.impact_signals)
+    severity = derive_severity(impact_signals)
     owner = route_owner(llm_analysis.problem_type, llm_analysis.product_area)
     review_reasons = list(evidence.failures)
     if not evidence.located:
@@ -24,13 +25,12 @@ def finalize_analysis(
         suggested_owner=owner,
         llm_owner_suggestion=llm_analysis.llm_owner_suggestion,
         root_cause_hypothesis=llm_analysis.root_cause_hypothesis,
-        impact_signals=llm_analysis.impact_signals,
+        impact_signals=impact_signals,
         evidence_spans=evidence.located,
         severity=severity,
-        needs_escalation=needs_escalation(severity, llm_analysis.impact_signals),
+        needs_escalation=needs_escalation(severity, impact_signals),
         review_status=review_status,
         review_reasons=review_reasons,
         workflow_version=workflow_version,
         analysis_source=analysis_source,
     )
-

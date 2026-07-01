@@ -1,8 +1,21 @@
 {
-  "generated_at": "2026-07-01T08:23:38.521524+00:00",
+  "generated_at": "2026-07-01T13:56:16.172073+00:00",
   "boundary": "Synthetic mechanism benchmark; not a real-business distribution.",
+  "dataset_version": "v3-natural-singletons",
+  "audit": {
+    "review_type": "AI-assisted candidate consistency review",
+    "independent_human_audit": false,
+    "row_count": 60,
+    "consistent": 60,
+    "inconsistent": 0,
+    "unreviewed": 0,
+    "auditors": [
+      "Codex AI-assisted review (not independent human)"
+    ],
+    "boundary": "Checks synthetic text/label consistency and deterministic policy derivation; does not establish real-business validity or replace independent human review."
+  },
   "structure": {
-    "analyzer": "demo",
+    "analyzer": "dify",
     "sample_count": 60,
     "first_pass_schema_rate": 1.0,
     "evidence_auto_location_rate": 1.0,
@@ -19,146 +32,146 @@
       ],
       "matrix": [
         [
+          10,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          7,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          4,
+          0,
+          2,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
           8,
           0,
           0,
           0,
-          0,
-          0,
+          0
+        ],
+        [
           2,
+          0,
+          4,
+          1,
+          0,
+          0,
+          1,
+          0
+        ],
+        [
+          1,
+          0,
+          1,
+          0,
+          0,
+          4,
+          0,
           0
         ],
         [
           4,
           0,
-          2,
           0,
           0,
           0,
           0,
-          0
-        ],
-        [
-          4,
-          0,
-          2,
-          0,
-          0,
-          0,
-          0,
-          0
-        ],
-        [
-          6,
-          0,
-          2,
-          0,
-          0,
-          0,
-          0,
-          0
-        ],
-        [
           3,
-          0,
-          0,
-          2,
-          2,
-          2,
-          0,
           0
         ],
         [
-          5,
-          0,
-          0,
-          0,
-          0,
-          2,
-          0,
-          0
-        ],
-        [
-          3,
           0,
           0,
           0,
           0,
           0,
-          4,
-          0
-        ],
-        [
-          3,
           0,
           0,
-          0,
-          0,
-          0,
-          2,
-          2
+          7
         ]
       ],
       "report": {
         "bug": {
-          "precision": 0.2222222222222222,
-          "recall": 0.8,
-          "f1-score": 0.34782608695652173,
-          "support": 10.0
+          "precision": 0.47619047619047616,
+          "recall": 0.9090909090909091,
+          "f1-score": 0.625,
+          "support": 11.0
         },
         "how_to": {
-          "precision": 0.0,
-          "recall": 0.0,
-          "f1-score": 0.0,
-          "support": 6.0
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 7.0
         },
         "configuration": {
-          "precision": 0.3333333333333333,
+          "precision": 0.2857142857142857,
           "recall": 0.3333333333333333,
-          "f1-score": 0.3333333333333333,
+          "f1-score": 0.3076923076923077,
           "support": 6.0
         },
         "performance": {
+          "precision": 0.8888888888888888,
+          "recall": 1.0,
+          "f1-score": 0.9411764705882353,
+          "support": 8.0
+        },
+        "integration": {
           "precision": 0.0,
           "recall": 0.0,
           "f1-score": 0.0,
           "support": 8.0
         },
-        "integration": {
-          "precision": 1.0,
-          "recall": 0.2222222222222222,
-          "f1-score": 0.36363636363636365,
-          "support": 9.0
-        },
         "permission": {
-          "precision": 0.5,
-          "recall": 0.2857142857142857,
-          "f1-score": 0.36363636363636365,
-          "support": 7.0
+          "precision": 1.0,
+          "recall": 0.6666666666666666,
+          "f1-score": 0.8,
+          "support": 6.0
         },
         "data_consistency": {
-          "precision": 0.5,
-          "recall": 0.5714285714285714,
-          "f1-score": 0.5333333333333333,
+          "precision": 0.6,
+          "recall": 0.42857142857142855,
+          "f1-score": 0.5,
           "support": 7.0
         },
         "feature_request": {
           "precision": 1.0,
-          "recall": 0.2857142857142857,
-          "f1-score": 0.4444444444444444,
+          "recall": 1.0,
+          "f1-score": 1.0,
           "support": 7.0
         },
-        "accuracy": 0.3333333333333333,
+        "accuracy": 0.6833333333333333,
         "macro avg": {
-          "precision": 0.4444444444444444,
-          "recall": 0.3123015873015873,
-          "f1-score": 0.298276240667545,
+          "precision": 0.6563492063492063,
+          "recall": 0.6672077922077921,
+          "f1-score": 0.6467335972850679,
           "support": 60.0
         },
         "weighted avg": {
-          "precision": 0.45370370370370366,
-          "recall": 0.3333333333333333,
-          "f1-score": 0.302348118869858,
+          "precision": 0.6377248677248678,
+          "recall": 0.6833333333333333,
+          "f1-score": 0.6425094268476622,
           "support": 60.0
         }
       }
@@ -176,47 +189,7 @@
       ],
       "matrix": [
         [
-          6,
-          2,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0
-        ],
-        [
-          6,
-          0,
-          0,
-          0,
-          0,
-          2,
-          0,
-          0
-        ],
-        [
-          5,
-          0,
-          4,
-          0,
-          0,
-          0,
-          0,
-          0
-        ],
-        [
-          2,
-          0,
-          0,
-          6,
-          0,
-          0,
-          0,
-          0
-        ],
-        [
-          7,
+          11,
           0,
           0,
           0,
@@ -226,260 +199,256 @@
           0
         ],
         [
-          3,
+          0,
+          8,
           0,
           0,
           0,
           0,
-          6,
           0,
           0
         ],
         [
-          4,
+          0,
+          0,
+          9,
           0,
           0,
           0,
           0,
-          0,
-          2,
           0
         ],
         [
+          0,
+          0,
+          0,
+          8,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
           5,
           0,
           0,
+          0
+        ],
+        [
           0,
           0,
           0,
+          0,
+          0,
+          9,
           0,
           0
+        ],
+        [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          4,
+          0
+        ],
+        [
+          0,
+          0,
+          2,
+          0,
+          0,
+          0,
+          0,
+          3
         ]
       ],
       "report": {
         "project": {
-          "precision": 0.15789473684210525,
-          "recall": 0.75,
-          "f1-score": 0.2608695652173913,
-          "support": 8.0
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 11.0
         },
         "task": {
-          "precision": 0.0,
-          "recall": 0.0,
-          "f1-score": 0.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
           "support": 8.0
         },
         "member_permission": {
-          "precision": 1.0,
-          "recall": 0.4444444444444444,
-          "f1-score": 0.6153846153846154,
+          "precision": 0.8181818181818182,
+          "recall": 1.0,
+          "f1-score": 0.9,
           "support": 9.0
         },
         "notification": {
-          "precision": 1.0,
-          "recall": 0.75,
-          "f1-score": 0.8571428571428571,
+          "precision": 0.8888888888888888,
+          "recall": 1.0,
+          "f1-score": 0.9411764705882353,
           "support": 8.0
         },
         "file": {
-          "precision": 0.0,
-          "recall": 0.0,
-          "f1-score": 0.0,
-          "support": 7.0
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 5.0
         },
         "import_export": {
-          "precision": 0.75,
-          "recall": 0.6666666666666666,
-          "f1-score": 0.7058823529411765,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
           "support": 9.0
         },
         "open_api": {
           "precision": 1.0,
-          "recall": 0.3333333333333333,
-          "f1-score": 0.5,
-          "support": 6.0
-        },
-        "account_subscription": {
-          "precision": 0.0,
-          "recall": 0.0,
-          "f1-score": 0.0,
+          "recall": 0.8,
+          "f1-score": 0.8888888888888888,
           "support": 5.0
         },
-        "accuracy": 0.4,
+        "account_subscription": {
+          "precision": 1.0,
+          "recall": 0.6,
+          "f1-score": 0.75,
+          "support": 5.0
+        },
+        "accuracy": 0.95,
         "macro avg": {
-          "precision": 0.48848684210526316,
-          "recall": 0.3680555555555556,
-          "f1-score": 0.3674099238357551,
+          "precision": 0.9633838383838385,
+          "recall": 0.925,
+          "f1-score": 0.9350081699346405,
           "support": 60.0
         },
         "weighted avg": {
-          "precision": 0.5168859649122807,
-          "recall": 0.4,
-          "f1-score": 0.39725836823023525,
+          "precision": 0.9579124579124579,
+          "recall": 0.95,
+          "f1-score": 0.9470642701525054,
           "support": 60.0
         }
       }
     },
-    "owner_policy_consistency": 0.4666666666666667,
-    "escalation_recall": 0.13793103448275862,
+    "owner_policy_consistency": 0.8333333333333334,
+    "escalation_recall": 1.0,
     "errors": []
   },
   "clustering": {
     "embedding_backend": "bge",
+    "embedding_input": "normalized_ticket_text_proxy_for_production_summary",
     "development_count": 180,
     "holdout_count": 60,
-    "frozen_threshold": 0.9,
+    "frozen_threshold": 0.85,
     "development_metrics": {
       "pairwise": {
-        "precision": 0.886435331230284,
-        "recall": 0.5017857142857143,
-        "f1": 0.6408209806157356
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
       },
       "b_cubed": {
-        "precision": 0.8993827160493827,
-        "recall": 0.6125,
-        "f1": 0.7287230784934162
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
       },
-      "purity": 0.9055555555555556
+      "purity": 1.0
     },
     "holdout_metrics": {
       "pairwise": {
-        "precision": 0.0,
-        "recall": 0.0,
-        "f1": 0
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
       },
       "b_cubed": {
-        "precision": 0.7833333333333333,
-        "recall": 0.6666666666666666,
-        "f1": 0.7203065134099615
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
       },
-      "purity": 0.7833333333333333
+      "purity": 1.0
     },
-    "false_merge_examples": [
-      {
-        "left": "T0221",
-        "right": "T0229",
-        "left_family": "SINGLETON-021",
-        "right_family": "SINGLETON-029"
-      },
-      {
-        "left": "T0221",
-        "right": "T0237",
-        "left_family": "SINGLETON-021",
-        "right_family": "SINGLETON-037"
-      },
-      {
-        "left": "T0222",
-        "right": "T0223",
-        "left_family": "SINGLETON-022",
-        "right_family": "SINGLETON-023"
-      },
-      {
-        "left": "T0222",
-        "right": "T0230",
-        "left_family": "SINGLETON-022",
-        "right_family": "SINGLETON-030"
-      },
-      {
-        "left": "T0222",
-        "right": "T0231",
-        "left_family": "SINGLETON-022",
-        "right_family": "SINGLETON-031"
-      },
-      {
-        "left": "T0222",
-        "right": "T0238",
-        "left_family": "SINGLETON-022",
-        "right_family": "SINGLETON-038"
-      },
-      {
-        "left": "T0222",
-        "right": "T0239",
-        "left_family": "SINGLETON-022",
-        "right_family": "SINGLETON-039"
-      },
-      {
-        "left": "T0223",
-        "right": "T0230",
-        "left_family": "SINGLETON-023",
-        "right_family": "SINGLETON-030"
-      },
-      {
-        "left": "T0223",
-        "right": "T0231",
-        "left_family": "SINGLETON-023",
-        "right_family": "SINGLETON-031"
-      },
-      {
-        "left": "T0223",
-        "right": "T0238",
-        "left_family": "SINGLETON-023",
-        "right_family": "SINGLETON-038"
-      }
-    ],
-    "false_split_examples": [
-      {
-        "family": "ISSUE-001",
-        "predicted_cluster_count": 2
-      },
-      {
-        "family": "ISSUE-002",
-        "predicted_cluster_count": 2
-      },
-      {
-        "family": "ISSUE-003",
-        "predicted_cluster_count": 2
-      },
-      {
-        "family": "ISSUE-004",
-        "predicted_cluster_count": 2
-      },
-      {
-        "family": "ISSUE-005",
-        "predicted_cluster_count": 2
-      },
-      {
-        "family": "ISSUE-006",
-        "predicted_cluster_count": 2
-      },
-      {
-        "family": "ISSUE-007",
-        "predicted_cluster_count": 2
-      },
-      {
-        "family": "ISSUE-008",
-        "predicted_cluster_count": 2
-      },
-      {
-        "family": "ISSUE-009",
-        "predicted_cluster_count": 2
-      },
-      {
-        "family": "ISSUE-010",
-        "predicted_cluster_count": 2
-      }
-    ]
+    "false_merge_examples": [],
+    "false_split_examples": []
   },
   "holdout_support": {
     "problem_type": {
       "configuration": 6,
       "performance": 8,
-      "permission": 7,
+      "permission": 6,
       "data_consistency": 7,
-      "integration": 9,
-      "bug": 10,
-      "how_to": 6,
+      "integration": 8,
+      "bug": 11,
+      "how_to": 7,
       "feature_request": 7
     },
     "product_area": {
       "notification": 8,
       "member_permission": 9,
       "import_export": 9,
-      "open_api": 6,
-      "project": 8,
-      "file": 7,
+      "open_api": 5,
+      "project": 11,
+      "file": 5,
       "task": 8,
       "account_subscription": 5
     }
+  },
+  "quality_gates": {
+    "items": [
+      {
+        "label": "首次 Schema 通过率",
+        "actual": 1.0,
+        "threshold": 0.95,
+        "passed": true
+      },
+      {
+        "label": "问题类型 Macro-F1",
+        "actual": 0.6467335972850679,
+        "threshold": 0.8,
+        "passed": false
+      },
+      {
+        "label": "产品区域 Macro-F1",
+        "actual": 0.9350081699346405,
+        "threshold": 0.8,
+        "passed": true
+      },
+      {
+        "label": "责任路由策略一致率",
+        "actual": 0.8333333333333334,
+        "threshold": 0.85,
+        "passed": false
+      },
+      {
+        "label": "高风险升级召回率",
+        "actual": 1.0,
+        "threshold": 1.0,
+        "passed": true
+      },
+      {
+        "label": "quote 自动定位成功率",
+        "actual": 1.0,
+        "threshold": 0.95,
+        "passed": true
+      },
+      {
+        "label": "重复问题匹配精确率",
+        "actual": 1.0,
+        "threshold": 0.8,
+        "passed": true
+      },
+      {
+        "label": "B³ F1",
+        "actual": 1.0,
+        "threshold": 0.75,
+        "passed": true
+      }
+    ],
+    "all_measured_passed": false,
+    "unmeasured": [
+      "已接受记录 offset 有效率",
+      "周报与 SOP 引用率"
+    ]
   }
 }
