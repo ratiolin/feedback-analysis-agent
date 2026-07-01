@@ -4,9 +4,9 @@ __pycache__/
 .pytest_cache/
 *.pyc
 *.db
+*.tsbuildinfo
 node_modules/
 .next/
 coverage/
 data/generated/
 !data/generated/.gitkeep
-
