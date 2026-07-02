@@ -24,5 +24,8 @@ docker cp \
 docker cp \
   feedback-analysis-agent-feedback-worker-1:/app/artifacts/evaluation-v2-candidate/evaluation.md \
   artifacts/evaluation-v2-candidate/evaluation.md
+docker cp \
+  feedback-analysis-agent-feedback-worker-1:/app/artifacts/evaluation-v2-candidate/status.json \
+  artifacts/evaluation-v2-candidate/status.json
 
 echo "candidate evaluation complete: artifacts/evaluation-v2-candidate/evaluation.json"

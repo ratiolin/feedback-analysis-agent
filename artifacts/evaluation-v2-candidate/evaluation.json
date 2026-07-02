@@ -1,0 +1,497 @@
+{
+  "generated_at": "2026-07-02T01:42:12.778016+00:00",
+  "boundary": "Synthetic mechanism benchmark; not a real-business distribution.",
+  "dataset_version": "v4-frozen-candidate-holdout-20260702",
+  "evaluation_state": "candidate_scored_unpromoted",
+  "candidate_prompt_sha256": "47bcd77f2aa5b0b472a6b2df51266875ce1329f31ca72a947555de8dddb77178",
+  "audit": {
+    "review_type": "AI-assisted candidate consistency review",
+    "independent_human_audit": false,
+    "row_count": 60,
+    "consistent": 60,
+    "inconsistent": 0,
+    "unreviewed": 0,
+    "auditors": [
+      "Codex AI-assisted review (not independent human)"
+    ],
+    "boundary": "Checks synthetic text/label consistency and deterministic policy derivation; does not establish real-business validity or replace independent human review."
+  },
+  "structure": {
+    "analyzer": "dify",
+    "sample_count": 60,
+    "first_pass_schema_rate": 1.0,
+    "evidence_auto_location_rate": 1.0,
+    "problem_type": {
+      "labels": [
+        "bug",
+        "how_to",
+        "configuration",
+        "performance",
+        "integration",
+        "permission",
+        "data_consistency",
+        "feature_request"
+      ],
+      "matrix": [
+        [
+          6,
+          0,
+          0,
+          0,
+          0,
+          0,
+          2,
+          0
+        ],
+        [
+          0,
+          8,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          7,
+          0,
+          0,
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          8,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          8,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          6,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          8,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          6
+        ]
+      ],
+      "report": {
+        "bug": {
+          "precision": 1.0,
+          "recall": 0.75,
+          "f1-score": 0.8571428571428571,
+          "support": 8.0
+        },
+        "how_to": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 8.0
+        },
+        "configuration": {
+          "precision": 1.0,
+          "recall": 0.875,
+          "f1-score": 0.9333333333333333,
+          "support": 8.0
+        },
+        "performance": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 8.0
+        },
+        "integration": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 8.0
+        },
+        "permission": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 6.0
+        },
+        "data_consistency": {
+          "precision": 0.7272727272727273,
+          "recall": 1.0,
+          "f1-score": 0.8421052631578947,
+          "support": 8.0
+        },
+        "feature_request": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 6.0
+        },
+        "accuracy": 0.95,
+        "macro avg": {
+          "precision": 0.9659090909090909,
+          "recall": 0.953125,
+          "f1-score": 0.9540726817042606,
+          "support": 60.0
+        },
+        "weighted avg": {
+          "precision": 0.9636363636363636,
+          "recall": 0.95,
+          "f1-score": 0.9510108604845446,
+          "support": 60.0
+        }
+      }
+    },
+    "product_area": {
+      "labels": [
+        "project",
+        "task",
+        "member_permission",
+        "notification",
+        "file",
+        "import_export",
+        "open_api",
+        "account_subscription"
+      ],
+      "matrix": [
+        [
+          11,
+          1,
+          2,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          10,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          6,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          6,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          8,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          4,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          6,
+          0
+        ],
+        [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          5
+        ]
+      ],
+      "report": {
+        "project": {
+          "precision": 1.0,
+          "recall": 0.7857142857142857,
+          "f1-score": 0.88,
+          "support": 14.0
+        },
+        "task": {
+          "precision": 0.9090909090909091,
+          "recall": 1.0,
+          "f1-score": 0.9523809523809523,
+          "support": 10.0
+        },
+        "member_permission": {
+          "precision": 0.6666666666666666,
+          "recall": 1.0,
+          "f1-score": 0.8,
+          "support": 6.0
+        },
+        "notification": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 6.0
+        },
+        "file": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 8.0
+        },
+        "import_export": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 4.0
+        },
+        "open_api": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 6.0
+        },
+        "account_subscription": {
+          "precision": 1.0,
+          "recall": 0.8333333333333334,
+          "f1-score": 0.9090909090909091,
+          "support": 6.0
+        },
+        "accuracy": 0.9333333333333333,
+        "macro avg": {
+          "precision": 0.946969696969697,
+          "recall": 0.9523809523809523,
+          "f1-score": 0.9426839826839827,
+          "support": 60.0
+        },
+        "weighted avg": {
+          "precision": 0.9515151515151515,
+          "recall": 0.9333333333333333,
+          "f1-score": 0.9349725829725829,
+          "support": 60.0
+        }
+      }
+    },
+    "owner_policy_consistency": 0.95,
+    "escalation_recall": 1.0,
+    "errors": []
+  },
+  "clustering": {
+    "embedding_backend": "bge",
+    "embedding_input": "normalized_ticket_text_proxy_for_production_summary",
+    "development_count": 180,
+    "holdout_count": 60,
+    "frozen_threshold": 0.85,
+    "development_metrics": {
+      "pairwise": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "b_cubed": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "purity": 1.0
+    },
+    "holdout_metrics": {
+      "pairwise": {
+        "precision": 0,
+        "recall": 0.0,
+        "f1": 0
+      },
+      "b_cubed": {
+        "precision": 1.0,
+        "recall": 0.5,
+        "f1": 0.6666666666666666
+      },
+      "purity": 1.0
+    },
+    "false_merge_examples": [],
+    "false_split_examples": [
+      {
+        "family": "V4-ISSUE-001",
+        "predicted_cluster_count": 2
+      },
+      {
+        "family": "V4-ISSUE-002",
+        "predicted_cluster_count": 2
+      },
+      {
+        "family": "V4-ISSUE-003",
+        "predicted_cluster_count": 2
+      },
+      {
+        "family": "V4-ISSUE-004",
+        "predicted_cluster_count": 2
+      },
+      {
+        "family": "V4-ISSUE-005",
+        "predicted_cluster_count": 2
+      },
+      {
+        "family": "V4-ISSUE-006",
+        "predicted_cluster_count": 2
+      },
+      {
+        "family": "V4-ISSUE-007",
+        "predicted_cluster_count": 2
+      },
+      {
+        "family": "V4-ISSUE-008",
+        "predicted_cluster_count": 2
+      },
+      {
+        "family": "V4-ISSUE-009",
+        "predicted_cluster_count": 2
+      },
+      {
+        "family": "V4-ISSUE-010",
+        "predicted_cluster_count": 2
+      }
+    ]
+  },
+  "holdout_support": {
+    "problem_type": {
+      "integration": 8,
+      "bug": 8,
+      "how_to": 8,
+      "configuration": 8,
+      "performance": 8,
+      "permission": 6,
+      "data_consistency": 8,
+      "feature_request": 6
+    },
+    "product_area": {
+      "open_api": 6,
+      "member_permission": 6,
+      "file": 8,
+      "project": 14,
+      "task": 10,
+      "notification": 6,
+      "account_subscription": 6,
+      "import_export": 4
+    }
+  },
+  "quality_gates": {
+    "items": [
+      {
+        "label": "首次 Schema 通过率",
+        "actual": 1.0,
+        "threshold": 0.95,
+        "passed": true
+      },
+      {
+        "label": "问题类型 Macro-F1",
+        "actual": 0.9540726817042606,
+        "threshold": 0.8,
+        "passed": true
+      },
+      {
+        "label": "产品区域 Macro-F1",
+        "actual": 0.9426839826839827,
+        "threshold": 0.8,
+        "passed": true
+      },
+      {
+        "label": "责任路由策略一致率",
+        "actual": 0.95,
+        "threshold": 0.85,
+        "passed": true
+      },
+      {
+        "label": "高风险升级召回率",
+        "actual": 1.0,
+        "threshold": 1.0,
+        "passed": true
+      },
+      {
+        "label": "quote 自动定位成功率",
+        "actual": 1.0,
+        "threshold": 0.95,
+        "passed": true
+      },
+      {
+        "label": "重复问题匹配精确率",
+        "actual": 0,
+        "threshold": 0.8,
+        "passed": false
+      },
+      {
+        "label": "B³ F1",
+        "actual": 0.6666666666666666,
+        "threshold": 0.75,
+        "passed": false
+      }
+    ],
+    "all_measured_passed": false,
+    "unmeasured": [
+      "已接受记录 offset 有效率",
+      "周报与 SOP 引用率"
+    ]
+  }
+}

@@ -1,10 +1,38 @@
 import csv
 import hashlib
 import json
+from pathlib import Path
 
 import pytest
 
-from tools.evaluate import load_and_verify_manifest, load_audit_status
+from tools.evaluate import candidate_status_payload, load_and_verify_manifest, load_audit_status
+
+
+def test_worker_mounts_evaluation_inputs_read_only() -> None:
+    compose = Path("docker-compose.yml").read_text(encoding="utf-8")
+    api = compose.split("  feedback-api:", 1)[1].split("\n  feedback-worker:", 1)[0]
+    worker = compose.split("  feedback-worker:", 1)[1].split("\n  feedback-web:", 1)[0]
+    assert "./artifacts:/app/artifacts:ro" in api
+    assert "./data:/app/data:ro" in worker
+    assert "./dify-workflows:/app/dify-workflows:ro" in worker
+
+
+def test_failed_candidate_gates_block_promotion() -> None:
+    payload = {
+        "candidate_prompt_sha256": "hash",
+        "dataset_version": "v4",
+        "structure": {"sample_count": 60},
+        "audit": {"consistent": 60},
+        "quality_gates": {
+            "items": [
+                {"label": "structure", "passed": True},
+                {"label": "clustering", "passed": False},
+            ]
+        },
+    }
+    status = candidate_status_payload(payload)
+    assert status["promotion_state"] == "blocked_quality_gates"
+    assert status["failed_quality_gates"] == ["clustering"]
 
 
 def test_candidate_manifest_rejects_prompt_changed_after_freeze(tmp_path) -> None:

@@ -54,11 +54,11 @@ def ticket_payload(ticket_id: str) -> dict:
     }
 
 
-def test_candidate_evaluation_exposes_unscored_state(client: TestClient) -> None:
+def test_candidate_evaluation_exposes_scored_unpromoted_state(client: TestClient) -> None:
     response = client.get("/v1/evaluation/candidate")
     assert response.status_code == 200
-    assert response.json()["workflow_state"] == "candidate_awaiting_import"
-    assert response.json()["model_evaluation"] == "not_run"
+    assert response.json()["evaluation_state"] == "candidate_scored_unpromoted"
+    assert response.json()["quality_gates"]["all_measured_passed"] is False
 
 
 def test_session_creation_reuses_active_header(client: TestClient) -> None:

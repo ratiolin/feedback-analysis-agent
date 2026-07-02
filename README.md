@@ -36,12 +36,12 @@ CSV / 在线工单
 产品区域：8
 初始 BGE 问题簇：63
 候选 SOP：2
-Python 自动测试：37
+Python 自动测试：39
 ```
 
 当前公开基线来自已发布 `客户反馈结构化-v1` 的真实 Dify + BGE 回放（数据版本 `v3-natural-singletons`）。Schema、quote 定位、产品区域、升级召回与聚类指标通过门槛；问题类型 Macro-F1 为 0.647、责任路由策略一致率为 83.3%，未通过 0.80/0.85 门槛。因此只能声明机制已实现，不能声明整体分类质量达标。
 
-`客户反馈结构化-v2-candidate` 已冻结为候选 DSL，并配套全新 `v4-frozen-candidate-holdout-20260702` 锁定集。v4 已完成 60/60 条 AI 辅助一致性复核，但尚未运行模型评测；不得把候选状态写成质量提升。导入步骤见 `docs/activation-checklist.md`。
+`客户反馈结构化-v2-candidate` 已在全新 `v4-frozen-candidate-holdout-20260702` 锁定集完成真实 Dify + BGE 回放。结构化链路通过 6 项门禁：Schema 与 quote 定位 100%，问题类型 Macro-F1 0.954、产品区域 Macro-F1 0.943、责任路由一致率 95%、升级召回 100%。聚类未通过：30 个同族表述均被拆分，重复匹配精确率/召回率为 0，B³ F1 为 0.667。因此状态保持 `candidate_scored_unpromoted`，不得写成整体质量提升，也不替换 v1 公开基线。
 
 ## 快速开始
 

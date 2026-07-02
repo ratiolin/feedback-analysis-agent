@@ -38,6 +38,9 @@ services:
     depends_on:
       feedback-postgres:
         condition: service_healthy
+    volumes:
+      # Public evaluation endpoints read versioned host artifacts without write access.
+      - ./artifacts:/app/artifacts:ro
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8101/health')"]
       interval: 10s
@@ -58,6 +61,9 @@ services:
         condition: service_healthy
     volumes:
       - feedback_model_cache:/models/huggingface
+      # Evaluation fixtures and frozen candidate contracts are read-only inputs.
+      - ./data:/app/data:ro
+      - ./dify-workflows:/app/dify-workflows:ro
     networks: [feedback-net]
 
   feedback-web:

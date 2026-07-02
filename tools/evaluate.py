@@ -308,6 +308,34 @@ def quality_gate_results(payload: dict) -> dict:
     }
 
 
+def candidate_status_payload(payload: dict) -> dict:
+    failed = [
+        item["label"] for item in payload["quality_gates"]["items"] if not item["passed"]
+    ]
+    return {
+        "workflow_state": "candidate_scored_unpromoted",
+        "workflow_name": "客户反馈结构化-v2-candidate",
+        "dsl_path": "dify-workflows/feedback-structuring-v2-candidate.yml",
+        "candidate_prompt_sha256": payload.get("candidate_prompt_sha256"),
+        "dataset_version": payload["dataset_version"],
+        "holdout_rows": payload["structure"]["sample_count"],
+        "audit_consistent": payload["audit"]["consistent"],
+        "audit_type": "AI-assisted consistency review; not an independent human audit",
+        "model_evaluation": "completed",
+        "promotion_state": (
+            "eligible_for_manual_promotion"
+            if not failed
+            else "blocked_quality_gates"
+        ),
+        "quality_gates_all_passed": not failed,
+        "failed_quality_gates": failed,
+        "boundary": (
+            "A scored candidate remains separate from the official baseline. "
+            "Promotion requires every measured gate to pass and an explicit promotion record."
+        ),
+    }
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--data", type=Path, default=Path("data/generated"))
@@ -348,6 +376,11 @@ def main() -> None:
         json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8"
     )
     (args.out / "evaluation.md").write_text(markdown_report(payload), encoding="utf-8")
+    if is_candidate:
+        (args.out / "status.json").write_text(
+            json.dumps(candidate_status_payload(payload), ensure_ascii=False, indent=2),
+            encoding="utf-8",
+        )
     print(markdown_report(payload))
 
 
