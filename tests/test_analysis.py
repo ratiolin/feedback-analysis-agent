@@ -7,6 +7,7 @@ def test_final_analysis_routes_owner_and_locates_quote() -> None:
     analysis = LLMAnalysis.model_validate(
         {
             "summary": "团队无法收到任务到期通知",
+            "issue_signature": "任务到期通知未送达",
             "problem_type": "configuration",
             "product_area": "notification",
             "sentiment": "frustrated",
@@ -26,6 +27,7 @@ def test_final_analysis_routes_owner_and_locates_quote() -> None:
     assert final.llm_owner_suggestion == Owner.ENGINEERING_TRIAGE
     assert final.review_status == ReviewStatus.ACCEPTED
     assert final.needs_escalation
+    assert final.issue_signature == "任务到期通知未送达"
 
 
 def test_unverifiable_evidence_forces_review() -> None:
@@ -40,6 +42,7 @@ def test_unverifiable_evidence_forces_review() -> None:
         }
     )
     final = finalize_analysis("我的通知不太对", analysis, "v1", "test")
+    assert final.issue_signature == "通知异常"
     assert final.review_status == ReviewStatus.NEEDS_REVIEW
     assert "no_located_evidence" in final.review_reasons
 

@@ -32,6 +32,7 @@ def finalize_analysis(
     review_status = ReviewStatus.NEEDS_REVIEW if review_reasons else ReviewStatus.ACCEPTED
     return FinalAnalysis(
         summary=llm_analysis.summary,
+        issue_signature=llm_analysis.issue_signature or llm_analysis.summary,
         problem_type=problem_type,
         product_area=product_area,
         sentiment=llm_analysis.sentiment,

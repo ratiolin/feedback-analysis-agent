@@ -40,6 +40,16 @@ def test_product_area_blocking_prevents_cross_area_false_merge() -> None:
     assert labels[0] != labels[1]
 
 
+def test_composite_area_and_problem_type_blocking_prevents_adjacent_intent_merge() -> None:
+    vectors = np.array([[1, 0], [0.999, 0.001]], dtype=float)
+    labels = threshold_clusters(
+        vectors,
+        0.9,
+        groups=["notification|configuration", "notification|feature_request"],
+    )
+    assert labels[0] != labels[1]
+
+
 def test_complete_linkage_prevents_single_link_chaining() -> None:
     vectors = np.array(
         [[1.0, 0.0], [0.9, 0.4358899], [0.62, 0.7846018]],

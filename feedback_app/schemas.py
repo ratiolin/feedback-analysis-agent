@@ -92,6 +92,7 @@ class ImpactSignals(BaseModel):
 
 class LLMAnalysis(BaseModel):
     summary: str = Field(min_length=3, max_length=200)
+    issue_signature: str | None = Field(default=None, min_length=3, max_length=80)
     problem_type: ProblemType
     product_area: ProductArea
     sentiment: Sentiment
@@ -111,6 +112,7 @@ class LocatedEvidence(BaseModel):
 
 class FinalAnalysis(BaseModel):
     summary: str
+    issue_signature: str
     problem_type: ProblemType
     product_area: ProductArea
     sentiment: Sentiment

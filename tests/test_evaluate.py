@@ -122,7 +122,8 @@ def test_structure_evaluation_uses_only_hash_matched_cache() -> None:
         "items": {
             "T1": {
                 "input_sha256": analysis_input_hash(row),
-                "attempts": 1,
+                "attempts": 2,
+                "attempt_errors": ["ConnectTimeout: timed out"],
                 "analysis": {
                     "summary": "Jira 负责人同步为空",
                     "problem_type": "data_consistency",
@@ -143,6 +144,8 @@ def test_structure_evaluation_uses_only_hash_matched_cache() -> None:
     assert result["problem_type"]["matrix"][4][4] == 1
     assert result["product_area"]["matrix"][2][2] == 1
     assert result["owner_policy_consistency"] == 1
+    assert result["schema_contract_valid_rate"] == 1
+    assert result["first_attempt_dependency_success_rate"] == 0
 
     cached["items"]["T1"]["input_sha256"] = "wrong"
     mismatch = structure_evaluation(

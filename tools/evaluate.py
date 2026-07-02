@@ -35,16 +35,43 @@ def analysis_input_hash(row: dict) -> str:
     return hashlib.sha256(canonical.encode()).hexdigest()
 
 
-def cached_summaries(rows: list[dict], cache: dict) -> list[str]:
-    summaries: list[str] = []
+def cached_cluster_texts(rows: list[dict], cache: dict) -> list[str]:
+    cluster_texts: list[str] = []
     for row in rows:
         item = cache.get("items", {}).get(row["ticket_id"])
         if not item or "analysis" not in item:
             raise ValueError(f"analysis cache missing success for {row['ticket_id']}")
         if item.get("input_sha256") != analysis_input_hash(row):
             raise ValueError(f"analysis cache input mismatch for {row['ticket_id']}")
-        summaries.append(LLMAnalysis.model_validate(item["analysis"]).summary)
-    return summaries
+        analysis = LLMAnalysis.model_validate(item["analysis"])
+        cluster_texts.append(analysis.issue_signature or analysis.summary)
+    return cluster_texts
+
+
+def cached_routing_groups(
+    rows: list[dict],
+    cache: dict,
+    routing_policy_version: str,
+    block_by_problem_type: bool,
+) -> list[str]:
+    groups: list[str] = []
+    for row in rows:
+        item = cache.get("items", {}).get(row["ticket_id"])
+        if not item or "analysis" not in item:
+            raise ValueError(f"analysis cache missing success for {row['ticket_id']}")
+        raw = LLMAnalysis.model_validate(item["analysis"])
+        final = finalize_analysis(
+            row["message"],
+            raw,
+            get_settings().workflow_version,
+            "cache",
+            routing_policy_version,
+        )
+        group = final.product_area.value
+        if block_by_problem_type:
+            group = f"{group}|{final.problem_type.value}"
+        groups.append(group)
+    return groups
 
 
 def load_audit_status(path: Path, expected_rows: list[dict]) -> dict:
@@ -156,7 +183,8 @@ def structure_evaluation(
     predicted_owners: list[str] = []
     predicted_escalations: list[bool] = []
     evidence_located = 0
-    first_pass_valid = 0
+    schema_contract_valid = 0
+    first_attempt_dependency_success = 0
     errors: list[dict] = []
     for row in rows:
         try:
@@ -171,7 +199,8 @@ def structure_evaluation(
                     raise ValueError("analysis_cache_input_mismatch")
                 raw = LLMAnalysis.model_validate(cached["analysis"])
                 attempts = int(cached.get("attempts", 1))
-            first_pass_valid += int(attempts == 1)
+            schema_contract_valid += 1
+            first_attempt_dependency_success += int(attempts == 1)
             final = finalize_analysis(
                 row["message"],
                 raw,
@@ -205,7 +234,13 @@ def structure_evaluation(
         "analyzer": analyzer_name,
         "routing_policy_version": routing_policy_version,
         "sample_count": len(rows),
-        "first_pass_schema_rate": first_pass_valid / len(rows),
+        "schema_contract_valid_rate": schema_contract_valid / len(rows),
+        "first_attempt_dependency_success_rate": (
+            first_attempt_dependency_success / len(rows)
+        ),
+        # Backward-compatible alias. This now measures validated contract output,
+        # while transport reliability is reported separately above.
+        "first_pass_schema_rate": schema_contract_valid / len(rows),
         "evidence_auto_location_rate": evidence_located / len(rows),
         "problem_type": confusion_payload(
             gold_types, predicted_types, [item.value for item in ProblemType]
@@ -214,6 +249,7 @@ def structure_evaluation(
             gold_areas, predicted_areas, [item.value for item in ProductArea]
         ),
         "predicted_product_areas": predicted_areas,
+        "predicted_problem_types": predicted_types,
         "owner_policy_consistency": sum(
             actual == expected
             for actual, expected in zip(predicted_owners, gold_owners, strict=True)
@@ -228,11 +264,13 @@ def clustering_evaluation(
     development: list[dict],
     holdout: list[dict],
     embedding_backend: str,
+    development_groups: list[str] | None = None,
     holdout_groups: list[str] | None = None,
     linkage: str = "single",
-    development_summaries: list[str] | None = None,
-    holdout_summaries: list[str] | None = None,
+    development_cluster_texts: list[str] | None = None,
+    holdout_cluster_texts: list[str] | None = None,
     raw_text_weight: float = 1.0,
+    block_by_problem_type: bool = False,
 ) -> dict:
     all_rows = development + holdout
     texts = [normalize_ticket_text(row["message"]) for row in all_rows]
@@ -240,15 +278,22 @@ def clustering_evaluation(
         embedder = SentenceTransformerEmbedder(get_settings().embedding_model)
     else:
         embedder = TfidfEmbedder()
-    summaries = (development_summaries or texts[: len(development)]) + (
-        holdout_summaries or texts[len(development) :]
+    summaries = (development_cluster_texts or texts[: len(development)]) + (
+        holdout_cluster_texts or texts[len(development) :]
     )
     vectors = blended_embeddings(embedder, texts, summaries, raw_text_weight)
     development_vectors = vectors[: len(development)]
     holdout_vectors = vectors[len(development) :]
     development_gold = [row["gold_issue_family"] for row in development]
     holdout_gold = [row["gold_issue_family"] for row in holdout]
-    development_groups = [row["gold_product_area"] for row in development]
+    development_groups = development_groups or [
+        (
+            f"{row['gold_product_area']}|{row['gold_problem_type']}"
+            if block_by_problem_type
+            else row["gold_product_area"]
+        )
+        for row in development
+    ]
     holdout_groups = holdout_groups or [row["gold_product_area"] for row in holdout]
     tuned = select_threshold(
         development_vectors,
@@ -300,11 +345,13 @@ def clustering_evaluation(
     )
     return {
         "embedding_backend": embedding_backend,
-        "embedding_input": "normalized_ticket_text_proxy_for_production_summary",
-        "blocking_key": "product_area",
+        "embedding_input": "normalized_ticket_text_plus_issue_signature",
+        "blocking_key": (
+            "product_area+problem_type" if block_by_problem_type else "product_area"
+        ),
         "linkage": linkage,
         "raw_text_weight": raw_text_weight,
-        "summary_weight": 1 - raw_text_weight,
+        "issue_signature_weight": 1 - raw_text_weight,
         "development_count": len(development),
         "holdout_count": len(holdout),
         "frozen_threshold": tuned.threshold,
@@ -352,12 +399,17 @@ def markdown_report(payload: dict) -> str:
                 f"{audit['unreviewed']} 条未复核"
             ),
             f"- 分析器：`{structure['analyzer']}`",
-            f"- 首次 Schema 通过率：{structure['first_pass_schema_rate']:.1%}",
+            f"- Schema 契约有效率：{structure['schema_contract_valid_rate']:.1%}",
+            (
+                "- 外部依赖首轮成功率："
+                f"{structure['first_attempt_dependency_success_rate']:.1%}"
+                "（与 Schema 质量分开计量）"
+            ),
             f"- 证据自动定位成功率：{structure['evidence_auto_location_rate']:.1%}",
             f"- 问题类型 Macro-F1：{problem_macro:.3f}",
             f"- 产品区域 Macro-F1：{area_macro:.3f}",
             f"- 责任路由策略一致率：{structure['owner_policy_consistency']:.1%}",
-            f"- 升级召回率：{structure['escalation_recall']:.1%}",
+            f"- 高风险升级召回率：{structure['escalation_recall']:.1%}",
             f"- 重复问题匹配精确率：{holdout['pairwise']['precision']:.1%}",
             f"- 重复问题匹配召回率：{holdout['pairwise']['recall']:.1%}",
             f"- 聚类纯度：{holdout['purity']:.1%}",
@@ -386,7 +438,7 @@ def quality_gate_results(payload: dict) -> dict:
     structure = payload["structure"]
     holdout = payload["clustering"]["holdout_metrics"]
     values = [
-        ("首次 Schema 通过率", structure["first_pass_schema_rate"], 0.95),
+        ("Schema 契约有效率", structure["schema_contract_valid_rate"], 0.95),
         (
             "问题类型 Macro-F1",
             structure["problem_type"]["report"]["macro avg"]["f1-score"],
@@ -421,8 +473,8 @@ def candidate_status_payload(payload: dict) -> dict:
     ]
     return {
         "workflow_state": "candidate_scored_unpromoted",
-        "workflow_name": "客户反馈结构化-v2-candidate",
-        "dsl_path": "dify-workflows/feedback-structuring-v2-candidate.yml",
+        "workflow_name": "客户反馈结构化-v3-candidate",
+        "dsl_path": "dify-workflows/feedback-structuring-v3-candidate.yml",
         "candidate_prompt_sha256": payload.get("candidate_prompt_sha256"),
         "dataset_version": payload["dataset_version"],
         "holdout_rows": payload["structure"]["sample_count"],
@@ -465,6 +517,7 @@ def main() -> None:
     parser.add_argument("--analysis-cache", type=Path)
     parser.add_argument("--development-analysis-cache", type=Path)
     parser.add_argument("--cluster-raw-text-weight", type=float, default=1.0)
+    parser.add_argument("--cluster-block-by-problem-type", action="store_true")
     args = parser.parse_args()
     development = load_rows(args.development or args.data / "tickets_development_with_gold.csv")
     holdout_path = args.holdout or args.data / "tickets_holdout_locked.csv"
@@ -500,17 +553,39 @@ def main() -> None:
             development,
             holdout,
             args.embedding,
-            holdout_groups=structure["predicted_product_areas"],
-            linkage=args.linkage,
-            development_summaries=(
-                cached_summaries(development, development_analysis_cache)
+            development_groups=(
+                cached_routing_groups(
+                    development,
+                    development_analysis_cache,
+                    args.routing_policy_version,
+                    args.cluster_block_by_problem_type,
+                )
                 if development_analysis_cache
                 else None
             ),
-            holdout_summaries=(
-                cached_summaries(holdout, analysis_cache) if analysis_cache else None
+            holdout_groups=[
+                (
+                    f"{area}|{problem_type}"
+                    if args.cluster_block_by_problem_type
+                    else area
+                )
+                for area, problem_type in zip(
+                    structure["predicted_product_areas"],
+                    structure["predicted_problem_types"],
+                    strict=True,
+                )
+            ],
+            linkage=args.linkage,
+            development_cluster_texts=(
+                cached_cluster_texts(development, development_analysis_cache)
+                if development_analysis_cache
+                else None
+            ),
+            holdout_cluster_texts=(
+                cached_cluster_texts(holdout, analysis_cache) if analysis_cache else None
             ),
             raw_text_weight=args.cluster_raw_text_weight,
+            block_by_problem_type=args.cluster_block_by_problem_type,
         ),
         "holdout_support": {
             "problem_type": Counter(row["gold_problem_type"] for row in holdout),

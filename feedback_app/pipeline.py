@@ -53,18 +53,28 @@ def rebuild_clusters(
     if not rows:
         return []
     texts = [normalize_ticket_text(ticket.message) for ticket, _ in rows]
-    summaries = [analysis.payload["summary"] for _, analysis in rows]
+    summaries = [
+        analysis.payload.get("issue_signature") or analysis.payload["summary"]
+        for _, analysis in rows
+    ]
     product_areas = [analysis.product_area for _, analysis in rows]
+    problem_types = [analysis.problem_type for _, analysis in rows]
     vectors = blended_embeddings(
         embedder,
         texts,
         summaries,
         settings.cluster_raw_text_weight if settings else 1.0,
     )
+    blocking_groups = product_areas
+    if settings and settings.cluster_block_by_problem_type:
+        blocking_groups = [
+            f"{area}|{problem_type}"
+            for area, problem_type in zip(product_areas, problem_types, strict=True)
+        ]
     labels = threshold_clusters(
         vectors,
         threshold,
-        groups=product_areas,
+        groups=blocking_groups,
         linkage=settings.cluster_linkage if settings else "single",
     )
     grouped: dict[int, list[int]] = defaultdict(list)

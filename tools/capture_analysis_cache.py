@@ -56,21 +56,25 @@ def analyze_row(row: dict, max_attempts: int) -> dict:
         current_status=row["current_status"],
     )
     error = "unknown"
+    attempt_errors: list[str] = []
     for attempt in range(1, max_attempts + 1):
         try:
             result = analyzer.analyze(ticket)
             return {
                 "input_sha256": row_hash(row),
                 "attempts": attempt,
+                "attempt_errors": attempt_errors,
                 "analysis": result.model_dump(mode="json"),
             }
         except Exception as exc:  # the cache records dependency failures verbatim
             error = f"{type(exc).__name__}: {exc}"
+            attempt_errors.append(error)
             if attempt < max_attempts:
                 time.sleep(2 * attempt)
     return {
         "input_sha256": row_hash(row),
         "attempts": max_attempts,
+        "attempt_errors": attempt_errors,
         "error": error,
     }
 

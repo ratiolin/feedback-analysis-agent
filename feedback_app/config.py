@@ -14,10 +14,11 @@ class Settings(BaseSettings):
     dify_sop_workflow_api_key: str = ""
     dify_report_workflow_api_key: str = ""
     dify_timeout_seconds: float = 20.0
-    workflow_version: str = "feedback-structuring-v2-candidate"
+    workflow_version: str = "feedback-structuring-v3-candidate"
     routing_policy_version: str = "feedback-routing-v1"
     cluster_linkage: str = "single"
     cluster_raw_text_weight: float = 1.0
+    cluster_block_by_problem_type: bool = False
     cluster_workflow_version: str = "issue-cluster-narrative-v1-candidate"
     sop_workflow_version: str = "sop-draft-v1-candidate"
     report_workflow_version: str = "weekly-report-narrative-v1-candidate"

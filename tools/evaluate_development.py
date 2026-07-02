@@ -4,7 +4,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 from tools.evaluate import (
-    cached_summaries,
+    cached_cluster_texts,
     clustering_evaluation,
     load_rows,
     structure_evaluation,
@@ -26,16 +26,26 @@ def main() -> None:
         "feedback-routing-v3-candidate",
         analysis_cache=cache,
     )
-    summaries = cached_summaries(rows, cache)
+    cluster_texts = cached_cluster_texts(rows, cache)
+    groups = [
+        f"{area}|{problem_type}"
+        for area, problem_type in zip(
+            structure["predicted_product_areas"],
+            structure["predicted_problem_types"],
+            strict=True,
+        )
+    ]
     clustering = clustering_evaluation(
         rows,
         rows,
         "bge",
-        holdout_groups=structure["predicted_product_areas"],
+        development_groups=groups,
+        holdout_groups=groups,
         linkage="complete",
-        development_summaries=summaries,
-        holdout_summaries=summaries,
-        raw_text_weight=0.8,
+        development_cluster_texts=cluster_texts,
+        holdout_cluster_texts=cluster_texts,
+        raw_text_weight=0.2,
+        block_by_problem_type=True,
     )
     payload = {
         "generated_at": datetime.now(UTC).isoformat(),
