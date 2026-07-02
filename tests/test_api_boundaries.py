@@ -67,12 +67,13 @@ def test_suite_evaluation_keeps_component_and_overall_status_separate(
     response = client.get("/v1/evaluation/suite")
     assert response.status_code == 200
     payload = response.json()
-    assert payload["evaluation_state"] == "candidate_scored_unpromoted"
-    assert payload["overall_passed"] is False
+    assert payload["evaluation_state"] == "promoted_for_portfolio_demo"
+    assert payload["overall_passed"] is True
+    assert payload["promotion"]["quality_gates_all_passed"] is True
     assert payload["content_workflows"]["quality_gates"]["all_passed"] is True
     assert (
         payload["structure_clustering"]["quality_gates"]["all_measured_passed"]
-        is False
+        is True
     )
 
 

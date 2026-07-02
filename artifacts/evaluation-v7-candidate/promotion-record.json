@@ -1,0 +1,20 @@
+{
+  "decision": "promoted_for_portfolio_demo",
+  "decided_at": "2026-07-02T18:20:00+08:00",
+  "candidate": "feedback-structuring-v3-candidate",
+  "dataset_version": "v7-frozen-signature-clustering-holdout-20260702",
+  "evaluation_sha256": "40b156c07897898d2dda7b7213d2757c353607f03b25dab3933d086e71bfeead",
+  "manifest_sha256": "f7338a94c461c1d7bd22d3db75b0b13e61cd5b0f2b809a3b69ea325a8358f4bf",
+  "dsl_sha256": "6fb0f287b081d5e09256e881ed24a8710e7c7db087ed1675879e2e72f467c447",
+  "quality_gates_all_passed": true,
+  "approved_runtime_config": {
+    "workflow_version": "feedback-structuring-v3-candidate",
+    "routing_policy_version": "feedback-routing-v3-candidate",
+    "embedding_model": "BAAI/bge-small-zh-v1.5",
+    "cluster_linkage": "complete",
+    "cluster_raw_text_weight": 0.2,
+    "cluster_block_by_problem_type": true
+  },
+  "scope": "Synthetic portfolio demo only; not evidence of real-business distribution or production SLA.",
+  "audit_boundary": "V7 labels received AI-assisted consistency review, not independent human audit."
+}

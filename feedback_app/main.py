@@ -487,20 +487,28 @@ def candidate_evaluation() -> dict:
 
 @app.get("/v1/evaluation/suite")
 def suite_evaluation() -> dict:
-    structure_path = Path("artifacts/evaluation-v5-suite-candidate/evaluation.json")
+    structure_path = Path("artifacts/evaluation-v7-candidate/evaluation.json")
+    promotion_path = Path("artifacts/evaluation-v7-candidate/promotion-record.json")
     content_path = Path("artifacts/workflow-suite-v1-candidate/evaluation.json")
-    if not structure_path.exists() or not content_path.exists():
+    if (
+        not structure_path.exists()
+        or not promotion_path.exists()
+        or not content_path.exists()
+    ):
         raise HTTPException(status_code=404, detail="suite_evaluation_not_found")
     structure = json.loads(structure_path.read_text(encoding="utf-8"))
+    promotion = json.loads(promotion_path.read_text(encoding="utf-8"))
     content = json.loads(content_path.read_text(encoding="utf-8"))
+    overall_passed = bool(
+        structure.get("quality_gates", {}).get("all_measured_passed")
+        and content.get("quality_gates", {}).get("all_passed")
+    )
     return {
-        "evaluation_state": "candidate_scored_unpromoted",
+        "evaluation_state": promotion.get("decision"),
         "dataset_version": structure.get("dataset_version"),
-        "boundary": "Synthetic locked-suite replay; not a real-business distribution.",
-        "overall_passed": bool(
-            structure.get("quality_gates", {}).get("all_measured_passed")
-            and content.get("quality_gates", {}).get("all_passed")
-        ),
+        "boundary": promotion.get("scope"),
+        "overall_passed": overall_passed,
+        "promotion": promotion,
         "structure_clustering": structure,
         "content_workflows": content,
     }

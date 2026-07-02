@@ -61,7 +61,7 @@ docker compose exec feedback-api alembic check
 curl -fsS http://127.0.0.1:18100/feedback/api/health
 ```
 
-## 四工作流候选回放
+## 四工作流回放与当前配置
 
 四个 DSL 导入、发布与 API Key 配置完成后执行：
 
@@ -70,6 +70,8 @@ cd /srv/stack/feedback-analysis-agent
 ./tools/run_v5_suite_evaluation.sh
 ```
 
-候选结果写入 `artifacts/evaluation-v5-suite-candidate/` 和 `artifacts/workflow-suite-v1-candidate/`，不会自动覆盖 `artifacts/evaluation/` 的 v1 官方基线。manifest 中的冻结文件或开发集哈希不匹配、审计行不一致时，评测会直接失败。v5 已评分，后续调参必须创建 v6。
+该脚本用于复现历史 V5；结果写入 `artifacts/evaluation-v5-suite-candidate/` 和 `artifacts/workflow-suite-v1-candidate/`。V5、V6 均已读取且未晋级，不得再作为调参后的未见集。
+
+当前作品集演示运行配置由 `artifacts/evaluation-v7-candidate/promotion-record.json` 固化，使用 V3 结构化工作流、V3 路由策略和 V7 聚类配置。V7 冻结清单位于 `data/v7-evaluation/v7-manifest.json`。manifest 哈希、审计行或 promotion record 不匹配时，不得声称部署的是已评分配置。
 
 公网 BFF 会把 HttpOnly 会话 cookie 转成内部 `X-Demo-Session`，并将可信代理链末端地址传给 API 生成单向哈希。API 同时执行会话、来源和全站三级日限额；原始地址不持久化。

@@ -1,0 +1,544 @@
+{
+  "generated_at": "2026-07-02T10:15:30.253206+00:00",
+  "state": "development_only_not_promotion_eligible",
+  "boundary": "v5 is a seen development set. Metrics are resubstitution evidence for candidate selection and must not be presented as holdout performance.",
+  "data": "data/v6-evaluation/v6-holdout-locked.csv",
+  "analysis_cache": "data/development/v6-v3-analysis-cache.json",
+  "structure": {
+    "analyzer": "dify",
+    "routing_policy_version": "feedback-routing-v3-candidate",
+    "sample_count": 60,
+    "schema_contract_valid_rate": 1.0,
+    "first_attempt_dependency_success_rate": 0.9833333333333333,
+    "first_pass_schema_rate": 1.0,
+    "evidence_auto_location_rate": 1.0,
+    "problem_type": {
+      "labels": [
+        "bug",
+        "how_to",
+        "configuration",
+        "performance",
+        "integration",
+        "permission",
+        "data_consistency",
+        "feature_request"
+      ],
+      "matrix": [
+        [
+          6,
+          0,
+          0,
+          0,
+          0,
+          0,
+          2,
+          0
+        ],
+        [
+          0,
+          4,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          8,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          8,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          8,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          8,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          8,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          3,
+          0,
+          0,
+          5
+        ]
+      ],
+      "report": {
+        "bug": {
+          "precision": 1.0,
+          "recall": 0.75,
+          "f1-score": 0.8571428571428571,
+          "support": 8.0
+        },
+        "how_to": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 4.0
+        },
+        "configuration": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 8.0
+        },
+        "performance": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 8.0
+        },
+        "integration": {
+          "precision": 0.7272727272727273,
+          "recall": 1.0,
+          "f1-score": 0.8421052631578947,
+          "support": 8.0
+        },
+        "permission": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 8.0
+        },
+        "data_consistency": {
+          "precision": 0.8,
+          "recall": 1.0,
+          "f1-score": 0.8888888888888888,
+          "support": 8.0
+        },
+        "feature_request": {
+          "precision": 1.0,
+          "recall": 0.625,
+          "f1-score": 0.7692307692307693,
+          "support": 8.0
+        },
+        "accuracy": 0.9166666666666666,
+        "macro avg": {
+          "precision": 0.9409090909090909,
+          "recall": 0.921875,
+          "f1-score": 0.9196709723025512,
+          "support": 60.0
+        },
+        "weighted avg": {
+          "precision": 0.936969696969697,
+          "recall": 0.9166666666666666,
+          "f1-score": 0.914315703789388,
+          "support": 60.0
+        }
+      }
+    },
+    "product_area": {
+      "labels": [
+        "project",
+        "task",
+        "member_permission",
+        "notification",
+        "file",
+        "import_export",
+        "open_api",
+        "account_subscription"
+      ],
+      "matrix": [
+        [
+          12,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          8,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          8,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          8,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          3,
+          0,
+          1,
+          0,
+          0,
+          0
+        ],
+        [
+          1,
+          0,
+          0,
+          0,
+          0,
+          7,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          8,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          3
+        ]
+      ],
+      "report": {
+        "project": {
+          "precision": 0.9230769230769231,
+          "recall": 1.0,
+          "f1-score": 0.96,
+          "support": 12.0
+        },
+        "task": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 8.0
+        },
+        "member_permission": {
+          "precision": 0.7272727272727273,
+          "recall": 1.0,
+          "f1-score": 0.8421052631578947,
+          "support": 8.0
+        },
+        "notification": {
+          "precision": 0.8888888888888888,
+          "recall": 1.0,
+          "f1-score": 0.9411764705882353,
+          "support": 8.0
+        },
+        "file": {
+          "precision": 1.0,
+          "recall": 0.25,
+          "f1-score": 0.4,
+          "support": 4.0
+        },
+        "import_export": {
+          "precision": 1.0,
+          "recall": 0.875,
+          "f1-score": 0.9333333333333333,
+          "support": 8.0
+        },
+        "open_api": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 8.0
+        },
+        "account_subscription": {
+          "precision": 1.0,
+          "recall": 0.75,
+          "f1-score": 0.8571428571428571,
+          "support": 4.0
+        },
+        "accuracy": 0.9166666666666666,
+        "macro avg": {
+          "precision": 0.9424048174048174,
+          "recall": 0.859375,
+          "f1-score": 0.8667197405277901,
+          "support": 60.0
+        },
+        "weighted avg": {
+          "precision": 0.9334369334369335,
+          "recall": 0.9166666666666666,
+          "f1-score": 0.9046915327534522,
+          "support": 60.0
+        }
+      }
+    },
+    "predicted_product_areas": [
+      "open_api",
+      "open_api",
+      "open_api",
+      "open_api",
+      "member_permission",
+      "member_permission",
+      "member_permission",
+      "member_permission",
+      "task",
+      "task",
+      "task",
+      "task",
+      "project",
+      "project",
+      "project",
+      "project",
+      "project",
+      "project",
+      "project",
+      "project",
+      "task",
+      "task",
+      "task",
+      "task",
+      "notification",
+      "notification",
+      "notification",
+      "notification",
+      "notification",
+      "account_subscription",
+      "account_subscription",
+      "account_subscription",
+      "file",
+      "member_permission",
+      "member_permission",
+      "member_permission",
+      "member_permission",
+      "member_permission",
+      "member_permission",
+      "member_permission",
+      "project",
+      "project",
+      "project",
+      "project",
+      "import_export",
+      "import_export",
+      "import_export",
+      "import_export",
+      "import_export",
+      "import_export",
+      "project",
+      "import_export",
+      "notification",
+      "notification",
+      "notification",
+      "notification",
+      "open_api",
+      "open_api",
+      "open_api",
+      "open_api"
+    ],
+    "predicted_problem_types": [
+      "integration",
+      "integration",
+      "integration",
+      "integration",
+      "integration",
+      "integration",
+      "integration",
+      "integration",
+      "bug",
+      "bug",
+      "data_consistency",
+      "data_consistency",
+      "bug",
+      "bug",
+      "bug",
+      "bug",
+      "data_consistency",
+      "data_consistency",
+      "data_consistency",
+      "data_consistency",
+      "data_consistency",
+      "data_consistency",
+      "data_consistency",
+      "data_consistency",
+      "configuration",
+      "configuration",
+      "configuration",
+      "configuration",
+      "configuration",
+      "configuration",
+      "configuration",
+      "configuration",
+      "permission",
+      "permission",
+      "permission",
+      "permission",
+      "permission",
+      "permission",
+      "permission",
+      "permission",
+      "performance",
+      "performance",
+      "performance",
+      "performance",
+      "performance",
+      "performance",
+      "performance",
+      "performance",
+      "how_to",
+      "how_to",
+      "how_to",
+      "how_to",
+      "feature_request",
+      "feature_request",
+      "feature_request",
+      "feature_request",
+      "integration",
+      "integration",
+      "integration",
+      "feature_request"
+    ],
+    "owner_policy_consistency": 0.9166666666666666,
+    "escalation_recall": 1.0,
+    "errors": []
+  },
+  "clustering": {
+    "embedding_backend": "bge",
+    "embedding_input": "normalized_ticket_text_plus_issue_signature",
+    "blocking_key": "product_area+problem_type",
+    "linkage": "complete",
+    "raw_text_weight": 0.2,
+    "issue_signature_weight": 0.8,
+    "development_count": 60,
+    "holdout_count": 60,
+    "frozen_threshold": 0.64,
+    "development_metrics": {
+      "pairwise": {
+        "precision": 0.95,
+        "recall": 0.6333333333333333,
+        "f1": 0.7599999999999999
+      },
+      "b_cubed": {
+        "precision": 0.9833333333333333,
+        "recall": 0.8166666666666667,
+        "f1": 0.892283950617284
+      },
+      "purity": 0.9833333333333333
+    },
+    "holdout_metrics": {
+      "pairwise": {
+        "precision": 0.95,
+        "recall": 0.6333333333333333,
+        "f1": 0.7599999999999999
+      },
+      "b_cubed": {
+        "precision": 0.9833333333333333,
+        "recall": 0.8166666666666667,
+        "f1": 0.892283950617284
+      },
+      "purity": 0.9833333333333333
+    },
+    "false_merge_examples": [
+      {
+        "left": "V6-T006",
+        "right": "V6-T007",
+        "left_family": "V6-ISSUE-003",
+        "right_family": "V6-ISSUE-004"
+      }
+    ],
+    "false_split_examples": [
+      {
+        "family": "V6-ISSUE-001",
+        "predicted_cluster_count": 2
+      },
+      {
+        "family": "V6-ISSUE-003",
+        "predicted_cluster_count": 2
+      },
+      {
+        "family": "V6-ISSUE-004",
+        "predicted_cluster_count": 2
+      },
+      {
+        "family": "V6-ISSUE-005",
+        "predicted_cluster_count": 2
+      },
+      {
+        "family": "V6-ISSUE-015",
+        "predicted_cluster_count": 2
+      },
+      {
+        "family": "V6-ISSUE-017",
+        "predicted_cluster_count": 2
+      },
+      {
+        "family": "V6-ISSUE-020",
+        "predicted_cluster_count": 2
+      },
+      {
+        "family": "V6-ISSUE-022",
+        "predicted_cluster_count": 2
+      },
+      {
+        "family": "V6-ISSUE-024",
+        "predicted_cluster_count": 2
+      },
+      {
+        "family": "V6-ISSUE-026",
+        "predicted_cluster_count": 2
+      }
+    ]
+  }
+}

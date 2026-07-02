@@ -7,8 +7,8 @@ import yaml
 
 ROOT = Path("dify-workflows")
 WORKFLOWS = {
-    "feedback-structuring-v2-candidate.yml": {
-        "name": "客户反馈结构化-v2-candidate",
+    "feedback-structuring-v3-candidate.yml": {
+        "name": "客户反馈结构化-v3-candidate",
         "inputs": {"ticket_id", "user_type", "channel", "message", "created_at"},
         "output": "analysis_json",
     },
@@ -80,7 +80,7 @@ def test_suite_manifest_freezes_all_four_dsl_hashes() -> None:
 
 
 def test_structuring_workflow_preserves_verified_llm_boundary() -> None:
-    workflow = load_workflow("feedback-structuring-v2-candidate.yml")
+    workflow = load_workflow("feedback-structuring-v3-candidate.yml")
     prompt = node_by_type(workflow, "llm")["data"]["prompt_template"][0]["text"]
     assert "不得输出 start/end" in prompt
     assert "服务端负责定位" in prompt

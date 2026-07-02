@@ -1,0 +1,56 @@
+{
+  "dataset_version": "v7-frozen-signature-clustering-holdout-20260702",
+  "state": "candidate_unscored",
+  "generated_at": "2026-07-02T10:15:42.572170+00:00",
+  "row_count": 60,
+  "family_count": 30,
+  "boundary": "Synthetic locked holdout with two distinct families per type/area combination; AI-assisted review is not an independent human audit.",
+  "candidate_config": {
+    "workflow_version": "feedback-structuring-v3-candidate",
+    "routing_policy_version": "feedback-routing-v3-candidate",
+    "embedding_model": "BAAI/bge-small-zh-v1.5",
+    "cluster_linkage": "complete",
+    "cluster_raw_text_weight": 0.2,
+    "cluster_block_by_problem_type": true
+  },
+  "holdout_path": "data/v7-evaluation/v7-holdout-locked.csv",
+  "holdout_sha256": "33efff97118fb740cb1fa517dd912085419da0e2f9aecf889750836c69df6dc1",
+  "audit_path": "data/v7-evaluation/v7-holdout-audit.csv",
+  "audit_sha256": "5e1921eb526cc4720b7088828f2622197cff729f779abcf82b1898ac4791013a",
+  "frozen_files": [
+    {
+      "path": "dify-workflows/feedback-structuring-v3-candidate.yml",
+      "sha256": "6fb0f287b081d5e09256e881ed24a8710e7c7db087ed1675879e2e72f467c447"
+    },
+    {
+      "path": "feedback_app/routing.py",
+      "sha256": "391bc17c196eca9d45222face670012319cb2f20ff35a948e1b3d1a39f603ee6"
+    },
+    {
+      "path": "feedback_app/clustering.py",
+      "sha256": "cdcb0e08c6878001fb04cf4d7a5630bb843fecef1e4740d1eff05726e33daba2"
+    },
+    {
+      "path": "feedback_app/embeddings.py",
+      "sha256": "11aab91b6171d890e656e16d20f35e086267159dbe9fff3d54a67d975547aecb"
+    },
+    {
+      "path": "tools/evaluate.py",
+      "sha256": "6cd159ef4cbe008298f9f7c8c67d7e217178b94a128ad54824bcf579011072b1"
+    },
+    {
+      "path": "tools/generate_v7_holdout.py",
+      "sha256": "2c6f385ccddf71d2e00821c4f9e21abccb61485da61efc48f7b1a7d000dd0c89"
+    }
+  ],
+  "development_files": [
+    {
+      "path": "data/v6-evaluation/v6-holdout-locked.csv",
+      "sha256": "68ec9d3deb6bdc5b59ea05c9385f49ed1105a8a8d043272ff6cecb125e685da7"
+    },
+    {
+      "path": "data/development/v6-v3-analysis-cache.json",
+      "sha256": "12f637890bbc4716308a962d7560b7cd0cb0284963987726ec89ddb973f9bf51"
+    }
+  ]
+}
