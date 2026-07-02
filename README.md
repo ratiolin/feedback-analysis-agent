@@ -36,7 +36,7 @@ CSV / 在线工单
 产品区域：8
 初始 BGE 问题簇：63
 候选 SOP：2
-Python 自动测试：39
+Python 自动测试：45
 ```
 
 当前公开基线来自已发布 `客户反馈结构化-v1` 的真实 Dify + BGE 回放（数据版本 `v3-natural-singletons`）。Schema、quote 定位、产品区域、升级召回与聚类指标通过门槛；问题类型 Macro-F1 为 0.647、责任路由策略一致率为 83.3%，未通过 0.80/0.85 门槛。因此只能声明机制已实现，不能声明整体分类质量达标。
@@ -102,3 +102,5 @@ docs/               架构、部署、评测边界与人工审核说明
 详见 `docs/architecture.md`、`docs/evaluation-boundary.md` 和 `docs/deployment.md`。
 
 激活 v2 候选时按 `docs/activation-checklist.md` 执行；真实密钥不得进入仓库。AI 辅助复核不等于独立人工审计。
+
+四工作流套件的三个新增候选 DSL 已准备完成但尚未导入或真实评测。批量导入顺序、Key 映射和已知边界见 `docs/workflow-suite-activation.md`；在真实回放前不得把新增候选描述为已上线。
