@@ -27,8 +27,14 @@ def normalize_vectors(vectors: np.ndarray) -> np.ndarray:
     return vectors / norms
 
 
-def threshold_clusters(vectors: np.ndarray, threshold: float) -> list[int]:
+def threshold_clusters(
+    vectors: np.ndarray,
+    threshold: float,
+    groups: list[str] | None = None,
+) -> list[int]:
     vectors = normalize_vectors(np.asarray(vectors, dtype=float))
+    if groups is not None and len(groups) != len(vectors):
+        raise ValueError("groups must match vector count")
     parent = list(range(len(vectors)))
 
     def find(item: int) -> int:
@@ -45,6 +51,8 @@ def threshold_clusters(vectors: np.ndarray, threshold: float) -> list[int]:
     similarities = vectors @ vectors.T
     for left in range(len(vectors)):
         for right in range(left + 1, len(vectors)):
+            if groups is not None and groups[left] != groups[right]:
+                continue
             if similarities[left, right] >= threshold:
                 union(left, right)
     roots: dict[int, int] = {}
@@ -116,11 +124,12 @@ def select_threshold(
     gold: list[str],
     thresholds: list[float] | None = None,
     minimum_pairwise_precision: float = 0.80,
+    groups: list[str] | None = None,
 ) -> ThresholdResult:
     thresholds = thresholds or [round(value / 100, 2) for value in range(30, 91, 5)]
     candidates: list[ThresholdResult] = []
     for threshold in thresholds:
-        labels = threshold_clusters(vectors, threshold)
+        labels = threshold_clusters(vectors, threshold, groups=groups)
         pairwise = pairwise_metrics(gold, labels)
         candidates.append(
             ThresholdResult(

@@ -1,6 +1,6 @@
 {
   "suite": "customer-feedback-four-workflow-suite-v1",
-  "state": "candidate_awaiting_import",
+  "state": "candidate_scored_unpromoted",
   "generated_at": "2026-07-02",
   "dify_dsl_version": "0.6.0",
   "model": "deepseek-v4-pro",
@@ -15,24 +15,33 @@
     {
       "file": "issue-cluster-narrative-v1-candidate.yml",
       "app_name": "问题簇命名与解释-v1-candidate",
-      "state": "candidate_awaiting_import",
+      "state": "candidate_scored_unpromoted",
       "sha256": "1de4f77112023b2d22cbf83099fe9c490bbd2847ffcc4ccc631dceb04a108c78",
       "api_key_env": "DIFY_CLUSTER_WORKFLOW_API_KEY"
     },
     {
       "file": "sop-draft-v1-candidate.yml",
       "app_name": "候选SOP草案-v1-candidate",
-      "state": "candidate_awaiting_import",
+      "state": "candidate_scored_unpromoted",
       "sha256": "fa12e2a1501e8122740d81d75540137191670b91ce6abf8b3a7b3f7e7852a22c",
       "api_key_env": "DIFY_SOP_WORKFLOW_API_KEY"
     },
     {
       "file": "weekly-report-narrative-v1-candidate.yml",
       "app_name": "运营周报叙事-v1-candidate",
-      "state": "candidate_awaiting_import",
+      "state": "candidate_scored_unpromoted",
       "sha256": "f92918e54119d340fbd2aa2b6a4ae1615c88e28e0096f951b89cdd68680beb9b",
       "api_key_env": "DIFY_REPORT_WORKFLOW_API_KEY"
     }
   ],
-  "boundary": "The three new workflows are import-ready but unscored. BGE clustering remains an external deterministic subsystem and is not fixed by importing these DSL files."
+  "evaluation": {
+    "dataset_version": "v5-frozen-suite-holdout-20260702",
+    "content_workflow_gates_passed": true,
+    "overall_quality_gates_passed": false,
+    "artifacts": [
+      "artifacts/evaluation-v5-suite-candidate/evaluation.json",
+      "artifacts/workflow-suite-v1-candidate/evaluation.json"
+    ]
+  },
+  "boundary": "All four workflows are published and replayed. The suite remains unpromoted because structure/owner-routing and duplicate-detection gates failed; passing content-generation gates does not override those failures."
 }

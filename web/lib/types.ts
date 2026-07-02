@@ -34,6 +34,8 @@ export type Cluster = {
   suggested_owner: string;
   representative_ticket_ids: string[];
   evidence: Evidence[];
+  narrative_source: string;
+  narrative_workflow_version?: string | null;
 };
 
 export type SOPCandidate = {
@@ -46,6 +48,7 @@ export type SOPCandidate = {
   escalation_condition: string;
   prohibited_actions: string[];
   evidence_ticket_ids: string[];
+  generation_source: string;
+  workflow_version?: string | null;
   session_status: string;
 };
-

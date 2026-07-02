@@ -34,14 +34,16 @@ CSV / 在线工单
 合成工单：240（开发/演示 180，锁定抽检 60）
 问题类型：8
 产品区域：8
-初始 BGE 问题簇：63
-候选 SOP：2
-Python 自动测试：45
+当前问题簇：40（20 个重复簇 + 20 个单例）
+候选 SOP：20
+工作流：4 个已发布并完成真实 API 回放
 ```
 
 当前公开基线来自已发布 `客户反馈结构化-v1` 的真实 Dify + BGE 回放（数据版本 `v3-natural-singletons`）。Schema、quote 定位、产品区域、升级召回与聚类指标通过门槛；问题类型 Macro-F1 为 0.647、责任路由策略一致率为 83.3%，未通过 0.80/0.85 门槛。因此只能声明机制已实现，不能声明整体分类质量达标。
 
-`客户反馈结构化-v2-candidate` 已在全新 `v4-frozen-candidate-holdout-20260702` 锁定集完成真实 Dify + BGE 回放。结构化链路通过 6 项门禁：Schema 与 quote 定位 100%，问题类型 Macro-F1 0.954、产品区域 Macro-F1 0.943、责任路由一致率 95%、升级召回 100%。聚类未通过：30 个同族表述均被拆分，重复匹配精确率/召回率为 0，B³ F1 为 0.667。因此状态保持 `candidate_scored_unpromoted`，不得写成整体质量提升，也不替换 v1 公开基线。
+四个工作流已发布、配置 Key 并接入后端，在全新 `v5-frozen-suite-holdout-20260702` 上完成真实 Dify + BGE 回放。问题簇叙事 30/30、候选 SOP 5/5、周报叙事 6/6 成功，证据 ID 有效率与安全动作契约均为 100%。
+
+整体候选仍未晋级：v5 问题类型 Macro-F1 0.776、责任路由一致率 78.3%、重复识别精确率 71.4%、召回率 33.3%，均未达门槛；产品区域 Macro-F1 0.912、升级召回 100%、聚类纯度 96.7%、B³ F1 0.785 通过。`v5` 已读取，不得再用于调参后的正式评测；后续修改需新建 `v6` 锁定集。公开基线与线上聚类阈值 0.85 保持不变。
 
 ## 快速开始
 
@@ -71,8 +73,8 @@ docker run --rm -v "$PWD/web:/app" -w /app node:22-alpine \
 ```bash
 uv run python tools/evaluate.py --analyzer demo --embedding tfidf
 
-# 导入并配置 v2 候选 Key 后，在 WSL 执行
-./tools/run_candidate_evaluation.sh
+# 配置四个工作流 Key 后，在 WSL 执行
+./tools/run_v5_suite_evaluation.sh
 ```
 
 ## 目录
@@ -80,7 +82,7 @@ uv run python tools/evaluate.py --analyzer demo --embedding tfidf
 ```text
 feedback_app/       FastAPI、Worker、规则、聚类和周报
 web/                Next.js 产品看板与匿名会话 BFF
-dify-workflows/     已发布 v1 基线与可导入的 v2 候选 DSL
+dify-workflows/     已发布的四工作流 DSL 与冻结套件清单
 tools/              数据生成、种子和离线评测
 tests/              规则、证据、数据、聚类和报告测试
 portfolio/          静态作品页
@@ -103,4 +105,4 @@ docs/               架构、部署、评测边界与人工审核说明
 
 激活 v2 候选时按 `docs/activation-checklist.md` 执行；真实密钥不得进入仓库。AI 辅助复核不等于独立人工审计。
 
-四工作流套件的三个新增候选 DSL 已准备完成但尚未导入或真实评测。批量导入顺序、Key 映射和已知边界见 `docs/workflow-suite-activation.md`；在真实回放前不得把新增候选描述为已上线。
+四工作流套件的导入、真实回放和 v5 评测已完成，激活记录与 Key 映射见 `docs/workflow-suite-activation.md`。候选状态与部分门禁通过必须分开表述。

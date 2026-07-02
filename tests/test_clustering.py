@@ -31,3 +31,10 @@ def test_threshold_selection_honors_precision_floor() -> None:
     vectors = np.array([[1, 0], [0.98, 0.02], [0.7, 0.7]], dtype=float)
     result = select_threshold(vectors, ["A", "A", "B"], thresholds=[0.7, 0.9])
     assert result.threshold == 0.9
+
+
+def test_product_area_blocking_prevents_cross_area_false_merge() -> None:
+    vectors = np.array([[1, 0], [1, 0], [0.99, 0.01]], dtype=float)
+    labels = threshold_clusters(vectors, 0.9, groups=["task", "file", "task"])
+    assert labels[0] == labels[2]
+    assert labels[0] != labels[1]

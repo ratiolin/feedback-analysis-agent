@@ -364,6 +364,8 @@ def list_clusters(db: Annotated[Session, Depends(get_db)]) -> list[dict]:
             "suggested_owner": cluster.suggested_owner,
             "representative_ticket_ids": cluster.representative_ticket_ids,
             "evidence": cluster.evidence,
+            "narrative_source": cluster.narrative_source,
+            "narrative_workflow_version": cluster.narrative_workflow_version,
         }
         for cluster in clusters
     ]
@@ -384,6 +386,8 @@ def cluster_detail(cluster_id: str, db: Annotated[Session, Depends(get_db)]) -> 
         "suggested_owner": cluster.suggested_owner,
         "representative_ticket_ids": cluster.representative_ticket_ids,
         "evidence": cluster.evidence,
+        "narrative_source": cluster.narrative_source,
+        "narrative_workflow_version": cluster.narrative_workflow_version,
     }
 
 
@@ -406,6 +410,8 @@ def list_sop_candidates(
             "id": candidate.id,
             "cluster_id": candidate.cluster_id,
             **candidate.payload,
+            "generation_source": candidate.generation_source,
+            "workflow_version": candidate.workflow_version,
             "session_status": reviews.get(candidate.id, candidate.status),
         }
         for candidate in candidates
@@ -451,7 +457,13 @@ def latest_weekly_report(db: Annotated[Session, Depends(get_db)]) -> dict:
     report = db.scalar(select(WeeklyReport).order_by(WeeklyReport.week_start.desc()).limit(1))
     if report is None:
         raise HTTPException(status_code=404, detail="weekly_report_not_found")
-    return {"week_start": report.week_start, "payload": report.payload, "markdown": report.markdown}
+    return {
+        "week_start": report.week_start,
+        "payload": report.payload,
+        "markdown": report.markdown,
+        "generation_source": report.generation_source,
+        "workflow_version": report.workflow_version,
+    }
 
 
 @app.get("/v1/evaluation")
@@ -471,6 +483,27 @@ def candidate_evaluation() -> dict:
     if not path.exists():
         raise HTTPException(status_code=404, detail="candidate_evaluation_not_found")
     return json.loads(path.read_text(encoding="utf-8"))
+
+
+@app.get("/v1/evaluation/suite")
+def suite_evaluation() -> dict:
+    structure_path = Path("artifacts/evaluation-v5-suite-candidate/evaluation.json")
+    content_path = Path("artifacts/workflow-suite-v1-candidate/evaluation.json")
+    if not structure_path.exists() or not content_path.exists():
+        raise HTTPException(status_code=404, detail="suite_evaluation_not_found")
+    structure = json.loads(structure_path.read_text(encoding="utf-8"))
+    content = json.loads(content_path.read_text(encoding="utf-8"))
+    return {
+        "evaluation_state": "candidate_scored_unpromoted",
+        "dataset_version": structure.get("dataset_version"),
+        "boundary": "Synthetic locked-suite replay; not a real-business distribution.",
+        "overall_passed": bool(
+            structure.get("quality_gates", {}).get("all_measured_passed")
+            and content.get("quality_gates", {}).get("all_passed")
+        ),
+        "structure_clustering": structure,
+        "content_workflows": content,
+    }
 
 
 @app.patch("/v1/tickets/{ticket_id}/review")

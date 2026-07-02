@@ -1,0 +1,54 @@
+{
+  "generated_at": "2026-07-02T03:52:34.338585+00:00",
+  "dataset_version": "v5-frozen-suite-holdout-20260702",
+  "evaluation_state": "candidate_scored_unpromoted",
+  "boundary": "Synthetic suite replay; not a real-business distribution.",
+  "metrics": {
+    "cluster_success_rate": 1.0,
+    "sop_success_rate": 1.0,
+    "report_success_rate": 1.0,
+    "evidence_valid_rate": 1.0,
+    "safe_action_rate": 1.0
+  },
+  "quality_gates": {
+    "items": [
+      {
+        "label": "cluster_success_rate",
+        "actual": 1.0,
+        "threshold": 0.95,
+        "passed": true
+      },
+      {
+        "label": "sop_success_rate",
+        "actual": 1.0,
+        "threshold": 1.0,
+        "passed": true
+      },
+      {
+        "label": "report_success_rate",
+        "actual": 1.0,
+        "threshold": 1.0,
+        "passed": true
+      },
+      {
+        "label": "evidence_valid_rate",
+        "actual": 1.0,
+        "threshold": 1.0,
+        "passed": true
+      },
+      {
+        "label": "safe_action_rate",
+        "actual": 1.0,
+        "threshold": 1.0,
+        "passed": true
+      }
+    ],
+    "all_passed": true
+  },
+  "attempts": {
+    "cluster": 30,
+    "sop": 5,
+    "report": 6
+  },
+  "errors": []
+}

@@ -61,6 +61,21 @@ def test_candidate_evaluation_exposes_scored_unpromoted_state(client: TestClient
     assert response.json()["quality_gates"]["all_measured_passed"] is False
 
 
+def test_suite_evaluation_keeps_component_and_overall_status_separate(
+    client: TestClient,
+) -> None:
+    response = client.get("/v1/evaluation/suite")
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["evaluation_state"] == "candidate_scored_unpromoted"
+    assert payload["overall_passed"] is False
+    assert payload["content_workflows"]["quality_gates"]["all_passed"] is True
+    assert (
+        payload["structure_clustering"]["quality_gates"]["all_measured_passed"]
+        is False
+    )
+
+
 def test_session_creation_reuses_active_header(client: TestClient) -> None:
     session_id = new_session(client)
     response = client.post("/v1/demo/sessions", headers={"X-Demo-Session": session_id})

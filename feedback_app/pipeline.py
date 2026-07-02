@@ -1,3 +1,4 @@
+import logging
 from collections import Counter, defaultdict
 from datetime import UTC, datetime
 
@@ -5,7 +6,8 @@ import numpy as np
 from sqlalchemy import delete, select
 from sqlalchemy.orm import Session
 
-from .clustering import threshold_clusters
+from .clustering import normalize_ticket_text, threshold_clusters
+from .config import Settings
 from .embeddings import Embedder
 from .models import (
     Analysis,
@@ -17,6 +19,14 @@ from .models import (
 )
 from .reports import build_weekly_report, report_to_markdown, trend_for_dates
 from .sop import build_sop_candidate
+from .workflow_suite import (
+    WorkflowSuiteError,
+    generate_cluster_narrative,
+    generate_report_narrative,
+    generate_sop_draft,
+)
+
+logger = logging.getLogger(__name__)
 
 SEVERITY_ORDER = {"low": 0, "medium": 1, "high": 2, "critical": 3}
 OWNER_ACTIONS = {
@@ -29,7 +39,12 @@ OWNER_ACTIONS = {
 }
 
 
-def rebuild_clusters(db: Session, embedder: Embedder, threshold: float) -> list[IssueCluster]:
+def rebuild_clusters(
+    db: Session,
+    embedder: Embedder,
+    threshold: float,
+    settings: Settings | None = None,
+) -> list[IssueCluster]:
     rows = db.execute(
         select(Ticket, Analysis)
         .join(Analysis, Analysis.ticket_id == Ticket.id)
@@ -38,9 +53,10 @@ def rebuild_clusters(db: Session, embedder: Embedder, threshold: float) -> list[
     ).all()
     if not rows:
         return []
-    texts = [analysis.payload["summary"] for _, analysis in rows]
+    texts = [normalize_ticket_text(ticket.message) for ticket, _ in rows]
+    product_areas = [analysis.product_area for _, analysis in rows]
     vectors = np.asarray(embedder.encode(texts), dtype=float)
-    labels = threshold_clusters(vectors, threshold)
+    labels = threshold_clusters(vectors, threshold, groups=product_areas)
     grouped: dict[int, list[int]] = defaultdict(list)
     for index, label in enumerate(labels):
         grouped[label].append(index)
@@ -85,9 +101,29 @@ def rebuild_clusters(db: Session, embedder: Embedder, threshold: float) -> list[
             centroid=centroid,
             representative_ticket_ids=representatives,
             evidence=evidence,
+            narrative_source="deterministic",
+            narrative_workflow_version=None,
         )
         db.add(cluster)
         db.flush()
+        pending_cause = hypotheses[0] if hypotheses else None
+        if settings and settings.dify_cluster_workflow_api_key and len(group) >= 2:
+            context = {
+                "member_count": len(group),
+                "trend": cluster.trend,
+                "severity": severity,
+                "suggested_owner": owner,
+                "representative_tickets": evidence,
+            }
+            try:
+                narrative = generate_cluster_narrative(settings, cluster.id, context)
+                cluster.title = narrative.title
+                cluster.summary = narrative.observation
+                pending_cause = narrative.pending_cause or pending_cause
+                cluster.narrative_source = "dify"
+                cluster.narrative_workflow_version = settings.cluster_workflow_version
+            except (WorkflowSuiteError, ValueError) as exc:
+                logger.warning("cluster narrative fallback for %s: %s", cluster.id, exc)
         for ticket in tickets:
             db.add(ClusterMember(cluster_id=cluster.id, ticket_id=ticket.id))
         cluster_payload = {
@@ -99,13 +135,48 @@ def rebuild_clusters(db: Session, embedder: Embedder, threshold: float) -> list[
         }
         candidate = build_sop_candidate(cluster_payload)
         if candidate:
-            candidate["pending_cause"] = hypotheses[0] if hypotheses else None
+            candidate["pending_cause"] = pending_cause
             candidate["recommended_action"] = OWNER_ACTIONS.get(owner, "人工确认责任方")
+            generation_source = "deterministic"
+            workflow_version = None
+            if settings and settings.dify_sop_workflow_api_key:
+                try:
+                    draft = generate_sop_draft(
+                        settings,
+                        cluster.id,
+                        {
+                            "member_count": cluster.member_count,
+                            "trend": cluster.trend,
+                            "severity": cluster.severity,
+                            "suggested_owner": cluster.suggested_owner,
+                            "pending_cause": pending_cause,
+                            "evidence_ticket_ids": representatives,
+                        },
+                    )
+                    candidate.update(
+                        {
+                            "title": draft.title,
+                            "applicable_when": draft.applicable_when,
+                            "steps": draft.steps,
+                            "pending_cause": draft.pending_cause or pending_cause,
+                            "evidence_ticket_ids": draft.evidence_ticket_ids,
+                        }
+                    )
+                    generation_source = "dify"
+                    workflow_version = settings.sop_workflow_version
+                except (WorkflowSuiteError, ValueError) as exc:
+                    logger.warning("SOP draft fallback for %s: %s", cluster.id, exc)
+            candidate["_generation"] = {
+                "source": generation_source,
+                "workflow_version": workflow_version,
+            }
             db.add(
                 SOPCandidate(
                     cluster_id=cluster.id,
                     title=candidate["title"],
                     payload=candidate,
+                    generation_source=generation_source,
+                    workflow_version=workflow_version,
                 )
             )
         clusters.append(cluster)
@@ -113,7 +184,11 @@ def rebuild_clusters(db: Session, embedder: Embedder, threshold: float) -> list[
     return clusters
 
 
-def rebuild_weekly_report(db: Session, as_of: datetime | None = None) -> WeeklyReport:
+def rebuild_weekly_report(
+    db: Session,
+    as_of: datetime | None = None,
+    settings: Settings | None = None,
+) -> WeeklyReport:
     as_of = as_of or datetime.now(UTC)
     ticket_rows = db.execute(
         select(Ticket, Analysis)
@@ -127,15 +202,66 @@ def rebuild_weekly_report(db: Session, as_of: datetime | None = None) -> WeeklyR
     ]
     clusters = [
         {
+            "cluster_id": cluster.id,
             "title": cluster.title,
             "member_count": cluster.member_count,
             "representative_ticket_ids": cluster.representative_ticket_ids,
+            "severity": cluster.severity,
+            "trend": cluster.trend,
+            "suggested_owner": cluster.suggested_owner,
             "root_cause_hypothesis": None,
             "recommended_action": OWNER_ACTIONS.get(cluster.suggested_owner),
         }
         for cluster in cluster_rows
     ]
     payload = build_weekly_report(tickets, clusters, as_of)
+    generation_source = "deterministic"
+    workflow_version = None
+    if settings and settings.dify_report_workflow_api_key and clusters:
+        report_clusters = [
+            {
+                "cluster_id": item["cluster_id"],
+                "title": item["title"],
+                "member_count": item["member_count"],
+                "trend": item["trend"],
+                "severity": item["severity"],
+                "suggested_owner": item["suggested_owner"],
+                "evidence_ticket_ids": item["representative_ticket_ids"],
+            }
+            for item in sorted(clusters, key=lambda value: value["member_count"], reverse=True)[:5]
+        ]
+        try:
+            narrative = generate_report_narrative(
+                settings,
+                f"{payload['period']['start'][:10]}/{payload['period']['end'][:10]}",
+                {
+                    "ticket_total": payload["ticket_count"],
+                    "previous_ticket_total": payload["previous_ticket_count"],
+                    "change_rate": payload["change_rate"],
+                    "severity_counts": payload["severity_counts"],
+                    "clusters": report_clusters,
+                },
+            )
+            payload["title"] = narrative.title
+            payload["executive_summary"] = narrative.executive_summary
+            payload["observations"] = [
+                {
+                    "cluster_id": item.cluster_id,
+                    "text": item.observation,
+                    "evidence_ticket_ids": item.evidence_ticket_ids,
+                    "pending_cause": item.pending_cause,
+                    "recommended_action": item.recommended_action,
+                }
+                for item in narrative.observations
+            ]
+            generation_source = "dify"
+            workflow_version = settings.report_workflow_version
+        except (WorkflowSuiteError, ValueError) as exc:
+            logger.warning("weekly report narrative fallback: %s", exc)
+    payload["_generation"] = {
+        "source": generation_source,
+        "workflow_version": workflow_version,
+    }
     week_start = as_of.replace(hour=0, minute=0, second=0, microsecond=0)
     report = db.scalar(select(WeeklyReport).where(WeeklyReport.week_start == week_start))
     if report is None:
@@ -143,11 +269,15 @@ def rebuild_weekly_report(db: Session, as_of: datetime | None = None) -> WeeklyR
             week_start=week_start,
             payload=payload,
             markdown=report_to_markdown(payload),
+            generation_source=generation_source,
+            workflow_version=workflow_version,
         )
         db.add(report)
     else:
         report.payload = payload
         report.markdown = report_to_markdown(payload)
+        report.generation_source = generation_source
+        report.workflow_version = workflow_version
     db.commit()
     db.refresh(report)
     return report

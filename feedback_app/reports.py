@@ -35,6 +35,7 @@ def build_weekly_report(tickets: list[dict], clusters: list[dict], as_of: dateti
     top_clusters = sorted(clusters, key=lambda item: item["member_count"], reverse=True)[:5]
     observations = [
         {
+            "cluster_id": item.get("cluster_id"),
             "text": f"近 7 天有 {item['member_count']} 条工单指向“{item['title']}”。",
             "evidence_ticket_ids": item["representative_ticket_ids"],
             "pending_cause": item.get("root_cause_hypothesis"),
@@ -55,12 +56,14 @@ def build_weekly_report(tickets: list[dict], clusters: list[dict], as_of: dateti
 
 def report_to_markdown(report: dict) -> str:
     lines = [
-        "# 客户反馈周报",
+        f"# {report.get('title') or '客户反馈周报'}",
         "",
         f"本周工单：{report['ticket_count']}；上周工单：{report['previous_ticket_count']}。",
         "",
-        "## 重点观察",
     ]
+    if report.get("executive_summary"):
+        lines.extend([report["executive_summary"], ""])
+    lines.append("## 重点观察")
     for index, observation in enumerate(report["observations"], start=1):
         evidence = "、".join(observation["evidence_ticket_ids"])
         lines.extend(

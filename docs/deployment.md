@@ -61,15 +61,15 @@ docker compose exec feedback-api alembic check
 curl -fsS http://127.0.0.1:18100/feedback/api/health
 ```
 
-## v2 候选激活
+## 四工作流候选回放
 
-候选 DSL 导入与 API Key 创建必须由项目所有者在 Dify 控制台完成，具体见 `docs/activation-checklist.md`。配置候选 Key 后执行：
+四个 DSL 导入、发布与 API Key 配置完成后执行：
 
 ```bash
 cd /srv/stack/feedback-analysis-agent
-./tools/run_candidate_evaluation.sh
+./tools/run_v5_suite_evaluation.sh
 ```
 
-候选结果写入独立目录 `artifacts/evaluation-v2-candidate/`，不会自动覆盖 `artifacts/evaluation/` 的 v1 官方基线。候选提示词哈希不匹配、审计行与锁定集不一致或存在未复核行时，评测会直接失败。
+候选结果写入 `artifacts/evaluation-v5-suite-candidate/` 和 `artifacts/workflow-suite-v1-candidate/`，不会自动覆盖 `artifacts/evaluation/` 的 v1 官方基线。manifest 中的冻结文件或开发集哈希不匹配、审计行不一致时，评测会直接失败。v5 已评分，后续调参必须创建 v6。
 
 公网 BFF 会把 HttpOnly 会话 cookie 转成内部 `X-Demo-Session`，并将可信代理链末端地址传给 API 生成单向哈希。API 同时执行会话、来源和全站三级日限额；原始地址不持久化。

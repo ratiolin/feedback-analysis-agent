@@ -1,0 +1,54 @@
+{
+  "dataset_version": "v5-frozen-suite-holdout-20260702",
+  "state": "candidate_unscored",
+  "generated_at": "2026-07-02T03:43:03.720111+00:00",
+  "row_count": 60,
+  "family_count": 30,
+  "candidate_prompt_path": "dify-workflows/feedback-structuring-v2-candidate.yml",
+  "candidate_prompt_sha256": "47bcd77f2aa5b0b472a6b2df51266875ce1329f31ca72a947555de8dddb77178",
+  "frozen_files": [
+    {
+      "path": "dify-workflows/feedback-structuring-v2-candidate.yml",
+      "sha256": "47bcd77f2aa5b0b472a6b2df51266875ce1329f31ca72a947555de8dddb77178"
+    },
+    {
+      "path": "dify-workflows/issue-cluster-narrative-v1-candidate.yml",
+      "sha256": "1de4f77112023b2d22cbf83099fe9c490bbd2847ffcc4ccc631dceb04a108c78"
+    },
+    {
+      "path": "dify-workflows/sop-draft-v1-candidate.yml",
+      "sha256": "fa12e2a1501e8122740d81d75540137191670b91ce6abf8b3a7b3f7e7852a22c"
+    },
+    {
+      "path": "dify-workflows/weekly-report-narrative-v1-candidate.yml",
+      "sha256": "f92918e54119d340fbd2aa2b6a4ae1615c88e28e0096f951b89cdd68680beb9b"
+    },
+    {
+      "path": "feedback_app/clustering.py",
+      "sha256": "35ce5c34d6c136968971037efe816356d9fe878e4fa7d0b06f0bc02c71344511"
+    }
+  ],
+  "development_dataset": "data/candidate-evaluation/v4-holdout-locked.csv",
+  "development_sha256": "cb940342331ee8d92932546743f2a898db29496d97c5ba0e281c757171d2b81c",
+  "problem_type_support": {
+    "integration": 8,
+    "bug": 8,
+    "how_to": 8,
+    "configuration": 8,
+    "performance": 8,
+    "permission": 6,
+    "data_consistency": 8,
+    "feature_request": 6
+  },
+  "product_area_support": {
+    "member_permission": 8,
+    "notification": 8,
+    "open_api": 6,
+    "file": 8,
+    "task": 6,
+    "project": 10,
+    "import_export": 6,
+    "account_subscription": 8
+  },
+  "boundary": "Fresh synthetic v5 holdout generated after v4 was retired to development-only use. Do not tune prompts, product-area blocking, or the threshold on v5. AI-assisted review is not an independent human audit."
+}

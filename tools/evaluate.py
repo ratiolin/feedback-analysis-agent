@@ -63,6 +63,19 @@ def load_and_verify_manifest(path: Path) -> dict:
             raise ValueError(
                 "candidate prompt changed after holdout freeze; create a new holdout version"
             )
+    for frozen in manifest.get("frozen_files", []):
+        frozen_path = Path(frozen["path"])
+        actual_hash = hashlib.sha256(frozen_path.read_bytes()).hexdigest()
+        if actual_hash != frozen["sha256"]:
+            raise ValueError(
+                f"frozen file changed after holdout freeze: {frozen_path}; create a new holdout"
+            )
+    development_path = manifest.get("development_dataset")
+    development_hash = manifest.get("development_sha256")
+    if development_path and development_hash:
+        actual_hash = hashlib.sha256(Path(development_path).read_bytes()).hexdigest()
+        if actual_hash != development_hash:
+            raise ValueError("development dataset changed after holdout freeze")
     return manifest
 
 
@@ -139,6 +152,7 @@ def structure_evaluation(rows: list[dict], analyzer_name: str) -> dict:
         "product_area": confusion_payload(
             gold_areas, predicted_areas, [item.value for item in ProductArea]
         ),
+        "predicted_product_areas": predicted_areas,
         "owner_policy_consistency": sum(
             actual == expected
             for actual, expected in zip(predicted_owners, gold_owners, strict=True)
@@ -153,6 +167,7 @@ def clustering_evaluation(
     development: list[dict],
     holdout: list[dict],
     embedding_backend: str,
+    holdout_groups: list[str] | None = None,
 ) -> dict:
     all_rows = development + holdout
     texts = [normalize_ticket_text(row["message"]) for row in all_rows]
@@ -165,8 +180,18 @@ def clustering_evaluation(
     holdout_vectors = vectors[len(development) :]
     development_gold = [row["gold_issue_family"] for row in development]
     holdout_gold = [row["gold_issue_family"] for row in holdout]
-    tuned = select_threshold(development_vectors, development_gold)
-    holdout_labels = threshold_clusters(holdout_vectors, tuned.threshold)
+    development_groups = [row["gold_product_area"] for row in development]
+    holdout_groups = holdout_groups or [row["gold_product_area"] for row in holdout]
+    tuned = select_threshold(
+        development_vectors,
+        development_gold,
+        groups=development_groups,
+    )
+    holdout_labels = threshold_clusters(
+        holdout_vectors,
+        tuned.threshold,
+        groups=holdout_groups,
+    )
 
     false_merges: list[dict] = []
     for left in range(len(holdout)):
@@ -195,10 +220,12 @@ def clustering_evaluation(
         holdout_gold,
         thresholds=[tuned.threshold],
         minimum_pairwise_precision=0,
+        groups=holdout_groups,
     )
     return {
         "embedding_backend": embedding_backend,
         "embedding_input": "normalized_ticket_text_proxy_for_production_summary",
+        "blocking_key": "product_area",
         "development_count": len(development),
         "holdout_count": len(holdout),
         "frozen_threshold": tuned.threshold,
@@ -295,6 +322,7 @@ def quality_gate_results(payload: dict) -> dict:
         ("高风险升级召回率", structure["escalation_recall"], 1.0),
         ("quote 自动定位成功率", structure["evidence_auto_location_rate"], 0.95),
         ("重复问题匹配精确率", holdout["pairwise"]["precision"], 0.80),
+        ("重复问题匹配召回率", holdout["pairwise"]["recall"], 0.50),
         ("B³ F1", holdout["b_cubed"]["f1"], 0.75),
     ]
     items = [
@@ -340,6 +368,7 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--data", type=Path, default=Path("data/generated"))
     parser.add_argument("--holdout", type=Path)
+    parser.add_argument("--development", type=Path)
     parser.add_argument("--manifest", type=Path)
     parser.add_argument("--out", type=Path, default=Path("artifacts/evaluation"))
     parser.add_argument(
@@ -350,12 +379,13 @@ def main() -> None:
     parser.add_argument("--analyzer", choices=["demo", "dify"], default="demo")
     parser.add_argument("--embedding", choices=["tfidf", "bge"], default="tfidf")
     args = parser.parse_args()
-    development = load_rows(args.data / "tickets_development_with_gold.csv")
+    development = load_rows(args.development or args.data / "tickets_development_with_gold.csv")
     holdout_path = args.holdout or args.data / "tickets_holdout_locked.csv"
     manifest_path = args.manifest or args.data / "dataset_manifest.json"
     holdout = load_rows(holdout_path)
     manifest = load_and_verify_manifest(manifest_path)
     is_candidate = str(manifest.get("state", "")).startswith("candidate_")
+    structure = structure_evaluation(holdout, args.analyzer)
     payload = {
         "generated_at": datetime.now().astimezone().isoformat(),
         "boundary": "Synthetic mechanism benchmark; not a real-business distribution.",
@@ -363,8 +393,13 @@ def main() -> None:
         "evaluation_state": "candidate_scored_unpromoted" if is_candidate else "official_baseline",
         "candidate_prompt_sha256": manifest.get("candidate_prompt_sha256"),
         "audit": load_audit_status(args.audit, holdout),
-        "structure": structure_evaluation(holdout, args.analyzer),
-        "clustering": clustering_evaluation(development, holdout, args.embedding),
+        "structure": structure,
+        "clustering": clustering_evaluation(
+            development,
+            holdout,
+            args.embedding,
+            holdout_groups=structure["predicted_product_areas"],
+        ),
         "holdout_support": {
             "problem_type": Counter(row["gold_problem_type"] for row in holdout),
             "product_area": Counter(row["gold_product_area"] for row in holdout),

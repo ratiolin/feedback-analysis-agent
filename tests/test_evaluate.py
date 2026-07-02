@@ -54,6 +54,29 @@ def test_candidate_manifest_rejects_prompt_changed_after_freeze(tmp_path) -> Non
         load_and_verify_manifest(manifest)
 
 
+def test_manifest_rejects_any_changed_frozen_file(tmp_path) -> None:
+    frozen = tmp_path / "clustering.py"
+    frozen.write_text("version = 1\n", encoding="utf-8")
+    manifest = tmp_path / "manifest.json"
+    manifest.write_text(
+        json.dumps(
+            {
+                "frozen_files": [
+                    {
+                        "path": str(frozen),
+                        "sha256": hashlib.sha256(frozen.read_bytes()).hexdigest(),
+                    }
+                ]
+            }
+        ),
+        encoding="utf-8",
+    )
+    load_and_verify_manifest(manifest)
+    frozen.write_text("version = 2\n", encoding="utf-8")
+    with pytest.raises(ValueError, match="frozen file changed"):
+        load_and_verify_manifest(manifest)
+
+
 def test_audit_must_match_holdout_and_be_complete(tmp_path) -> None:
     audit = tmp_path / "audit.csv"
     with audit.open("w", encoding="utf-8", newline="") as handle:

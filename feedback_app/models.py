@@ -104,6 +104,8 @@ class IssueCluster(Base):
     centroid: Mapped[list] = mapped_column(JSON, default=list)
     representative_ticket_ids: Mapped[list] = mapped_column(JSON, default=list)
     evidence: Mapped[list] = mapped_column(JSON, default=list)
+    narrative_source: Mapped[str] = mapped_column(String(32), default="deterministic")
+    narrative_workflow_version: Mapped[str | None] = mapped_column(String(64), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)
 
@@ -125,6 +127,8 @@ class SOPCandidate(Base):
     title: Mapped[str] = mapped_column(String(200))
     payload: Mapped[dict] = mapped_column(JSON)
     status: Mapped[str] = mapped_column(String(24), default="pending_review")
+    generation_source: Mapped[str] = mapped_column(String(32), default="deterministic")
+    workflow_version: Mapped[str | None] = mapped_column(String(64), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)
 
 
@@ -147,4 +151,6 @@ class WeeklyReport(Base):
     week_start: Mapped[datetime] = mapped_column(DateTime(timezone=True), unique=True)
     payload: Mapped[dict] = mapped_column(JSON)
     markdown: Mapped[str] = mapped_column(Text)
+    generation_source: Mapped[str] = mapped_column(String(32), default="deterministic")
+    workflow_version: Mapped[str | None] = mapped_column(String(64), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)

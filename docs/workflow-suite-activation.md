@@ -1,41 +1,29 @@
-# 四工作流套件导入清单
+# 四工作流套件激活记录
 
-当前套件状态为 `candidate_awaiting_import`。结构化 v2 已有真实冻结回放记录；另外三个工作流只是已完成静态验证的候选，导入和真实调用前不得写成已上线或已达标。
+套件状态为 `candidate_scored_unpromoted`。四个 Dify 应用已导入、发布、配置独立 API Key，并完成真实 API 契约验证。内容生成工作流通过自身门禁，但四工作流整体套件因结构化/聚类门禁失败而未晋级。
 
-## 文件与应用
+## 应用与 Key
 
-| 顺序 | DSL 文件 | 导入后的应用名 | API Key 环境变量 |
-|---:|---|---|---|
-| 1 | `feedback-structuring-v2-candidate.yml` | `客户反馈结构化-v2-candidate` | `DIFY_FEEDBACK_WORKFLOW_API_KEY` |
-| 2 | `issue-cluster-narrative-v1-candidate.yml` | `问题簇命名与解释-v1-candidate` | `DIFY_CLUSTER_WORKFLOW_API_KEY` |
-| 3 | `sop-draft-v1-candidate.yml` | `候选SOP草案-v1-candidate` | `DIFY_SOP_WORKFLOW_API_KEY` |
-| 4 | `weekly-report-narrative-v1-candidate.yml` | `运营周报叙事-v1-candidate` | `DIFY_REPORT_WORKFLOW_API_KEY` |
+| DSL 文件 | 应用 | API Key 环境变量 | 回放状态 |
+|---|---|---|---|
+| `feedback-structuring-v2-candidate.yml` | `客户反馈结构化-v2-candidate` | `DIFY_FEEDBACK_WORKFLOW_API_KEY` | 60 条 v5 真实调用，2 条超时/缺失 |
+| `issue-cluster-narrative-v1-candidate.yml` | `问题簇命名与解释-v1-candidate` | `DIFY_CLUSTER_WORKFLOW_API_KEY` | 30/30 成功 |
+| `sop-draft-v1-candidate.yml` | `候选SOP草案-v1-candidate` | `DIFY_SOP_WORKFLOW_API_KEY` | 5/5 成功 |
+| `weekly-report-narrative-v1-candidate.yml` | `运营周报叙事-v1-candidate` | `DIFY_REPORT_WORKFLOW_API_KEY` | 6/6 成功 |
 
-结构化 v2 如果仍存在且 Key 可用，不要重复导入；只需连续导入后面三个文件。四个应用均确认使用 `deepseek-v4-pro`、发布并分别创建 API Key。
+真实 Key 只在 `.env`，不进入仓库、聊天、截图或作品材料。
 
-## 一次性配置
+## 已激活的服务端约束
 
-在 WSL 的 `/srv/stack/feedback-analysis-agent/.env` 中配置：
+- 结构化模型只输出 `quote`；服务端 exact match、规范化匹配并计算 offset。
+- 最终责任方、严重度和升级由规则裁决，不盲信模型值。
+- 问题簇、SOP 和周报中的 ticket ID 必须是确定性输入的子集，后端再次校验。
+- 候选 SOP 始终是 `pending_review`，不会自动更改正式知识库或执行不可逆动作。
+- 周报数字由确定性服务计算；模型只生成文案，根因只能标为“待确认原因”。
+- 任一 Dify 调用失败时可降级为确定性文案，并持久化 `generation_source`/`workflow_version` 以便审计。
 
-```dotenv
-DIFY_FEEDBACK_WORKFLOW_API_KEY=app-existing-structure-key
-DIFY_CLUSTER_WORKFLOW_API_KEY=app-new-cluster-key
-DIFY_SOP_WORKFLOW_API_KEY=app-new-sop-key
-DIFY_REPORT_WORKFLOW_API_KEY=app-new-report-key
-```
+## v5 结果
 
-不要把真实 Key 写入聊天、GitHub、截图或作品材料。新变量在导入后的后端接入步骤中启用；当前生产代码尚不会调用后三个 Key。
+内容生成：问题簇、SOP、周报成功率 100%，证据 ID 有效率和安全动作契约 100%。
 
-## 已在 DSL 内处理的已知边界
-
-- 结构化只输出原文 `quote`，不输出 start/end；责任方、严重度和升级由后端裁决。
-- 问题簇文案的证据 ID 必须来自输入代表工单。
-- SOP 不输出审批状态，不执行或建议不可逆动作，证据 ID 必须来自输入。
-- 周报不重新计算数字，且每条证据必须属于对应问题簇。
-- 四个工作流都把业务文本视为不可信数据，并要求根因只进入“待确认原因”。
-
-## 不属于 YML 的已知问题
-
-BGE 聚类的旧开发集包含同族重复文本，导致阈值 0.85 无法识别真实改写。该问题必须在导入后通过“重建改写开发集 → 仅在开发集选阈值 → 生成全新 v5 锁定集”修复，不能通过增加 Dify 节点解决，也不能复用 v4 调参后宣称未见评测。
-
-完成导入与 `.env` 配置后，只回复：`四工作流已发布并配置 Key`。随后再执行后端适配、真实 canary、聚类修复、v5 评测、展示页和文档更新。
+整体未晋级：问题类型 Macro-F1 0.776、责任路由一致率 78.3%、重复识别精确率 71.4%、召回率 33.3% 未达门槛。v5 结果见 `artifacts/evaluation-v5-suite-candidate/` 与 `artifacts/workflow-suite-v1-candidate/`；后续调整必须使用全新 v6 锁定集。
