@@ -125,6 +125,8 @@ class FinalAnalysis(BaseModel):
     review_reasons: list[str]
     workflow_version: str
     analysis_source: str
+    classification_source: str = "llm"
+    routing_policy_version: str = "feedback-routing-v1"
 
 
 class ReviewPatch(BaseModel):
@@ -133,4 +135,3 @@ class ReviewPatch(BaseModel):
     corrected_product_area: ProductArea | None = None
     corrected_owner: Owner | None = None
     note: str | None = Field(default=None, max_length=500)
-

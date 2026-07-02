@@ -38,3 +38,19 @@ def test_product_area_blocking_prevents_cross_area_false_merge() -> None:
     labels = threshold_clusters(vectors, 0.9, groups=["task", "file", "task"])
     assert labels[0] == labels[2]
     assert labels[0] != labels[1]
+
+
+def test_complete_linkage_prevents_single_link_chaining() -> None:
+    vectors = np.array(
+        [[1.0, 0.0], [0.9, 0.4358899], [0.62, 0.7846018]],
+        dtype=float,
+    )
+    single = threshold_clusters(vectors, 0.8, linkage="single")
+    complete = threshold_clusters(vectors, 0.8, linkage="complete")
+    assert len(set(single)) == 1
+    assert len(set(complete)) == 2
+
+
+def test_unknown_linkage_is_rejected() -> None:
+    with np.testing.assert_raises_regex(ValueError, "linkage"):
+        threshold_clusters(np.array([[1.0, 0.0]]), 0.8, linkage="average")

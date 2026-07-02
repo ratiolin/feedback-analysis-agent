@@ -180,7 +180,13 @@ def process_job(db: Session, settings: Settings, job: AnalysisJob) -> Analysis:
             raise AnalyzerError(job.last_error) from exc
         raw = DemoAnalyzer().analyze(ticket_payload)
         source = "demo_rules"
-    final = finalize_analysis(ticket.message, raw, settings.workflow_version, source)
+    final = finalize_analysis(
+        ticket.message,
+        raw,
+        settings.workflow_version,
+        source,
+        settings.routing_policy_version,
+    )
     analysis = Analysis(
         ticket_id=ticket.id,
         payload=final.model_dump(mode="json"),

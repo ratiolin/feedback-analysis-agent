@@ -2,13 +2,12 @@ import logging
 from collections import Counter, defaultdict
 from datetime import UTC, datetime
 
-import numpy as np
 from sqlalchemy import delete, select
 from sqlalchemy.orm import Session
 
 from .clustering import normalize_ticket_text, threshold_clusters
 from .config import Settings
-from .embeddings import Embedder
+from .embeddings import Embedder, blended_embeddings
 from .models import (
     Analysis,
     ClusterMember,
@@ -54,9 +53,20 @@ def rebuild_clusters(
     if not rows:
         return []
     texts = [normalize_ticket_text(ticket.message) for ticket, _ in rows]
+    summaries = [analysis.payload["summary"] for _, analysis in rows]
     product_areas = [analysis.product_area for _, analysis in rows]
-    vectors = np.asarray(embedder.encode(texts), dtype=float)
-    labels = threshold_clusters(vectors, threshold, groups=product_areas)
+    vectors = blended_embeddings(
+        embedder,
+        texts,
+        summaries,
+        settings.cluster_raw_text_weight if settings else 1.0,
+    )
+    labels = threshold_clusters(
+        vectors,
+        threshold,
+        groups=product_areas,
+        linkage=settings.cluster_linkage if settings else "single",
+    )
     grouped: dict[int, list[int]] = defaultdict(list)
     for index, label in enumerate(labels):
         grouped[label].append(index)

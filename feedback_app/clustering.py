@@ -3,6 +3,7 @@ from collections import Counter, defaultdict
 from dataclasses import dataclass
 
 import numpy as np
+from sklearn.cluster import AgglomerativeClustering
 
 GENERIC_SUPPORT_PATTERNS = (
     re.compile(r"^(你好，|麻烦帮忙看一下，|我们这边遇到一个问题：|今天使用时发现，|企业管理员反馈，)"),
@@ -31,10 +32,15 @@ def threshold_clusters(
     vectors: np.ndarray,
     threshold: float,
     groups: list[str] | None = None,
+    linkage: str = "single",
 ) -> list[int]:
     vectors = normalize_vectors(np.asarray(vectors, dtype=float))
     if groups is not None and len(groups) != len(vectors):
         raise ValueError("groups must match vector count")
+    if linkage not in {"single", "complete"}:
+        raise ValueError("linkage must be single or complete")
+    if linkage == "complete":
+        return _complete_linkage_clusters(vectors, threshold, groups)
     parent = list(range(len(vectors)))
 
     def find(item: int) -> int:
@@ -61,6 +67,38 @@ def threshold_clusters(
         root = find(item)
         roots.setdefault(root, len(roots))
         labels.append(roots[root])
+    return labels
+
+
+def _complete_linkage_clusters(
+    vectors: np.ndarray,
+    threshold: float,
+    groups: list[str] | None,
+) -> list[int]:
+    labels = [-1] * len(vectors)
+    grouped: dict[str, list[int]] = defaultdict(list)
+    for index in range(len(vectors)):
+        grouped[groups[index] if groups is not None else "__all__"].append(index)
+    next_label = 0
+    for indexes in grouped.values():
+        if len(indexes) == 1:
+            labels[indexes[0]] = next_label
+            next_label += 1
+            continue
+        subset = vectors[indexes]
+        distances = np.clip(1 - (subset @ subset.T), 0, 2)
+        model = AgglomerativeClustering(
+            n_clusters=None,
+            metric="precomputed",
+            linkage="complete",
+            distance_threshold=1 - threshold,
+        )
+        local_labels = model.fit_predict(distances)
+        mapping: dict[int, int] = {}
+        for index, local_label in zip(indexes, local_labels, strict=True):
+            mapping.setdefault(int(local_label), next_label + len(mapping))
+            labels[index] = mapping[int(local_label)]
+        next_label += len(mapping)
     return labels
 
 
@@ -125,11 +163,12 @@ def select_threshold(
     thresholds: list[float] | None = None,
     minimum_pairwise_precision: float = 0.80,
     groups: list[str] | None = None,
+    linkage: str = "single",
 ) -> ThresholdResult:
     thresholds = thresholds or [round(value / 100, 2) for value in range(30, 91, 5)]
     candidates: list[ThresholdResult] = []
     for threshold in thresholds:
-        labels = threshold_clusters(vectors, threshold, groups=groups)
+        labels = threshold_clusters(vectors, threshold, groups=groups, linkage=linkage)
         pairwise = pairwise_metrics(gold, labels)
         candidates.append(
             ThresholdResult(

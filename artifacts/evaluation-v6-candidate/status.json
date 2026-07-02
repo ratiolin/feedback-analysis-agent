@@ -1,0 +1,19 @@
+{
+  "workflow_state": "candidate_scored_unpromoted",
+  "workflow_name": "客户反馈结构化-v2-candidate",
+  "dsl_path": "dify-workflows/feedback-structuring-v2-candidate.yml",
+  "candidate_prompt_sha256": null,
+  "dataset_version": "v6-frozen-routing-clustering-holdout-20260702",
+  "holdout_rows": 60,
+  "audit_consistent": 60,
+  "audit_type": "AI-assisted consistency review; not an independent human audit",
+  "model_evaluation": "completed",
+  "promotion_state": "blocked_quality_gates",
+  "quality_gates_all_passed": false,
+  "failed_quality_gates": [
+    "首次 Schema 通过率",
+    "重复问题匹配精确率",
+    "重复问题匹配召回率"
+  ],
+  "boundary": "A scored candidate remains separate from the official baseline. Promotion requires every measured gate to pass and an explicit promotion record."
+}

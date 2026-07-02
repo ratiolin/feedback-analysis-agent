@@ -1,5 +1,66 @@
 from .schemas import ImpactSignals, Owner, ProblemType, ProductArea, Severity
 
+INTEGRATION_CUES = (
+    "Jira",
+    "外部日历",
+    "企业云盘",
+    "外部网盘",
+    "开放接口",
+    "API",
+    "Webhook",
+    "SSO",
+    "SCIM",
+    "cursor",
+)
+DATA_COMPARISON_CUES = ("统计", "数量", "计数", "比例", "席位", "对不上", "不一致")
+INTERNAL_BUG_CUES = (
+    "恢复原来",
+    "没有保留",
+    "缺少",
+    "旧版本",
+    "历史版本",
+    "另一个任务",
+    "不是消息里",
+    "丢失",
+)
+
+
+def arbitrate_classification(
+    message: str,
+    problem_type: ProblemType,
+    product_area: ProductArea,
+    policy_version: str,
+) -> tuple[ProblemType, ProductArea, str]:
+    """Apply narrow candidate rules; official v1 remains model-led."""
+    if policy_version != "feedback-routing-v3-candidate":
+        return problem_type, product_area, "llm"
+
+    final_type = problem_type
+    final_area = product_area
+    reasons: list[str] = []
+
+    if any(cue in message for cue in INTEGRATION_CUES):
+        final_type = ProblemType.INTEGRATION
+        reasons.append("explicit_external_integration")
+    elif any(cue in message for cue in DATA_COMPARISON_CUES):
+        final_type = ProblemType.DATA_CONSISTENCY
+        reasons.append("explicit_data_comparison")
+    elif problem_type == ProblemType.DATA_CONSISTENCY and any(
+        cue in message for cue in INTERNAL_BUG_CUES
+    ):
+        final_type = ProblemType.BUG
+        reasons.append("internal_state_or_target_failure")
+
+    if "Jira" in message and any(cue in message for cue in ("负责人", "经办人", "成员")):
+        final_area = ProductArea.MEMBER_PERMISSION
+        reasons.append("jira_member_identity")
+    elif any(cue in message for cue in ("附件", "网盘", "文件版本", "文件名")):
+        final_area = ProductArea.FILE
+        reasons.append("file_object")
+
+    source = "deterministic_override:" + ",".join(reasons) if reasons else "llm"
+    return final_type, final_area, source
+
 
 def supplement_impact_signals(message: str, model_signals: ImpactSignals) -> ImpactSignals:
     """Add only explicit, high-precision text cues missed by the model."""

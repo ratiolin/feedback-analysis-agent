@@ -1,0 +1,55 @@
+{
+  "dataset_version": "v6-frozen-routing-clustering-holdout-20260702",
+  "state": "candidate_unscored",
+  "generated_at": "2026-07-02T09:06:37.968416+00:00",
+  "row_count": 60,
+  "family_count": 30,
+  "boundary": "Synthetic locked holdout with two distinct families per type/area combination; AI-assisted review is not an independent human audit.",
+  "candidate_config": {
+    "workflow_version": "feedback-structuring-v2-candidate",
+    "routing_policy_version": "feedback-routing-v3-candidate",
+    "embedding_model": "BAAI/bge-small-zh-v1.5",
+    "cluster_linkage": "complete",
+    "cluster_raw_text_weight": 0.8
+  },
+  "holdout_path": "data/v6-evaluation/v6-holdout-locked.csv",
+  "holdout_sha256": "68ec9d3deb6bdc5b59ea05c9385f49ed1105a8a8d043272ff6cecb125e685da7",
+  "audit_path": "data/v6-evaluation/v6-holdout-audit.csv",
+  "audit_sha256": "252e73885e63774e4f9081cda6e75cfa68fac29ae9fb467b79e4c4132149e31f",
+  "frozen_files": [
+    {
+      "path": "dify-workflows/feedback-structuring-v2-candidate.yml",
+      "sha256": "47bcd77f2aa5b0b472a6b2df51266875ce1329f31ca72a947555de8dddb77178"
+    },
+    {
+      "path": "feedback_app/routing.py",
+      "sha256": "391bc17c196eca9d45222face670012319cb2f20ff35a948e1b3d1a39f603ee6"
+    },
+    {
+      "path": "feedback_app/clustering.py",
+      "sha256": "cdcb0e08c6878001fb04cf4d7a5630bb843fecef1e4740d1eff05726e33daba2"
+    },
+    {
+      "path": "feedback_app/embeddings.py",
+      "sha256": "11aab91b6171d890e656e16d20f35e086267159dbe9fff3d54a67d975547aecb"
+    },
+    {
+      "path": "tools/evaluate.py",
+      "sha256": "0b990715bdfaa90e52c4e54f1a06cccdcf3dcb5b24de67064b26cd829c6cb769"
+    },
+    {
+      "path": "tools/generate_v6_holdout.py",
+      "sha256": "f465abd21904f435330a85ef39eede8a30ee6d9dd93bcd51cbabd9aac9d48e50"
+    }
+  ],
+  "development_files": [
+    {
+      "path": "data/suite-evaluation/v5-holdout-locked.csv",
+      "sha256": "21bed5ba90ab97fdd37668595fee69a0c471ddc5e8712ffe78e274be174fd3eb"
+    },
+    {
+      "path": "data/development/v5-analysis-cache.json",
+      "sha256": "5354b0dcb7ef94c78dc6be2866359aac464f9686101216d26e09714de91da3a6"
+    }
+  ]
+}

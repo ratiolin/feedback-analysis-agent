@@ -5,7 +5,13 @@ from pathlib import Path
 
 import pytest
 
-from tools.evaluate import candidate_status_payload, load_and_verify_manifest, load_audit_status
+from tools.evaluate import (
+    analysis_input_hash,
+    candidate_status_payload,
+    load_and_verify_manifest,
+    load_audit_status,
+    structure_evaluation,
+)
 
 
 def test_worker_mounts_evaluation_inputs_read_only() -> None:
@@ -97,3 +103,52 @@ def test_audit_must_match_holdout_and_be_complete(tmp_path) -> None:
     assert status["consistent"] == 1
     with pytest.raises(ValueError, match="do not match"):
         load_audit_status(audit, [{"ticket_id": "T2", "message": "message"}])
+
+
+def test_structure_evaluation_uses_only_hash_matched_cache() -> None:
+    row = {
+        "ticket_id": "T1",
+        "user_type": "member",
+        "channel": "chat",
+        "message": "从 Jira 同步任务后负责人字段一直为空。",
+        "created_at": "2026-07-01T00:00:00+00:00",
+        "current_status": "open",
+        "gold_problem_type": "integration",
+        "gold_product_area": "member_permission",
+        "gold_owner": "technical_support",
+        "gold_escalation": "false",
+    }
+    cached = {
+        "items": {
+            "T1": {
+                "input_sha256": analysis_input_hash(row),
+                "attempts": 1,
+                "analysis": {
+                    "summary": "Jira 负责人同步为空",
+                    "problem_type": "data_consistency",
+                    "product_area": "open_api",
+                    "sentiment": "confused",
+                    "impact_signals": {},
+                    "evidence_spans": [{"quote": "从 Jira 同步任务后负责人字段一直为空"}],
+                },
+            }
+        }
+    }
+    result = structure_evaluation(
+        [row],
+        "dify",
+        "feedback-routing-v3-candidate",
+        analysis_cache=cached,
+    )
+    assert result["problem_type"]["matrix"][4][4] == 1
+    assert result["product_area"]["matrix"][2][2] == 1
+    assert result["owner_policy_consistency"] == 1
+
+    cached["items"]["T1"]["input_sha256"] = "wrong"
+    mismatch = structure_evaluation(
+        [row],
+        "dify",
+        "feedback-routing-v3-candidate",
+        analysis_cache=cached,
+    )
+    assert "analysis_cache_input_mismatch" in mismatch["errors"][0]["error"]

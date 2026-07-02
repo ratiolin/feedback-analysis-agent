@@ -28,3 +28,34 @@ class SentenceTransformerEmbedder:
         return np.asarray(
             self.model.encode(texts, normalize_embeddings=True, show_progress_bar=False)
         )
+
+
+def blended_embeddings(
+    embedder: Embedder,
+    raw_texts: list[str],
+    summaries: list[str],
+    raw_weight: float,
+) -> np.ndarray:
+    if len(raw_texts) != len(summaries):
+        raise ValueError("raw texts and summaries must have equal length")
+    if not 0 <= raw_weight <= 1:
+        raise ValueError("raw weight must be between 0 and 1")
+    raw_vectors = _normalize(np.asarray(embedder.encode(raw_texts), dtype=float))
+    if raw_weight == 1:
+        return raw_vectors
+    summary_vectors = _normalize(np.asarray(embedder.encode(summaries), dtype=float))
+    if raw_weight == 0:
+        return summary_vectors
+    return np.concatenate(
+        (
+            np.sqrt(raw_weight) * raw_vectors,
+            np.sqrt(1 - raw_weight) * summary_vectors,
+        ),
+        axis=1,
+    )
+
+
+def _normalize(vectors: np.ndarray) -> np.ndarray:
+    norms = np.linalg.norm(vectors, axis=1, keepdims=True)
+    norms[norms == 0] = 1
+    return vectors / norms

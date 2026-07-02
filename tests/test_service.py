@@ -27,7 +27,11 @@ def make_db() -> Session:
 
 def test_ticket_job_can_be_processed_with_transparent_demo_fallback() -> None:
     db = make_db()
-    settings = Settings(database_url="sqlite://", allow_demo_analyzer=True)
+    settings = Settings(
+        database_url="sqlite://",
+        allow_demo_analyzer=True,
+        dify_feedback_workflow_api_key="",
+    )
     demo_session = create_demo_session(db, settings)
     ticket, job = enqueue_ticket(
         db,
@@ -56,7 +60,11 @@ def test_active_demo_session_is_reused_instead_of_rotating_quota_identity() -> N
 
 def test_identical_exact_text_reuses_analysis_without_offset_risk() -> None:
     db = make_db()
-    settings = Settings(database_url="sqlite://", allow_demo_analyzer=True)
+    settings = Settings(
+        database_url="sqlite://",
+        allow_demo_analyzer=True,
+        dify_feedback_workflow_api_key="",
+    )
     demo_session = create_demo_session(db, settings)
     message = "我们整个项目组都收不到到期提醒，已经联系两次。"
     first, first_job = enqueue_ticket(
@@ -105,7 +113,11 @@ def test_failed_live_analysis_is_scheduled_with_backoff(monkeypatch: pytest.Monk
 
 def test_expired_session_cleanup_removes_private_artifacts() -> None:
     db = make_db()
-    settings = Settings(database_url="sqlite://", allow_demo_analyzer=True)
+    settings = Settings(
+        database_url="sqlite://",
+        allow_demo_analyzer=True,
+        dify_feedback_workflow_api_key="",
+    )
     demo_session = create_demo_session(db, settings)
     ticket, job = enqueue_ticket(
         db,

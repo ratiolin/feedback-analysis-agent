@@ -1,0 +1,1529 @@
+{
+  "workflow_version": "feedback-structuring-v2-candidate",
+  "items": {
+    "V6-T002": {
+      "input_sha256": "2adb6001cba6d5be5d92c4fc86a0d301c03aae3e97dcc95a4c8c353cfd929ab4",
+      "attempts": 1,
+      "analysis": {
+        "summary": "用户反馈相同 event_id 的回调被重复发送，影响整个团队，已联系客服两次。",
+        "problem_type": "integration",
+        "product_area": "open_api",
+        "sentiment": "frustrated",
+        "llm_owner_suggestion": "technical_support",
+        "root_cause_hypothesis": "回调重试机制或幂等性处理异常导致重复推送",
+        "impact_signals": {
+          "affected_scope": "team",
+          "workflow_blocked": false,
+          "data_loss_claimed": false,
+          "repeat_contacts": 2
+        },
+        "evidence_spans": [
+          {
+            "quote": "接收端发现相同 event_id 的回调被重复发送"
+          },
+          {
+            "quote": "该问题影响整个团队"
+          },
+          {
+            "quote": "已经联系客服两次"
+          }
+        ]
+      }
+    },
+    "V6-T001": {
+      "input_sha256": "4c9f7cbe59bbc2ad6fb69f413b4e4b277d898eeec2f68fb43e72c7f16ac9c47c",
+      "attempts": 1,
+      "analysis": {
+        "summary": "Webhook 超时重试导致同一任务事件被重复推送",
+        "problem_type": "integration",
+        "product_area": "open_api",
+        "sentiment": "calm",
+        "llm_owner_suggestion": "technical_support",
+        "root_cause_hypothesis": "Webhook 超时重试机制未正确去重，导致同一事件被多次投递",
+        "impact_signals": {
+          "affected_scope": "individual",
+          "workflow_blocked": false,
+          "data_loss_claimed": false,
+          "repeat_contacts": 0
+        },
+        "evidence_spans": [
+          {
+            "quote": "Webhook 超时重试后同一任务事件推送了两次。"
+          }
+        ]
+      }
+    },
+    "V6-T003": {
+      "input_sha256": "e863bce1807da729e2eb403ead793145ef68db465f6f38bc8f6e0a1221283d19",
+      "attempts": 2,
+      "analysis": {
+        "summary": "企业管理员反馈开放接口的 OAuth refresh token 无法换取新令牌。",
+        "problem_type": "integration",
+        "product_area": "open_api",
+        "sentiment": "frustrated",
+        "llm_owner_suggestion": "technical_support",
+        "root_cause_hypothesis": "refresh token 可能已过期、被吊销，或 OAuth 服务端配置/凭证异常。",
+        "impact_signals": {
+          "affected_scope": "individual",
+          "workflow_blocked": false,
+          "data_loss_claimed": false,
+          "repeat_contacts": 0
+        },
+        "evidence_spans": [
+          {
+            "quote": "开放接口的 OAuth refresh token 无法换取新令牌。"
+          }
+        ]
+      }
+    },
+    "V6-T004": {
+      "input_sha256": "b495402213c136e1f614df484fccc5dad225bbe9da9154e96a3d2822a3d79b3b",
+      "attempts": 1,
+      "analysis": {
+        "summary": "第三方应用刷新访问凭证时持续返回令牌失效，影响整个团队，已联系客服两次。",
+        "problem_type": "integration",
+        "product_area": "open_api",
+        "sentiment": "frustrated",
+        "llm_owner_suggestion": "technical_support",
+        "root_cause_hypothesis": "第三方应用的刷新令牌可能已过期或被吊销，或应用配置的凭证信息有误。",
+        "impact_signals": {
+          "affected_scope": "team",
+          "workflow_blocked": false,
+          "data_loss_claimed": false,
+          "repeat_contacts": 2
+        },
+        "evidence_spans": [
+          {
+            "quote": "第三方应用刷新访问凭证时持续返回令牌失效"
+          },
+          {
+            "quote": "该问题影响整个团队"
+          },
+          {
+            "quote": "已经联系客服两次"
+          }
+        ]
+      }
+    },
+    "V6-T005": {
+      "input_sha256": "d03412df477e7148065915feca02221fffc3a7bb7d0d61d17382fedf9e9fde5b",
+      "attempts": 1,
+      "analysis": {
+        "summary": "Okta 通过 SCIM 停用成员后，平台账号仍保持有效状态，未同步停用。",
+        "problem_type": "integration",
+        "product_area": "member_permission",
+        "sentiment": "frustrated",
+        "llm_owner_suggestion": "technical_support",
+        "root_cause_hypothesis": "SCIM 停用事件未正确触发平台侧账号禁用流程，可能因映射配置或事件处理异常。",
+        "impact_signals": {
+          "affected_scope": "organization",
+          "workflow_blocked": false,
+          "data_loss_claimed": false,
+          "repeat_contacts": 0
+        },
+        "evidence_spans": [
+          {
+            "quote": "Okta 通过 SCIM 停用成员后平台账号仍然有效。"
+          }
+        ]
+      }
+    },
+    "V6-T006": {
+      "input_sha256": "6cc9052858f6ee3e89be7d9716d673bb448573403fc12e98c96d96e0c98205d3",
+      "attempts": 1,
+      "analysis": {
+        "summary": "身份提供商禁用员工后，成员状态未同步关闭，影响整个团队，已联系客服两次。",
+        "problem_type": "integration",
+        "product_area": "member_permission",
+        "sentiment": "frustrated",
+        "llm_owner_suggestion": "technical_support",
+        "root_cause_hypothesis": "身份提供商与系统的成员状态同步机制未触发或执行失败",
+        "impact_signals": {
+          "affected_scope": "team",
+          "workflow_blocked": false,
+          "data_loss_claimed": false,
+          "repeat_contacts": 2
+        },
+        "evidence_spans": [
+          {
+            "quote": "身份提供商已经禁用员工但成员状态没有同步关闭"
+          },
+          {
+            "quote": "该问题影响整个团队"
+          },
+          {
+            "quote": "已经联系客服两次"
+          }
+        ]
+      }
+    },
+    "V6-T007": {
+      "input_sha256": "ec84a3db2eed299579c9b95c0e13ea88eee19c564f16fb9567e5e0c81db2c6d3",
+      "attempts": 1,
+      "analysis": {
+        "summary": "Azure AD 同步用户组后成员未进入对应部门",
+        "problem_type": "integration",
+        "product_area": "member_permission",
+        "sentiment": "frustrated",
+        "llm_owner_suggestion": "technical_support",
+        "root_cause_hypothesis": "Azure AD 同步配置中用户组与部门映射规则可能未正确设置或同步任务执行异常",
+        "impact_signals": {
+          "affected_scope": "team",
+          "workflow_blocked": false,
+          "data_loss_claimed": false,
+          "repeat_contacts": 0
+        },
+        "evidence_spans": [
+          {
+            "quote": "Azure AD 同步用户组后成员没有进入对应部门。"
+          }
+        ]
+      }
+    },
+    "V6-T009": {
+      "input_sha256": "694328a86b965e7889c3938369a1cb48892ca02f776d78c4a175b92bfea6baab",
+      "attempts": 1,
+      "analysis": {
+        "summary": "循环任务生成下一期实例时检查清单未带出，显示为空。",
+        "problem_type": "bug",
+        "product_area": "task",
+        "sentiment": "frustrated",
+        "llm_owner_suggestion": "qa_triage",
+        "root_cause_hypothesis": "循环任务复制逻辑未正确继承检查清单字段，或检查清单模板引用在实例化时丢失。",
+        "impact_signals": {
+          "affected_scope": "individual",
+          "workflow_blocked": false,
+          "data_loss_claimed": false,
+          "repeat_contacts": 0
+        },
+        "evidence_spans": [
+          {
+            "quote": "循环任务生成下一期实例时检查清单为空。"
+          }
+        ]
+      }
+    },
+    "V6-T008": {
+      "input_sha256": "b9df49000ff9411956549f4e73599b0a168971a7cf469d1fcb231487e2907afa",
+      "attempts": 1,
+      "analysis": {
+        "summary": "外部企业目录的组关系未映射到平台团队，影响整个团队，用户已联系客服两次。",
+        "problem_type": "integration",
+        "product_area": "member_permission",
+        "sentiment": "frustrated",
+        "llm_owner_suggestion": "implementation_support",
+        "root_cause_hypothesis": "外部企业目录同步配置或映射规则未正确设置，导致组关系无法同步到平台团队。",
+        "impact_signals": {
+          "affected_scope": "team",
+          "workflow_blocked": false,
+          "data_loss_claimed": false,
+          "repeat_contacts": 2
+        },
+        "evidence_spans": [
+          {
+            "quote": "外部企业目录中的组关系未映射到平台团队"
+          },
+          {
+            "quote": "该问题影响整个团队"
+          },
+          {
+            "quote": "已经联系客服两次"
+          }
+        ]
+      }
+    },
+    "V6-T011": {
+      "input_sha256": "9b9aef33059c1870f14323c18dcdaec77004245df2a96c01ad63d824654033a3",
+      "attempts": 1,
+      "analysis": {
+        "summary": "批量修改截止日期后，部分任务的截止日期被错误地设置为前一天。",
+        "problem_type": "data_consistency",
+        "product_area": "task",
+        "sentiment": "frustrated",
+        "llm_owner_suggestion": "qa_triage",
+        "root_cause_hypothesis": "批量修改截止日期时可能存在时区转换错误或日期计算偏移，导致部分任务日期减一天。",
+        "impact_signals": {
+          "affected_scope": "individual",
+          "workflow_blocked": false,
+          "data_loss_claimed": false,
+          "repeat_contacts": 0
+        },
+        "evidence_spans": [
+          {
+            "quote": "批量修改截止日期后部分任务被写成了前一天。"
+          }
+        ]
+      }
+    },
+    "V6-T013": {
+      "input_sha256": "12a61b99b930c8d30d76c05bf9534e94a00b5b6165fc1d0e432b28a899b7a188",
+      "attempts": 1,
+      "analysis": {
+        "summary": "用户反馈从归档恢复项目后，原有标签全部消失。",
+        "problem_type": "bug",
+        "product_area": "project",
+        "sentiment": "frustrated",
+        "llm_owner_suggestion": "qa_triage",
+        "root_cause_hypothesis": "项目归档恢复流程中未正确保留标签关联数据，导致标签丢失。",
+        "impact_signals": {
+          "affected_scope": "individual",
+          "workflow_blocked": false,
+          "data_loss_claimed": true,
+          "repeat_contacts": 0
+        },
+        "evidence_spans": [
+          {
+            "quote": "从归档恢复项目后原有标签全部消失。"
+          }
+        ]
+      }
+    },
+    "V6-T010": {
+      "input_sha256": "5069fabaaa602649948eefd2b0b4e65bd98b3a17908d4971cfbbb51e8811a058",
+      "attempts": 1,
+      "analysis": {
+        "summary": "用户反馈从模板创建重复任务时检查项丢失，影响整个团队，已联系客服两次。",
+        "problem_type": "bug",
+        "product_area": "task",
+        "sentiment": "frustrated",
+        "llm_owner_suggestion": "qa_triage",
+        "root_cause_hypothesis": "模板复制逻辑未包含检查项数据，或检查项关联在实例化时丢失。",
+        "impact_signals": {
+          "affected_scope": "team",
+          "workflow_blocked": false,
+          "data_loss_claimed": false,
+          "repeat_contacts": 2
+        },
+        "evidence_spans": [
+          {
+            "quote": "重复任务的新实例没有保留模板里的检查项"
+          },
+          {
+            "quote": "该问题影响整个团队"
+          },
+          {
+            "quote": "已经联系客服两次"
+          }
+        ]
+      }
+    },
+    "V6-T012": {
+      "input_sha256": "b0cfd18a25debf849c7cd9ac429eb2962cb73c8535844cdeb1a8ceafbc469211",
+      "attempts": 1,
+      "analysis": {
+        "summary": "多选任务统一改期后，记录被保存到错误日期，影响整个团队，用户已联系客服两次。",
+        "problem_type": "data_consistency",
+        "product_area": "task",
+        "sentiment": "frustrated",
+        "llm_owner_suggestion": "qa_triage",
+        "root_cause_hypothesis": "批量改期操作在保存时可能错误映射了日期字段，导致记录写入错误日期。",
+        "impact_signals": {
+          "affected_scope": "team",
+          "workflow_blocked": false,
+          "data_loss_claimed": false,
+          "repeat_contacts": 2
+        },
+        "evidence_spans": [
+          {
+            "quote": "多选任务统一改期后有记录保存到了错误日期"
+          },
+          {
+            "quote": "该问题影响整个团队"
+          },
+          {
+            "quote": "已经联系客服两次"
+          }
+        ]
+      }
+    },
+    "V6-T014": {
+      "input_sha256": "a22efba84e99020c0486e533209d37a64a30d0869cfc61acdc3c2813a9408b58",
+      "attempts": 1,
+      "analysis": {
+        "summary": "用户反馈项目解除归档后之前配置的标签未恢复，影响整个团队，已联系客服两次。",
+        "problem_type": "bug",
+        "product_area": "project",
+        "sentiment": "frustrated",
+        "llm_owner_suggestion": "qa_triage",
+        "root_cause_hypothesis": "项目解除归档时标签配置未随项目状态恢复，可能缺少标签数据的重新激活逻辑。",
+        "impact_signals": {
+          "affected_scope": "team",
+          "workflow_blocked": false,
+          "data_loss_claimed": false,
+          "repeat_contacts": 2
+        },
+        "evidence_spans": [
+          {
+            "quote": "项目解除归档时没有恢复之前配置的标签"
+          },
+          {
+            "quote": "该问题影响整个团队"
+          },
+          {
+            "quote": "已经联系客服两次"
+          }
+        ]
+      }
+    },
+    "V6-T015": {
+      "input_sha256": "7679e827ae5acd2f9789945412f3867613567e05d2118f38dd07d151d5712c4b",
+      "attempts": 1,
+      "analysis": {
+        "summary": "用户反馈保存看板筛选器后重新进入项目时筛选条件被清空。",
+        "problem_type": "bug",
+        "product_area": "project",
+        "sentiment": "frustrated",
+        "llm_owner_suggestion": "qa_triage",
+        "root_cause_hypothesis": "看板筛选器保存逻辑可能未正确持久化或加载时未恢复已保存的筛选条件。",
+        "impact_signals": {
+          "affected_scope": "individual",
+          "workflow_blocked": false,
+          "data_loss_claimed": false,
+          "repeat_contacts": 0
+        },
+        "evidence_spans": [
+          {
+            "quote": "保存看板筛选器后重新进入项目条件被清空。"
+          }
+        ]
+      }
+    },
+    "V6-T016": {
+      "input_sha256": "425dd8b62fcbdb2972c608e15cca8c88795a4e05660be30b714931d34cd7c610",
+      "attempts": 1,
+      "analysis": {
+        "summary": "用户反馈项目视图无法记住已保存的筛选规则，影响整个团队，已联系客服两次。",
+        "problem_type": "configuration",
+        "product_area": "project",
+        "sentiment": "frustrated",
+        "llm_owner_suggestion": "technical_support",
+        "root_cause_hypothesis": "筛选规则持久化失败，可能因视图配置保存异常或缓存未更新。",
+        "impact_signals": {
+          "affected_scope": "team",
+          "workflow_blocked": false,
+          "data_loss_claimed": false,
+          "repeat_contacts": 2
+        },
+        "evidence_spans": [
+          {
+            "quote": "项目视图记不住已经保存的筛选规则"
+          },
+          {
+            "quote": "该问题影响整个团队"
+          },
+          {
+            "quote": "已经联系客服两次"
+          }
+        ]
+      }
+    },
+    "V6-T018": {
+      "input_sha256": "244f1b88423955b05a4317857ccaacf30445389f47fd7141a29eb7f0f1d35975",
+      "attempts": 1,
+      "analysis": {
+        "summary": "用户反馈项目图表完成数量与任务列表不一致，影响整个团队，已联系客服两次。",
+        "problem_type": "data_consistency",
+        "product_area": "project",
+        "sentiment": "frustrated",
+        "llm_owner_suggestion": "qa_triage",
+        "root_cause_hypothesis": "图表统计缓存未及时更新或统计口径与任务列表不一致",
+        "impact_signals": {
+          "affected_scope": "team",
+          "workflow_blocked": false,
+          "data_loss_claimed": false,
+          "repeat_contacts": 2
+        },
+        "evidence_spans": [
+          {
+            "quote": "项目图表中的完成数量和任务列表对不上"
+          },
+          {
+            "quote": "该问题影响整个团队"
+          },
+          {
+            "quote": "已经联系客服两次"
+          }
+        ]
+      }
+    },
+    "V6-T019": {
+      "input_sha256": "b3ce376d713649cb1ea423c4ba64b3f953ac899e121ff355c2471592240b09d3",
+      "attempts": 1,
+      "analysis": {
+        "summary": "项目首页逾期任务总数与筛选结果数量不一致",
+        "problem_type": "data_consistency",
+        "product_area": "task",
+        "sentiment": "confused",
+        "llm_owner_suggestion": "qa_triage",
+        "root_cause_hypothesis": "首页统计与筛选列表可能使用了不同的过滤条件或缓存策略",
+        "impact_signals": {
+          "affected_scope": "individual",
+          "workflow_blocked": false,
+          "data_loss_claimed": false,
+          "repeat_contacts": 0
+        },
+        "evidence_spans": [
+          {
+            "quote": "项目首页显示的逾期任务总数与筛选结果不一致。"
+          }
+        ]
+      }
+    },
+    "V6-T020": {
+      "input_sha256": "a3115a98cc35373ceda5f5402548e32b3e989a7856c50799bc503c9cd50822cd",
+      "attempts": 1,
+      "analysis": {
+        "summary": "用户反馈概览卡片逾期数量与列表统计不一致，影响整个团队，已联系客服两次。",
+        "problem_type": "data_consistency",
+        "product_area": "task",
+        "sentiment": "frustrated",
+        "llm_owner_suggestion": "qa_triage",
+        "root_cause_hypothesis": "概览卡片与列表统计的逾期任务计算逻辑或数据源不一致，导致计数差异。",
+        "impact_signals": {
+          "affected_scope": "team",
+          "workflow_blocked": false,
+          "data_loss_claimed": false,
+          "repeat_contacts": 2
+        },
+        "evidence_spans": [
+          {
+            "quote": "概览卡片的逾期数量和列表统计对不上"
+          },
+          {
+            "quote": "该问题影响整个团队"
+          },
+          {
+            "quote": "已经联系客服两次"
+          }
+        ]
+      }
+    },
+    "V6-T022": {
+      "input_sha256": "5a52164948c6e799a49d0e2ab3cddd5fb3c3b84f8c553a74e702a569d19460fe",
+      "attempts": 1,
+      "analysis": {
+        "summary": "用户反馈时间记录明细合计与任务卡片工时不一致，影响整个团队，已联系客服两次。",
+        "problem_type": "data_consistency",
+        "product_area": "task",
+        "sentiment": "frustrated",
+        "llm_owner_suggestion": "qa_triage",
+        "root_cause_hypothesis": "工时汇总计算逻辑或缓存未同步导致明细合计与卡片展示不一致",
+        "impact_signals": {
+          "affected_scope": "team",
+          "workflow_blocked": false,
+          "data_loss_claimed": false,
+          "repeat_contacts": 2
+        },
+        "evidence_spans": [
+          {
+            "quote": "时间记录明细合计和任务卡片上的工时不一致"
+          },
+          {
+            "quote": "该问题影响整个团队"
+          },
+          {
+            "quote": "已经联系客服两次"
+          }
+        ]
+      }
+    },
+    "V6-T021": {
+      "input_sha256": "668c68d6286b1794195c98f51cfb250c4567b4b2b85de68560a23375b073962a",
+      "attempts": 1,
+      "analysis": {
+        "summary": "用户反馈任务总工时与逐条工时记录求和结果不一致",
+        "problem_type": "data_consistency",
+        "product_area": "task",
+        "sentiment": "calm",
+        "llm_owner_suggestion": "qa_triage",
+        "root_cause_hypothesis": "任务总工时字段的聚合计算逻辑与工时记录列表的求和逻辑可能存在差异，或存在未被列表展示的工时记录",
+        "impact_signals": {
+          "affected_scope": "individual",
+          "workflow_blocked": false,
+          "data_loss_claimed": false,
+          "repeat_contacts": 0
+        },
+        "evidence_spans": [
+          {
+            "quote": "任务显示的总工时与逐条工时记录求和不同。"
+          }
+        ]
+      }
+    },
+    "V6-T023": {
+      "input_sha256": "0a1da8b99168486fca0fce47b27e17f172996b2184a717ef7416e0b2dd0e27d8",
+      "attempts": 1,
+      "analysis": {
+        "summary": "父任务显示的子任务数量与实际列表条数不一致",
+        "problem_type": "data_consistency",
+        "product_area": "task",
+        "sentiment": "confused",
+        "llm_owner_suggestion": "qa_triage",
+        "root_cause_hypothesis": "子任务计数缓存未更新或统计逻辑未正确过滤已删除/归档的子任务",
+        "impact_signals": {
+          "affected_scope": "individual",
+          "workflow_blocked": false,
+          "data_loss_claimed": false,
+          "repeat_contacts": 0
+        },
+        "evidence_spans": [
+          {
+            "quote": "父任务显示的子任务数量与实际列表条数不同。"
+          }
+        ]
+      }
+    },
+    "V6-T025": {
+      "input_sha256": "e7b0fb6b52685c7ccdac173aa9a2cbde6f6f23b1ee384d9759812d6cbd64e49b",
+      "attempts": 1,
+      "analysis": {
+        "summary": "用户已设置免打扰时间，但夜间仍收到任务通知，怀疑免打扰规则未生效。",
+        "problem_type": "configuration",
+        "product_area": "notification",
+        "sentiment": "frustrated",
+        "llm_owner_suggestion": "technical_support",
+        "root_cause_hypothesis": "免打扰时间配置未正确保存或通知触发逻辑未正确读取免打扰设置",
+        "impact_signals": {
+          "affected_scope": "individual",
+          "workflow_blocked": false,
+          "data_loss_claimed": false,
+          "repeat_contacts": 0
+        },
+        "evidence_spans": [
+          {
+            "quote": "已经设置免打扰时间但夜间仍收到任务通知。"
+          }
+        ]
+      }
+    },
+    "V6-T026": {
+      "input_sha256": "2e71b3ff7cf76d4d9f613464b2eedebff9791db4d515aa29dae1e6deacaefea5",
+      "attempts": 1,
+      "analysis": {
+        "summary": "用户反馈通知静默时段配置保存后未按预期生效，影响整个团队，已联系客服两次。",
+        "problem_type": "configuration",
+        "product_area": "notification",
+        "sentiment": "frustrated",
+        "llm_owner_suggestion": "technical_support",
+        "root_cause_hypothesis": "静默时段配置保存后未正确触发或应用，可能因后端规则引擎未刷新或缓存未失效。",
+        "impact_signals": {
+          "affected_scope": "team",
+          "workflow_blocked": false,
+          "data_loss_claimed": false,
+          "repeat_contacts": 2
+        },
+        "evidence_spans": [
+          {
+            "quote": "通知静默时段配置保存后没有按预期生效"
+          },
+          {
+            "quote": "该问题影响整个团队"
+          },
+          {
+            "quote": "已经联系客服两次"
+          }
+        ]
+      }
+    },
+    "V6-T027": {
+      "input_sha256": "4c490a9d7a55c402cebf33df1f757446c69e7999ce2ae3f1b992053649ae5b67",
+      "attempts": 1,
+      "analysis": {
+        "summary": "用户反馈每日摘要虽按北京时间配置，但实际在UTC时间发送，存在时区偏差。",
+        "problem_type": "configuration",
+        "product_area": "notification",
+        "sentiment": "frustrated",
+        "llm_owner_suggestion": "technical_support",
+        "root_cause_hypothesis": "每日摘要发送任务未正确读取或应用用户配置的时区，可能默认使用了UTC。",
+        "impact_signals": {
+          "affected_scope": "individual",
+          "workflow_blocked": false,
+          "data_loss_claimed": false,
+          "repeat_contacts": 0
+        },
+        "evidence_spans": [
+          {
+            "quote": "每日摘要按北京时间配置却在 UTC 时间发送。"
+          }
+        ]
+      }
+    },
+    "V6-T024": {
+      "input_sha256": "26c24999f61ae74b71cf4a98183e203aec24660b9b64c238be778df38eed16cf",
+      "attempts": 2,
+      "analysis": {
+        "summary": "用户反馈任务卡片子项计数与展开后实际记录数量不一致，影响整个团队，已联系客服两次。",
+        "problem_type": "data_consistency",
+        "product_area": "task",
+        "sentiment": "frustrated",
+        "llm_owner_suggestion": "qa_triage",
+        "root_cause_hypothesis": "子项计数缓存未及时更新或过滤条件导致展开后记录与计数不一致",
+        "impact_signals": {
+          "affected_scope": "team",
+          "workflow_blocked": false,
+          "data_loss_claimed": false,
+          "repeat_contacts": 2
+        },
+        "evidence_spans": [
+          {
+            "quote": "任务卡片的子项计数和展开后看到的记录对不上"
+          },
+          {
+            "quote": "该问题影响整个团队"
+          },
+          {
+            "quote": "已经联系客服两次"
+          }
+        ]
+      }
+    },
+    "V6-T017": {
+      "input_sha256": "0a7ebac453fbe51f0e478369a32fec8e0e6129e23536dc29db8431ae56083f11",
+      "attempts": 2,
+      "analysis": {
+        "summary": "燃尽图统计的已完成任务数与项目明细不一致",
+        "problem_type": "data_consistency",
+        "product_area": "project",
+        "sentiment": "calm",
+        "llm_owner_suggestion": "qa_triage",
+        "root_cause_hypothesis": "燃尽图缓存未刷新或统计口径与任务明细不一致",
+        "impact_signals": {
+          "affected_scope": "individual",
+          "workflow_blocked": false,
+          "data_loss_claimed": false,
+          "repeat_contacts": 0
+        },
+        "evidence_spans": [
+          {
+            "quote": "燃尽图统计的已完成任务数与项目明细不同。"
+          }
+        ]
+      }
+    },
+    "V6-T029": {
+      "input_sha256": "423ee74c24e8b48703204e608b2dcc8d491387cc8573544923ecd9d6aaefe87a",
+      "attempts": 1,
+      "analysis": {
+        "summary": "用户反馈订阅续费提醒设置为提前七天，但实际仍提前一天发送。",
+        "problem_type": "configuration",
+        "product_area": "notification",
+        "sentiment": "confused",
+        "llm_owner_suggestion": "technical_support",
+        "root_cause_hypothesis": "提醒规则配置未正确保存或存在默认值覆盖逻辑",
+        "impact_signals": {
+          "affected_scope": "individual",
+          "workflow_blocked": false,
+          "data_loss_claimed": false,
+          "repeat_contacts": 0
+        },
+        "evidence_spans": [
+          {
+            "quote": "订阅续费提醒设置为提前七天却仍提前一天发送。"
+          }
+        ]
+      }
+    },
+    "V6-T028": {
+      "input_sha256": "b63540809f55ff4fc10da8c685779e811f40ef45f74f1f1d8026fd02a13762c2",
+      "attempts": 1,
+      "analysis": {
+        "summary": "通知摘要发送时间未遵循账号设置的时区，影响整个团队，用户已联系客服两次。",
+        "problem_type": "configuration",
+        "product_area": "notification",
+        "sentiment": "frustrated",
+        "llm_owner_suggestion": "technical_support",
+        "root_cause_hypothesis": "通知摘要的发送时间计算未读取或未正确应用账号级别的时区设置，可能使用了默认时区或服务器时区。",
+        "impact_signals": {
+          "affected_scope": "team",
+          "workflow_blocked": false,
+          "data_loss_claimed": false,
+          "repeat_contacts": 2
+        },
+        "evidence_spans": [
+          {
+            "quote": "通知摘要的发送时间没有采用账号设置的时区"
+          },
+          {
+            "quote": "该问题影响整个团队"
+          },
+          {
+            "quote": "已经联系客服两次"
+          }
+        ]
+      }
+    },
+    "V6-T031": {
+      "input_sha256": "6a4fa59120a8cc12d5032e119bbca7d38d199c52b662705f578692ad312dee3f",
+      "attempts": 1,
+      "analysis": {
+        "summary": "企业管理员反馈保存默认发票抬头后，新申请中该抬头仍显示为空。",
+        "problem_type": "configuration",
+        "product_area": "account_subscription",
+        "sentiment": "frustrated",
+        "llm_owner_suggestion": "technical_support",
+        "root_cause_hypothesis": "默认发票抬头保存逻辑未正确关联至新申请流程，或存在缓存/会话未刷新导致读取旧值。",
+        "impact_signals": {
+          "affected_scope": "individual",
+          "workflow_blocked": false,
+          "data_loss_claimed": false,
+          "repeat_contacts": 0
+        },
+        "evidence_spans": [
+          {
+            "quote": "保存默认发票抬头后新申请仍然为空。"
+          }
+        ]
+      }
+    },
+    "V6-T030": {
+      "input_sha256": "b5876c62037695579d087a5e8a96da698491ae7b147d82041711f2d511f65aaa",
+      "attempts": 1,
+      "analysis": {
+        "summary": "用户反馈账户续费通知提前量配置未生效，影响整个团队，已联系客服两次。",
+        "problem_type": "configuration",
+        "product_area": "notification",
+        "sentiment": "frustrated",
+        "llm_owner_suggestion": "technical_support",
+        "root_cause_hypothesis": "续费通知提前量配置可能未正确保存或触发条件存在逻辑缺陷",
+        "impact_signals": {
+          "affected_scope": "team",
+          "workflow_blocked": false,
+          "data_loss_claimed": false,
+          "repeat_contacts": 2
+        },
+        "evidence_spans": [
+          {
+            "quote": "账户中的续费通知提前量配置没有生效"
+          },
+          {
+            "quote": "该问题影响整个团队"
+          },
+          {
+            "quote": "已经联系客服两次"
+          }
+        ]
+      }
+    },
+    "V6-T033": {
+      "input_sha256": "a3ef9caa81ff1b68a80e712da1f57f3b8b10d263a599232233511d108986879d",
+      "attempts": 1,
+      "analysis": {
+        "summary": "企业管理员反馈只读访客仍可删除项目附件，疑似权限控制失效。",
+        "problem_type": "permission",
+        "product_area": "member_permission",
+        "sentiment": "frustrated",
+        "llm_owner_suggestion": "qa_triage",
+        "root_cause_hypothesis": "只读访客角色的删除权限配置未正确限制附件操作，或前端/后端权限校验存在漏洞。",
+        "impact_signals": {
+          "affected_scope": "team",
+          "workflow_blocked": false,
+          "data_loss_claimed": false,
+          "repeat_contacts": 0
+        },
+        "evidence_spans": [
+          {
+            "quote": "只读访客仍然能够删除项目附件。"
+          }
+        ]
+      }
+    },
+    "V6-T034": {
+      "input_sha256": "66f8640c0c97e1d35fa3bebd2d70e2ac7392933c74b9c986968ca16fc8b6fb3b",
+      "attempts": 1,
+      "analysis": {
+        "summary": "访客权限账号在文件区看到删除按钮并可执行删除，影响整个团队，用户已联系客服两次。",
+        "problem_type": "permission",
+        "product_area": "member_permission",
+        "sentiment": "frustrated",
+        "llm_owner_suggestion": "technical_support",
+        "root_cause_hypothesis": "访客角色的文件删除权限配置错误或前端权限校验缺失",
+        "impact_signals": {
+          "affected_scope": "team",
+          "workflow_blocked": false,
+          "data_loss_claimed": false,
+          "repeat_contacts": 2
+        },
+        "evidence_spans": [
+          {
+            "quote": "访客权限账号在文件区看到了删除按钮并能执行"
+          },
+          {
+            "quote": "该问题影响整个团队"
+          },
+          {
+            "quote": "已经联系客服两次"
+          }
+        ]
+      }
+    },
+    "V6-T035": {
+      "input_sha256": "5d61c8c6248b16981e5cc15c154c0b9e7243fa76154095841253e3085285efa7",
+      "attempts": 1,
+      "analysis": {
+        "summary": "企业管理员反馈未授权成员能打开受限文件夹内的文档，存在越权访问风险。",
+        "problem_type": "permission",
+        "product_area": "member_permission",
+        "sentiment": "frustrated",
+        "llm_owner_suggestion": "technical_support",
+        "root_cause_hypothesis": "文件夹权限继承或共享设置未正确生效，导致受限文件夹对未授权成员可见并可访问。",
+        "impact_signals": {
+          "affected_scope": "team",
+          "workflow_blocked": false,
+          "data_loss_claimed": false,
+          "repeat_contacts": 0
+        },
+        "evidence_spans": [
+          {
+            "quote": "未授权成员可以打开受限文件夹里的文档。"
+          }
+        ]
+      }
+    },
+    "V6-T032": {
+      "input_sha256": "3beba15fdda7a40ba6160ec095368d80cee8fabc00ce7bc74dbde8f0ba84141f",
+      "attempts": 2,
+      "analysis": {
+        "summary": "用户反馈账户订阅页设置的开票抬头未自动带入，影响整个团队，已联系客服两次。",
+        "problem_type": "configuration",
+        "product_area": "account_subscription",
+        "sentiment": "frustrated",
+        "llm_owner_suggestion": "technical_support",
+        "root_cause_hypothesis": "开票抬头字段的自动带入逻辑未正确关联或缓存未刷新",
+        "impact_signals": {
+          "affected_scope": "team",
+          "workflow_blocked": false,
+          "data_loss_claimed": false,
+          "repeat_contacts": 2
+        },
+        "evidence_spans": [
+          {
+            "quote": "账户订阅页设置的开票抬头没有自动带入"
+          },
+          {
+            "quote": "该问题影响整个团队"
+          },
+          {
+            "quote": "已经联系客服两次"
+          }
+        ]
+      }
+    },
+    "V6-T036": {
+      "input_sha256": "ef098fe91b63d9ff3ed1a0efeebe7e87308003d842f1d476a827137187686b5e",
+      "attempts": 1,
+      "analysis": {
+        "summary": "文件夹设为指定成员可见后，其他成员仍能进入，影响整个团队，已联系客服两次。",
+        "problem_type": "permission",
+        "product_area": "member_permission",
+        "sentiment": "frustrated",
+        "llm_owner_suggestion": "technical_support",
+        "root_cause_hypothesis": "文件夹可见性权限规则未正确生效，可能因缓存或权限继承逻辑异常导致非授权成员仍可访问。",
+        "impact_signals": {
+          "affected_scope": "team",
+          "workflow_blocked": false,
+          "data_loss_claimed": false,
+          "repeat_contacts": 2
+        },
+        "evidence_spans": [
+          {
+            "quote": "文件夹设置为指定成员可见后其他人仍能进入"
+          },
+          {
+            "quote": "该问题影响整个团队"
+          },
+          {
+            "quote": "已经联系客服两次"
+          }
+        ]
+      }
+    },
+    "V6-T038": {
+      "input_sha256": "e677b006ef38ada9ffd9a2e4f5435c3063628ed24930732e8cc41eba7a174a85",
+      "attempts": 1,
+      "analysis": {
+        "summary": "受限管理员可编辑超级管理员资料，影响整个团队，用户已联系客服两次。",
+        "problem_type": "permission",
+        "product_area": "member_permission",
+        "sentiment": "frustrated",
+        "llm_owner_suggestion": "engineering_triage",
+        "root_cause_hypothesis": "角色权限校验逻辑存在缺陷，导致受限管理员获得了不应有的编辑权限。",
+        "impact_signals": {
+          "affected_scope": "organization",
+          "workflow_blocked": false,
+          "data_loss_claimed": false,
+          "repeat_contacts": 2
+        },
+        "evidence_spans": [
+          {
+            "quote": "受限管理员拥有了编辑超级管理员资料的权限"
+          },
+          {
+            "quote": "该问题影响整个团队"
+          },
+          {
+            "quote": "已经联系客服两次"
+          }
+        ]
+      }
+    },
+    "V6-T037": {
+      "input_sha256": "36908d98c5c43ae2656ab4eec62d0100b088560cd76f3f224d2fe1d8c95e235e",
+      "attempts": 1,
+      "analysis": {
+        "summary": "部门管理员可修改组织所有者账号信息，存在越权风险。",
+        "problem_type": "permission",
+        "product_area": "member_permission",
+        "sentiment": "frustrated",
+        "llm_owner_suggestion": "qa_triage",
+        "root_cause_hypothesis": "角色权限校验逻辑未正确限制部门管理员对组织所有者账号的修改操作。",
+        "impact_signals": {
+          "affected_scope": "organization",
+          "workflow_blocked": false,
+          "data_loss_claimed": false,
+          "repeat_contacts": 0
+        },
+        "evidence_spans": [
+          {
+            "quote": "部门管理员能够修改组织所有者的账号信息。"
+          }
+        ]
+      }
+    },
+    "V6-T039": {
+      "input_sha256": "22a18170ef019ef2fe1b229c4d821562291edff3fde2ce158955da042f12cdb0",
+      "attempts": 1,
+      "analysis": {
+        "summary": "企业管理员反馈外部协作者账号可以向组织发送成员邀请。",
+        "problem_type": "permission",
+        "product_area": "member_permission",
+        "sentiment": "calm",
+        "llm_owner_suggestion": "technical_support",
+        "root_cause_hypothesis": "外部协作者的角色权限配置中可能错误地包含了邀请成员的权限。",
+        "impact_signals": {
+          "affected_scope": "organization",
+          "workflow_blocked": false,
+          "data_loss_claimed": false,
+          "repeat_contacts": 0
+        },
+        "evidence_spans": [
+          {
+            "quote": "外部协作者账号可以向组织发送成员邀请。"
+          }
+        ]
+      }
+    },
+    "V6-T040": {
+      "input_sha256": "2b0cbfc0fb057e33153d8e3d46b633eb8747f7db54b58be79b48c8c8387bfb0c",
+      "attempts": 1,
+      "analysis": {
+        "summary": "访客角色出现邀请新成员入口，影响整个团队，用户已联系客服两次。",
+        "problem_type": "permission",
+        "product_area": "member_permission",
+        "sentiment": "frustrated",
+        "llm_owner_suggestion": "qa_triage",
+        "root_cause_hypothesis": "访客角色的邀请权限配置未正确限制，导致UI展示了不应出现的邀请入口。",
+        "impact_signals": {
+          "affected_scope": "team",
+          "workflow_blocked": false,
+          "data_loss_claimed": false,
+          "repeat_contacts": 2
+        },
+        "evidence_spans": [
+          {
+            "quote": "访客角色出现了邀请新成员进入团队的入口"
+          },
+          {
+            "quote": "该问题影响整个团队"
+          },
+          {
+            "quote": "已经联系客服两次"
+          }
+        ]
+      }
+    },
+    "V6-T041": {
+      "input_sha256": "a36c00ebc87d1ea456b3079f5bae78caad22b7d4938273299bb13f974246ebe6",
+      "attempts": 1,
+      "analysis": {
+        "summary": "用户反馈包含两千个任务的甘特图打开需要四十秒，存在性能问题。",
+        "problem_type": "performance",
+        "product_area": "project",
+        "sentiment": "frustrated",
+        "llm_owner_suggestion": "engineering_triage",
+        "root_cause_hypothesis": "甘特图渲染或数据加载逻辑在处理大量任务时存在性能瓶颈，可能涉及前端渲染效率或后端数据查询优化不足。",
+        "impact_signals": {
+          "affected_scope": "individual",
+          "workflow_blocked": false,
+          "data_loss_claimed": false,
+          "repeat_contacts": 0
+        },
+        "evidence_spans": [
+          {
+            "quote": "包含两千个任务的甘特图打开需要四十秒。"
+          }
+        ]
+      }
+    },
+    "V6-T042": {
+      "input_sha256": "b486e8e1785819336aeb1619f7c73a131f52d23659c7d87a2bc0487f742d5b23",
+      "attempts": 1,
+      "analysis": {
+        "summary": "大型项目甘特视图长时间加载中，影响整个团队，用户已联系客服两次。",
+        "problem_type": "performance",
+        "product_area": "project",
+        "sentiment": "frustrated",
+        "llm_owner_suggestion": "engineering_triage",
+        "root_cause_hypothesis": "大型项目甘特视图数据量过大或查询未优化导致加载超时",
+        "impact_signals": {
+          "affected_scope": "team",
+          "workflow_blocked": false,
+          "data_loss_claimed": false,
+          "repeat_contacts": 2
+        },
+        "evidence_spans": [
+          {
+            "quote": "大型项目的甘特视图长时间停留在加载状态"
+          },
+          {
+            "quote": "该问题影响整个团队"
+          },
+          {
+            "quote": "已经联系客服两次"
+          }
+        ]
+      }
+    },
+    "V6-T044": {
+      "input_sha256": "690795af5c23d0bc994c8ae762e6fda3aad81cf85e701536563f2b54fb680c21",
+      "attempts": 1,
+      "analysis": {
+        "summary": "用户反馈打开另一个项目视图时加载缓慢且偶尔失败，问题影响整个团队，已联系客服两次。",
+        "problem_type": "performance",
+        "product_area": "project",
+        "sentiment": "frustrated",
+        "llm_owner_suggestion": "engineering_triage",
+        "root_cause_hypothesis": "项目视图加载可能存在后端查询性能瓶颈或资源竞争，导致超时与间歇性失败。",
+        "impact_signals": {
+          "affected_scope": "team",
+          "workflow_blocked": false,
+          "data_loss_claimed": false,
+          "repeat_contacts": 2
+        },
+        "evidence_spans": [
+          {
+            "quote": "打开另一个项目视图需要等待很久并偶尔失败"
+          },
+          {
+            "quote": "该问题影响整个团队"
+          },
+          {
+            "quote": "已经联系客服两次"
+          }
+        ]
+      }
+    },
+    "V6-T045": {
+      "input_sha256": "42247a3f87f8ffa6f1e0f836ae1880519df225fc952e264701721e8c93f2d527",
+      "attempts": 1,
+      "analysis": {
+        "summary": "用户反馈导出一万条任务记录耗时超过五分钟仍未完成。",
+        "problem_type": "performance",
+        "product_area": "import_export",
+        "sentiment": "frustrated",
+        "llm_owner_suggestion": "engineering_triage",
+        "root_cause_hypothesis": "导出大量任务时后端处理或查询性能不足，导致超时或长时间无响应。",
+        "impact_signals": {
+          "affected_scope": "individual",
+          "workflow_blocked": false,
+          "data_loss_claimed": false,
+          "repeat_contacts": 0
+        },
+        "evidence_spans": [
+          {
+            "quote": "导出一万条任务记录超过五分钟仍未完成。"
+          }
+        ]
+      }
+    },
+    "V6-T046": {
+      "input_sha256": "d63e8ee938e8022c4b91dac63fdf4624625eef03ac325e4cd771bae4ec945229",
+      "attempts": 1,
+      "analysis": {
+        "summary": "用户反馈大量任务导出 CSV 长时间无响应，影响整个团队，已联系客服两次。",
+        "problem_type": "performance",
+        "product_area": "import_export",
+        "sentiment": "frustrated",
+        "llm_owner_suggestion": "technical_support",
+        "root_cause_hypothesis": "大量任务导出时可能因数据量过大或后台处理队列阻塞导致超时。",
+        "impact_signals": {
+          "affected_scope": "team",
+          "workflow_blocked": false,
+          "data_loss_claimed": false,
+          "repeat_contacts": 2
+        },
+        "evidence_spans": [
+          {
+            "quote": "大量任务生成 CSV 时长时间没有得到文件"
+          },
+          {
+            "quote": "该问题影响整个团队"
+          },
+          {
+            "quote": "已经联系客服两次"
+          }
+        ]
+      }
+    },
+    "V6-T048": {
+      "input_sha256": "5146bf6d92fd1ecb3f85b32184ee0beaa4fa39938fa619c3d7aaff3a14ff5b47",
+      "attempts": 1,
+      "analysis": {
+        "summary": "用户反馈大批量CSV解析长时间无进度，影响整个团队，已联系客服两次。",
+        "problem_type": "performance",
+        "product_area": "import_export",
+        "sentiment": "frustrated",
+        "llm_owner_suggestion": "technical_support",
+        "root_cause_hypothesis": "大批量CSV解析可能因数据量过大或解析逻辑效率不足导致处理缓慢或阻塞。",
+        "impact_signals": {
+          "affected_scope": "team",
+          "workflow_blocked": false,
+          "data_loss_claimed": false,
+          "repeat_contacts": 2
+        },
+        "evidence_spans": [
+          {
+            "quote": "大批量 CSV 解析阶段等待很久没有进度"
+          },
+          {
+            "quote": "该问题影响整个团队"
+          },
+          {
+            "quote": "已经联系客服两次"
+          }
+        ]
+      }
+    },
+    "V6-T043": {
+      "input_sha256": "d4ef1870a633c2bd2af1def0d9da3436a36237a224865c3e9d79737518cb95c9",
+      "attempts": 2,
+      "analysis": {
+        "summary": "用户反馈在多个项目看板之间切换时经常出现请求超时。",
+        "problem_type": "performance",
+        "product_area": "project",
+        "sentiment": "frustrated",
+        "llm_owner_suggestion": "engineering_triage",
+        "root_cause_hypothesis": "看板数据加载或前端路由切换时接口响应时间过长，可能因数据量大或服务端资源不足导致超时。",
+        "impact_signals": {
+          "affected_scope": "individual",
+          "workflow_blocked": false,
+          "data_loss_claimed": false,
+          "repeat_contacts": 0
+        },
+        "evidence_spans": [
+          {
+            "quote": "在多个项目看板之间切换时经常请求超时。"
+          }
+        ]
+      }
+    },
+    "V6-T049": {
+      "input_sha256": "97ea3d3a62b1a242731b8368e5c71e5b36ac270415f5583efe465cbe3c156f77",
+      "attempts": 1,
+      "analysis": {
+        "summary": "用户询问如何查看上一次 CSV 导入失败的具体行。",
+        "problem_type": "how_to",
+        "product_area": "import_export",
+        "sentiment": "calm",
+        "llm_owner_suggestion": "customer_success",
+        "root_cause_hypothesis": null,
+        "impact_signals": {
+          "affected_scope": "individual",
+          "workflow_blocked": false,
+          "data_loss_claimed": false,
+          "repeat_contacts": 0
+        },
+        "evidence_spans": [
+          {
+            "quote": "如何查看上一次 CSV 导入失败的具体行。"
+          }
+        ]
+      }
+    },
+    "V6-T047": {
+      "input_sha256": "8a3fc3ff52510c56dacb7b193f16b8ee6fe80cef0816f38d49c593129dd96d4e",
+      "attempts": 1,
+      "analysis": {
+        "summary": "用户反馈导入包含五千行的表格时页面持续卡顿。",
+        "problem_type": "performance",
+        "product_area": "import_export",
+        "sentiment": "frustrated",
+        "llm_owner_suggestion": "engineering_triage",
+        "root_cause_hypothesis": "导入大文件时前端渲染或后端处理存在性能瓶颈，导致页面卡顿。",
+        "impact_signals": {
+          "affected_scope": "individual",
+          "workflow_blocked": false,
+          "data_loss_claimed": false,
+          "repeat_contacts": 0
+        },
+        "evidence_spans": [
+          {
+            "quote": "导入包含五千行的表格时页面持续卡顿。"
+          }
+        ]
+      }
+    },
+    "V6-T050": {
+      "input_sha256": "4108ce41dea1823e3c502134f105bf7a918de4f5eed6686671827dc581849748",
+      "attempts": 1,
+      "analysis": {
+        "summary": "用户希望查看批量导入中未成功记录的错误明细。",
+        "problem_type": "how_to",
+        "product_area": "import_export",
+        "sentiment": "calm",
+        "llm_owner_suggestion": "customer_success",
+        "root_cause_hypothesis": null,
+        "impact_signals": {
+          "affected_scope": "individual",
+          "workflow_blocked": false,
+          "data_loss_claimed": false,
+          "repeat_contacts": 0
+        },
+        "evidence_spans": [
+          {
+            "quote": "想找到批量导入中未成功记录的错误明细。"
+          }
+        ]
+      }
+    },
+    "V6-T051": {
+      "input_sha256": "c1433cceb01111d490ef4dd523a75f3caf39c55c2e951a29e077106f9d7183ba",
+      "attempts": 1,
+      "analysis": {
+        "summary": "用户询问如何将项目模板从一个空间迁移到另一个空间。",
+        "problem_type": "how_to",
+        "product_area": "project",
+        "sentiment": "calm",
+        "llm_owner_suggestion": "customer_success",
+        "root_cause_hypothesis": null,
+        "impact_signals": {
+          "affected_scope": "individual",
+          "workflow_blocked": false,
+          "data_loss_claimed": false,
+          "repeat_contacts": 0
+        },
+        "evidence_spans": [
+          {
+            "quote": "怎样把一个空间的项目模板迁移到另一个空间。"
+          }
+        ]
+      }
+    },
+    "V6-T053": {
+      "input_sha256": "e4bcdad1c3ede92e246695a92ac8a63fd4d9ca1f0270d12640be8f65fd0e4445",
+      "attempts": 1,
+      "analysis": {
+        "summary": "企业管理员希望通知规则支持按评论关键词暂停提醒。",
+        "problem_type": "feature_request",
+        "product_area": "notification",
+        "sentiment": "calm",
+        "llm_owner_suggestion": "product_ops",
+        "root_cause_hypothesis": null,
+        "impact_signals": {
+          "affected_scope": "individual",
+          "workflow_blocked": false,
+          "data_loss_claimed": false,
+          "repeat_contacts": 0
+        },
+        "evidence_spans": [
+          {
+            "quote": "希望通知规则支持按评论关键词暂停提醒。"
+          }
+        ]
+      }
+    },
+    "V6-T054": {
+      "input_sha256": "316088b1b22dc2b0e8d9ec49fee7c76481abd8a0cab5e05fec0d7dc05046ccee",
+      "attempts": 1,
+      "analysis": {
+        "summary": "用户建议新增按消息关键词静默通知的功能。",
+        "problem_type": "feature_request",
+        "product_area": "notification",
+        "sentiment": "calm",
+        "llm_owner_suggestion": "product_ops",
+        "root_cause_hypothesis": null,
+        "impact_signals": {
+          "affected_scope": "individual",
+          "workflow_blocked": false,
+          "data_loss_claimed": false,
+          "repeat_contacts": 0
+        },
+        "evidence_spans": [
+          {
+            "quote": "建议增加根据消息关键词静默通知的功能。"
+          }
+        ]
+      }
+    },
+    "V6-T052": {
+      "input_sha256": "6ed493e4afd2751b077349d3a99f4cbc7eab4ad57f145f07879d6b4cb99b338c",
+      "attempts": 1,
+      "analysis": {
+        "summary": "用户询问跨工作区导出并导入模板的操作步骤。",
+        "problem_type": "how_to",
+        "product_area": "import_export",
+        "sentiment": "calm",
+        "llm_owner_suggestion": "customer_success",
+        "root_cause_hypothesis": null,
+        "impact_signals": {
+          "affected_scope": "individual",
+          "workflow_blocked": false,
+          "data_loss_claimed": false,
+          "repeat_contacts": 0
+        },
+        "evidence_spans": [
+          {
+            "quote": "需要了解跨工作区导出并导入模板的操作步骤。"
+          }
+        ]
+      }
+    },
+    "V6-T056": {
+      "input_sha256": "5304451c7a65a4956e8d5d13d93d7542c9881308a576f5a977a5fd0354a3f469",
+      "attempts": 1,
+      "analysis": {
+        "summary": "用户建议允许调整摘要邮件中的项目顺序。",
+        "problem_type": "feature_request",
+        "product_area": "notification",
+        "sentiment": "calm",
+        "llm_owner_suggestion": "product_ops",
+        "root_cause_hypothesis": null,
+        "impact_signals": {
+          "affected_scope": "individual",
+          "workflow_blocked": false,
+          "data_loss_claimed": false,
+          "repeat_contacts": 0
+        },
+        "evidence_spans": [
+          {
+            "quote": "建议允许用户调整摘要邮件里的项目顺序。"
+          }
+        ]
+      }
+    },
+    "V6-T055": {
+      "input_sha256": "447d40958509de801bddef17cec48a77ffc874e9a5a48f8d92b7cb181e239b8c",
+      "attempts": 2,
+      "analysis": {
+        "summary": "企业管理员希望每日通知摘要支持自定义项目排序。",
+        "problem_type": "feature_request",
+        "product_area": "notification",
+        "sentiment": "calm",
+        "llm_owner_suggestion": "product_ops",
+        "root_cause_hypothesis": null,
+        "impact_signals": {
+          "affected_scope": "individual",
+          "workflow_blocked": false,
+          "data_loss_claimed": false,
+          "repeat_contacts": 0
+        },
+        "evidence_spans": [
+          {
+            "quote": "希望每日通知摘要可以自定义项目排序。"
+          }
+        ]
+      }
+    },
+    "V6-T057": {
+      "input_sha256": "7eb22abbccdf38ee21402cae88bba40b974c586552f49658c6a3106ecd5a64e7",
+      "attempts": 2,
+      "analysis": {
+        "summary": "企业管理员希望开放接口提供独立的测试沙箱环境。",
+        "problem_type": "feature_request",
+        "product_area": "open_api",
+        "sentiment": "calm",
+        "llm_owner_suggestion": "product_ops",
+        "root_cause_hypothesis": null,
+        "impact_signals": {
+          "affected_scope": "organization",
+          "workflow_blocked": false,
+          "data_loss_claimed": false,
+          "repeat_contacts": 0
+        },
+        "evidence_spans": [
+          {
+            "quote": "希望开放接口提供独立的测试沙箱环境。"
+          }
+        ]
+      }
+    },
+    "V6-T058": {
+      "input_sha256": "cf4acaed0e02c6f86c046076e77b852a19fa689f9a8e37588f1d116f314dc2a9",
+      "attempts": 2,
+      "analysis": {
+        "summary": "用户建议为 API 集成提供不影响正式数据的沙箱环境。",
+        "problem_type": "feature_request",
+        "product_area": "open_api",
+        "sentiment": "calm",
+        "llm_owner_suggestion": "product_ops",
+        "root_cause_hypothesis": null,
+        "impact_signals": {
+          "affected_scope": "individual",
+          "workflow_blocked": false,
+          "data_loss_claimed": false,
+          "repeat_contacts": 0
+        },
+        "evidence_spans": [
+          {
+            "quote": "建议为 API 集成增加不影响正式数据的沙箱。"
+          }
+        ]
+      }
+    },
+    "V6-T059": {
+      "input_sha256": "11b94ca9e01244bd8b1837c5743bd662930f38491c27b107a5c01b91613e3a39",
+      "attempts": 1,
+      "analysis": {
+        "summary": "企业管理员希望后台支持手动回放失败的 Webhook。",
+        "problem_type": "feature_request",
+        "product_area": "open_api",
+        "sentiment": "calm",
+        "llm_owner_suggestion": "product_ops",
+        "root_cause_hypothesis": null,
+        "impact_signals": {
+          "affected_scope": "individual",
+          "workflow_blocked": false,
+          "data_loss_claimed": false,
+          "repeat_contacts": 0
+        },
+        "evidence_spans": [
+          {
+            "quote": "希望后台可以手动回放失败的 Webhook。"
+          }
+        ]
+      }
+    },
+    "V6-T060": {
+      "input_sha256": "db33a969551d7b73c42ed8d8ec95275f1e1585be86591f754598d444efcef045",
+      "attempts": 2,
+      "analysis": {
+        "summary": "用户建议新增查看并重新发送回调事件的控制台功能。",
+        "problem_type": "feature_request",
+        "product_area": "open_api",
+        "sentiment": "calm",
+        "llm_owner_suggestion": "product_ops",
+        "root_cause_hypothesis": null,
+        "impact_signals": {
+          "affected_scope": "individual",
+          "workflow_blocked": false,
+          "data_loss_claimed": false,
+          "repeat_contacts": 0
+        },
+        "evidence_spans": [
+          {
+            "quote": "建议增加查看并重新发送回调事件的控制台。"
+          }
+        ]
+      }
+    }
+  }
+}

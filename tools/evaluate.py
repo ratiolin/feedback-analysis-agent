@@ -12,13 +12,39 @@ from feedback_app.analysis import finalize_analysis
 from feedback_app.analyzers import DemoAnalyzer, DifyAnalyzer
 from feedback_app.clustering import normalize_ticket_text, select_threshold, threshold_clusters
 from feedback_app.config import get_settings
-from feedback_app.embeddings import SentenceTransformerEmbedder, TfidfEmbedder
-from feedback_app.schemas import ProblemType, ProductArea, TicketInput
+from feedback_app.embeddings import (
+    SentenceTransformerEmbedder,
+    TfidfEmbedder,
+    blended_embeddings,
+)
+from feedback_app.schemas import LLMAnalysis, ProblemType, ProductArea, TicketInput
 
 
 def load_rows(path: Path) -> list[dict]:
     with path.open(encoding="utf-8-sig", newline="") as handle:
         return list(csv.DictReader(handle))
+
+
+def analysis_input_hash(row: dict) -> str:
+    canonical = json.dumps(
+        {key: row[key] for key in ("ticket_id", "user_type", "channel", "message", "created_at")},
+        ensure_ascii=False,
+        sort_keys=True,
+        separators=(",", ":"),
+    )
+    return hashlib.sha256(canonical.encode()).hexdigest()
+
+
+def cached_summaries(rows: list[dict], cache: dict) -> list[str]:
+    summaries: list[str] = []
+    for row in rows:
+        item = cache.get("items", {}).get(row["ticket_id"])
+        if not item or "analysis" not in item:
+            raise ValueError(f"analysis cache missing success for {row['ticket_id']}")
+        if item.get("input_sha256") != analysis_input_hash(row):
+            raise ValueError(f"analysis cache input mismatch for {row['ticket_id']}")
+        summaries.append(LLMAnalysis.model_validate(item["analysis"]).summary)
+    return summaries
 
 
 def load_audit_status(path: Path, expected_rows: list[dict]) -> dict:
@@ -70,12 +96,25 @@ def load_and_verify_manifest(path: Path) -> dict:
             raise ValueError(
                 f"frozen file changed after holdout freeze: {frozen_path}; create a new holdout"
             )
+    for development in manifest.get("development_files", []):
+        development_path = Path(development["path"])
+        actual_hash = hashlib.sha256(development_path.read_bytes()).hexdigest()
+        if actual_hash != development["sha256"]:
+            raise ValueError(f"development file changed after freeze: {development_path}")
     development_path = manifest.get("development_dataset")
     development_hash = manifest.get("development_sha256")
     if development_path and development_hash:
         actual_hash = hashlib.sha256(Path(development_path).read_bytes()).hexdigest()
         if actual_hash != development_hash:
             raise ValueError("development dataset changed after holdout freeze")
+    for path_key, hash_key in (
+        ("holdout_path", "holdout_sha256"),
+        ("audit_path", "audit_sha256"),
+    ):
+        if manifest.get(path_key) and manifest.get(hash_key):
+            actual_hash = hashlib.sha256(Path(manifest[path_key]).read_bytes()).hexdigest()
+            if actual_hash != manifest[hash_key]:
+                raise ValueError(f"{path_key.removesuffix('_path')} changed after freeze")
     return manifest
 
 
@@ -104,7 +143,12 @@ def confusion_payload(gold: list[str], predicted: list[str], labels: list[str]) 
     }
 
 
-def structure_evaluation(rows: list[dict], analyzer_name: str) -> dict:
+def structure_evaluation(
+    rows: list[dict],
+    analyzer_name: str,
+    routing_policy_version: str,
+    analysis_cache: dict | None = None,
+) -> dict:
     settings = get_settings()
     analyzer = DifyAnalyzer(settings) if analyzer_name == "dify" else DemoAnalyzer()
     predicted_types: list[str] = []
@@ -116,9 +160,25 @@ def structure_evaluation(rows: list[dict], analyzer_name: str) -> dict:
     errors: list[dict] = []
     for row in rows:
         try:
-            raw = analyzer.analyze(as_ticket(row))
-            first_pass_valid += 1
-            final = finalize_analysis(row["message"], raw, settings.workflow_version, analyzer_name)
+            if analysis_cache is None:
+                raw = analyzer.analyze(as_ticket(row))
+                attempts = 1
+            else:
+                cached = analysis_cache.get("items", {}).get(row["ticket_id"])
+                if not cached or "analysis" not in cached:
+                    raise ValueError("analysis_cache_missing_success")
+                if cached.get("input_sha256") != analysis_input_hash(row):
+                    raise ValueError("analysis_cache_input_mismatch")
+                raw = LLMAnalysis.model_validate(cached["analysis"])
+                attempts = int(cached.get("attempts", 1))
+            first_pass_valid += int(attempts == 1)
+            final = finalize_analysis(
+                row["message"],
+                raw,
+                settings.workflow_version,
+                analyzer_name,
+                routing_policy_version,
+            )
             predicted_types.append(final.problem_type.value)
             predicted_areas.append(final.product_area.value)
             predicted_owners.append(final.suggested_owner.value)
@@ -143,6 +203,7 @@ def structure_evaluation(rows: list[dict], analyzer_name: str) -> dict:
     )
     return {
         "analyzer": analyzer_name,
+        "routing_policy_version": routing_policy_version,
         "sample_count": len(rows),
         "first_pass_schema_rate": first_pass_valid / len(rows),
         "evidence_auto_location_rate": evidence_located / len(rows),
@@ -168,6 +229,10 @@ def clustering_evaluation(
     holdout: list[dict],
     embedding_backend: str,
     holdout_groups: list[str] | None = None,
+    linkage: str = "single",
+    development_summaries: list[str] | None = None,
+    holdout_summaries: list[str] | None = None,
+    raw_text_weight: float = 1.0,
 ) -> dict:
     all_rows = development + holdout
     texts = [normalize_ticket_text(row["message"]) for row in all_rows]
@@ -175,7 +240,10 @@ def clustering_evaluation(
         embedder = SentenceTransformerEmbedder(get_settings().embedding_model)
     else:
         embedder = TfidfEmbedder()
-    vectors = embedder.encode(texts)
+    summaries = (development_summaries or texts[: len(development)]) + (
+        holdout_summaries or texts[len(development) :]
+    )
+    vectors = blended_embeddings(embedder, texts, summaries, raw_text_weight)
     development_vectors = vectors[: len(development)]
     holdout_vectors = vectors[len(development) :]
     development_gold = [row["gold_issue_family"] for row in development]
@@ -186,11 +254,18 @@ def clustering_evaluation(
         development_vectors,
         development_gold,
         groups=development_groups,
+        linkage=linkage,
+        thresholds=(
+            [round(value / 100, 2) for value in range(30, 91)]
+            if linkage == "complete"
+            else None
+        ),
     )
     holdout_labels = threshold_clusters(
         holdout_vectors,
         tuned.threshold,
         groups=holdout_groups,
+        linkage=linkage,
     )
 
     false_merges: list[dict] = []
@@ -221,11 +296,15 @@ def clustering_evaluation(
         thresholds=[tuned.threshold],
         minimum_pairwise_precision=0,
         groups=holdout_groups,
+        linkage=linkage,
     )
     return {
         "embedding_backend": embedding_backend,
         "embedding_input": "normalized_ticket_text_proxy_for_production_summary",
         "blocking_key": "product_area",
+        "linkage": linkage,
+        "raw_text_weight": raw_text_weight,
+        "summary_weight": 1 - raw_text_weight,
         "development_count": len(development),
         "holdout_count": len(holdout),
         "frozen_threshold": tuned.threshold,
@@ -378,6 +457,14 @@ def main() -> None:
     )
     parser.add_argument("--analyzer", choices=["demo", "dify"], default="demo")
     parser.add_argument("--embedding", choices=["tfidf", "bge"], default="tfidf")
+    parser.add_argument("--linkage", choices=["single", "complete"], default="single")
+    parser.add_argument(
+        "--routing-policy-version",
+        default="feedback-routing-v1",
+    )
+    parser.add_argument("--analysis-cache", type=Path)
+    parser.add_argument("--development-analysis-cache", type=Path)
+    parser.add_argument("--cluster-raw-text-weight", type=float, default=1.0)
     args = parser.parse_args()
     development = load_rows(args.development or args.data / "tickets_development_with_gold.csv")
     holdout_path = args.holdout or args.data / "tickets_holdout_locked.csv"
@@ -385,7 +472,22 @@ def main() -> None:
     holdout = load_rows(holdout_path)
     manifest = load_and_verify_manifest(manifest_path)
     is_candidate = str(manifest.get("state", "")).startswith("candidate_")
-    structure = structure_evaluation(holdout, args.analyzer)
+    analysis_cache = (
+        json.loads(args.analysis_cache.read_text(encoding="utf-8"))
+        if args.analysis_cache
+        else None
+    )
+    development_analysis_cache = (
+        json.loads(args.development_analysis_cache.read_text(encoding="utf-8"))
+        if args.development_analysis_cache
+        else None
+    )
+    structure = structure_evaluation(
+        holdout,
+        args.analyzer,
+        args.routing_policy_version,
+        analysis_cache=analysis_cache,
+    )
     payload = {
         "generated_at": datetime.now().astimezone().isoformat(),
         "boundary": "Synthetic mechanism benchmark; not a real-business distribution.",
@@ -399,6 +501,16 @@ def main() -> None:
             holdout,
             args.embedding,
             holdout_groups=structure["predicted_product_areas"],
+            linkage=args.linkage,
+            development_summaries=(
+                cached_summaries(development, development_analysis_cache)
+                if development_analysis_cache
+                else None
+            ),
+            holdout_summaries=(
+                cached_summaries(holdout, analysis_cache) if analysis_cache else None
+            ),
+            raw_text_weight=args.cluster_raw_text_weight,
         ),
         "holdout_support": {
             "problem_type": Counter(row["gold_problem_type"] for row in holdout),

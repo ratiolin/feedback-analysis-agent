@@ -1,0 +1,498 @@
+{
+  "generated_at": "2026-07-02T09:06:23.776920+00:00",
+  "state": "development_only_not_promotion_eligible",
+  "boundary": "v5 is a seen development set. Metrics are resubstitution evidence for candidate selection and must not be presented as holdout performance.",
+  "data": "data/suite-evaluation/v5-holdout-locked.csv",
+  "analysis_cache": "data/development/v5-analysis-cache.json",
+  "structure": {
+    "analyzer": "dify",
+    "routing_policy_version": "feedback-routing-v3-candidate",
+    "sample_count": 60,
+    "first_pass_schema_rate": 0.5333333333333333,
+    "evidence_auto_location_rate": 1.0,
+    "problem_type": {
+      "labels": [
+        "bug",
+        "how_to",
+        "configuration",
+        "performance",
+        "integration",
+        "permission",
+        "data_consistency",
+        "feature_request"
+      ],
+      "matrix": [
+        [
+          7,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          4,
+          0,
+          0,
+          2,
+          0,
+          1,
+          1
+        ],
+        [
+          0,
+          0,
+          8,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          8,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          1,
+          0,
+          0,
+          0,
+          6,
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          6,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          8,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          5
+        ]
+      ],
+      "report": {
+        "bug": {
+          "precision": 0.875,
+          "recall": 0.875,
+          "f1-score": 0.875,
+          "support": 8.0
+        },
+        "how_to": {
+          "precision": 1.0,
+          "recall": 0.5,
+          "f1-score": 0.6666666666666666,
+          "support": 8.0
+        },
+        "configuration": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 8.0
+        },
+        "performance": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 8.0
+        },
+        "integration": {
+          "precision": 0.6666666666666666,
+          "recall": 0.75,
+          "f1-score": 0.7058823529411765,
+          "support": 8.0
+        },
+        "permission": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 6.0
+        },
+        "data_consistency": {
+          "precision": 0.7272727272727273,
+          "recall": 1.0,
+          "f1-score": 0.8421052631578947,
+          "support": 8.0
+        },
+        "feature_request": {
+          "precision": 0.8333333333333334,
+          "recall": 0.8333333333333334,
+          "f1-score": 0.8333333333333334,
+          "support": 6.0
+        },
+        "accuracy": 0.8666666666666667,
+        "macro avg": {
+          "precision": 0.8877840909090908,
+          "recall": 0.8697916666666667,
+          "f1-score": 0.8653734520123839,
+          "support": 60.0
+        },
+        "weighted avg": {
+          "precision": 0.8858585858585858,
+          "recall": 0.8666666666666667,
+          "f1-score": 0.861953904368765,
+          "support": 60.0
+        }
+      }
+    },
+    "product_area": {
+      "labels": [
+        "project",
+        "task",
+        "member_permission",
+        "notification",
+        "file",
+        "import_export",
+        "open_api",
+        "account_subscription"
+      ],
+      "matrix": [
+        [
+          10,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          6,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          8,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          8,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          8,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          6,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          6,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          8
+        ]
+      ],
+      "report": {
+        "project": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 10.0
+        },
+        "task": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 6.0
+        },
+        "member_permission": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 8.0
+        },
+        "notification": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 8.0
+        },
+        "file": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 8.0
+        },
+        "import_export": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 6.0
+        },
+        "open_api": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 6.0
+        },
+        "account_subscription": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 8.0
+        },
+        "accuracy": 1.0,
+        "macro avg": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 60.0
+        },
+        "weighted avg": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 60.0
+        }
+      }
+    },
+    "predicted_product_areas": [
+      "member_permission",
+      "member_permission",
+      "notification",
+      "notification",
+      "open_api",
+      "open_api",
+      "file",
+      "file",
+      "task",
+      "task",
+      "project",
+      "project",
+      "file",
+      "file",
+      "notification",
+      "notification",
+      "import_export",
+      "import_export",
+      "open_api",
+      "open_api",
+      "member_permission",
+      "member_permission",
+      "account_subscription",
+      "account_subscription",
+      "task",
+      "task",
+      "notification",
+      "notification",
+      "project",
+      "project",
+      "account_subscription",
+      "account_subscription",
+      "import_export",
+      "import_export",
+      "member_permission",
+      "member_permission",
+      "file",
+      "file",
+      "project",
+      "project",
+      "file",
+      "file",
+      "member_permission",
+      "member_permission",
+      "account_subscription",
+      "account_subscription",
+      "import_export",
+      "import_export",
+      "project",
+      "project",
+      "task",
+      "task",
+      "account_subscription",
+      "account_subscription",
+      "project",
+      "project",
+      "open_api",
+      "open_api",
+      "notification",
+      "notification"
+    ],
+    "owner_policy_consistency": 0.9,
+    "escalation_recall": 1.0,
+    "errors": []
+  },
+  "clustering": {
+    "embedding_backend": "bge",
+    "embedding_input": "normalized_ticket_text_proxy_for_production_summary",
+    "blocking_key": "product_area",
+    "linkage": "complete",
+    "raw_text_weight": 0.8,
+    "summary_weight": 0.19999999999999996,
+    "development_count": 60,
+    "holdout_count": 60,
+    "frozen_threshold": 0.64,
+    "development_metrics": {
+      "pairwise": {
+        "precision": 0.8260869565217391,
+        "recall": 0.6333333333333333,
+        "f1": 0.7169811320754716
+      },
+      "b_cubed": {
+        "precision": 0.9555555555555556,
+        "recall": 0.8166666666666667,
+        "f1": 0.8806687565308255
+      },
+      "purity": 0.9666666666666667
+    },
+    "holdout_metrics": {
+      "pairwise": {
+        "precision": 0.8260869565217391,
+        "recall": 0.6333333333333333,
+        "f1": 0.7169811320754716
+      },
+      "b_cubed": {
+        "precision": 0.9555555555555556,
+        "recall": 0.8166666666666667,
+        "f1": 0.8806687565308255
+      },
+      "purity": 0.9666666666666667
+    },
+    "false_merge_examples": [
+      {
+        "left": "V5-T013",
+        "right": "V5-T042",
+        "left_family": "V5-ISSUE-007",
+        "right_family": "V5-ISSUE-021"
+      },
+      {
+        "left": "V5-T014",
+        "right": "V5-T042",
+        "left_family": "V5-ISSUE-007",
+        "right_family": "V5-ISSUE-021"
+      },
+      {
+        "left": "V5-T027",
+        "right": "V5-T060",
+        "left_family": "V5-ISSUE-014",
+        "right_family": "V5-ISSUE-030"
+      },
+      {
+        "left": "V5-T028",
+        "right": "V5-T060",
+        "left_family": "V5-ISSUE-014",
+        "right_family": "V5-ISSUE-030"
+      }
+    ],
+    "false_split_examples": [
+      {
+        "family": "V5-ISSUE-003",
+        "predicted_cluster_count": 2
+      },
+      {
+        "family": "V5-ISSUE-006",
+        "predicted_cluster_count": 2
+      },
+      {
+        "family": "V5-ISSUE-008",
+        "predicted_cluster_count": 2
+      },
+      {
+        "family": "V5-ISSUE-010",
+        "predicted_cluster_count": 2
+      },
+      {
+        "family": "V5-ISSUE-011",
+        "predicted_cluster_count": 2
+      },
+      {
+        "family": "V5-ISSUE-012",
+        "predicted_cluster_count": 2
+      },
+      {
+        "family": "V5-ISSUE-018",
+        "predicted_cluster_count": 2
+      },
+      {
+        "family": "V5-ISSUE-021",
+        "predicted_cluster_count": 2
+      },
+      {
+        "family": "V5-ISSUE-023",
+        "predicted_cluster_count": 2
+      },
+      {
+        "family": "V5-ISSUE-029",
+        "predicted_cluster_count": 2
+      }
+    ]
+  }
+}
