@@ -12,6 +12,11 @@ const links = [
   ["/about", "边界"],
 ];
 
+const portfolioLinks = [
+  ["/index", "作品首页"],
+  ["/index/catalog-ops", "商品自动化"],
+];
+
 export function Shell({ children }: { children: ReactNode }) {
   return (
     <div className="app-shell">
@@ -20,11 +25,13 @@ export function Shell({ children }: { children: ReactNode }) {
           <span className="brand-mark">F/</span>
           <div><strong>反馈结构化</strong><small>OPERATIONS AGENT</small></div>
         </div>
-        <nav>{links.map(([href, label]) => <Link key={href} href={href}>{label}</Link>)}</nav>
+        <nav>
+          {links.map(([href, label]) => <Link key={href} href={href}>{label}</Link>)}
+          {portfolioLinks.map(([href, label]) => <a key={href} href={href}>{label}</a>)}
+        </nav>
         <div className="sidebar-note"><span className="status-dot" /> 合成数据演示环境</div>
       </aside>
       <main className="main">{children}</main>
     </div>
   );
 }
-

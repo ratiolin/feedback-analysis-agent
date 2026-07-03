@@ -5,6 +5,7 @@
 - 交互演示：<https://metratio.com/feedback>
 - 作品说明：<https://metratio.com/index/feedback>
 - 评测页面：<https://metratio.com/feedback/evaluation>
+- 商品上架项目：<https://metratio.com/index/catalog-ops>
 
 ## 定位
 
