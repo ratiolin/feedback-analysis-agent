@@ -92,7 +92,7 @@ uv run python tools/evaluate.py --analyzer demo --embedding tfidf
 |---|---|---|
 | [ruff](https://docs.astral.sh/ruff/) | Lint + 格式化 | 零警告 |
 | [pytest](https://docs.pytest.org/) | 单元 & 集成测试 | 134 通过，总覆盖率 99% |
-| [SonarQube Cloud](https://sonarcloud.io/dashboard?id=metratio_feedback-analysis-agent) | 持续代码质量 | 质量门 OK，新代码覆盖率 100%，未解决问题 0 |
+| [SonarQube Cloud](https://sonarcloud.io/dashboard?id=metratio_feedback-analysis-agent) | 持续代码质量 | 质量门 OK，新代码覆盖率 98.9%，未解决问题 0 |
 | GitHub Actions CI | ruff + pytest + SonarQube | 已配置 |
 
 CI 约束：`portfolio/index.html` 是静态作品页契约测试输入，必须随仓库提交；不要让测试依赖只存在于本地 ignored 文件中。
