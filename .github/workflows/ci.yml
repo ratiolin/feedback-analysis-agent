@@ -17,6 +17,20 @@ jobs:
       - run: uv run pytest --cov=feedback_app --cov-report=xml
       - run: DATABASE_URL=sqlite:///./ci-migration.db uv run alembic upgrade head
       - run: DATABASE_URL=sqlite:///./ci-migration.db uv run alembic check
+      - name: SonarQube Scan
+        uses: SonarSource/sonarqube-scan-action@v8.2.0
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          projectBaseDir: .
+          args: >
+            -Dsonar.organization=metratio
+            -Dsonar.projectKey=metratio_feedback-analysis-agent
+            -Dsonar.sources=feedback_app,tools,migrations
+            -Dsonar.tests=tests
+            -Dsonar.python.version=3.12
+            -Dsonar.python.coverage.reportPaths=coverage.xml
+            -Dsonar.coverage.exclusions=tools/**,migrations/**
 
   web:
     runs-on: ubuntu-latest
@@ -34,19 +48,3 @@ jobs:
       - run: npm audit --audit-level=moderate
       - run: npm run lint
       - run: npm run build
-
-
-
-      - name: SonarQube Scan
-        uses: SonarSource/sonarqube-scan-action@v8.2.0
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        with:
-          projectBaseDir: .
-          args: >
-            -Dsonar.organization=metratio
-            -Dsonar.projectKey=metratio_feedback-analysis-agent
-            -Dsonar.sources=feedback_app,tools,migrations
-            -Dsonar.tests=tests
-            -Dsonar.python.coverage.reportPaths=coverage.xml
-            -Dsonar.coverage.exclusions=tools/**,migrations/**
