@@ -6,10 +6,9 @@ from feedback_app.config import Settings
 from feedback_app.models import Analysis, Ticket
 from feedback_app.pipeline import (
     _extract_cluster_features,
-    _fetch_cluster_input,
     _group_indices_by_label,
-    _truncate_cluster_tables,
     _resolve_blocking_groups,
+    _truncate_cluster_tables,
 )
 
 # ---------------------------------------------------------------------------
