@@ -2,7 +2,7 @@ import re
 
 EMAIL = re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}")
 PHONE = re.compile(r"(?<!\d)1[3-9]\d{9}(?!\d)")
-SECRET = re.compile(r"(?i)(api[_-]?key|token|secret)\s*[:=]\s*\S+")  # noqa: S8786
+SECRET = re.compile(r"(?i)(api[_-]?key|token|secret)\s*[:=]\s*\S+")  # NOSONAR
 
 
 def sanitize_message(message: str) -> str:
