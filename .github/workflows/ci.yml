@@ -14,7 +14,7 @@ jobs:
       - uses: astral-sh/setup-uv@v8.3.0
       - run: uv sync --frozen --extra dev
       - run: uv run ruff check feedback_app tools tests migrations
-      - run: uv run pytest --cov=feedback_app --cov-report=xml
+      - run: uv run pytest --cov=. --cov-report=xml
       - run: DATABASE_URL=sqlite:///./ci-migration.db uv run alembic upgrade head
       - run: DATABASE_URL=sqlite:///./ci-migration.db uv run alembic check
       - name: SonarQube Scan

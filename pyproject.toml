@@ -33,6 +33,9 @@ testpaths = ["tests"]
 addopts = "-q"
 pythonpath = ["."]
 
+[tool.coverage.run]
+omit = ["tests/*", "migrations/*", "tools/*", "web/*", ".venv/*"]
+
 [tool.hatch.build.targets.wheel]
 packages = ["feedback_app", "tools"]
 
