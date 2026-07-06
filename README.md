@@ -1,5 +1,9 @@
 # 客户反馈结构化分析 Agent
 
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=metratio_feedback-analysis-agent&metric=alert_status)](https://sonarcloud.io/dashboard?id=metratio_feedback-analysis-agent)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=metratio_feedback-analysis-agent&metric=coverage)](https://sonarcloud.io/dashboard?id=metratio_feedback-analysis-agent)
+[![CI](https://github.com/ratiolin/feedback-analysis-agent/actions/workflows/ci.yml/badge.svg)](https://github.com/ratiolin/feedback-analysis-agent/actions)
+
 面向虚构项目协作 SaaS 的工单结构化、重复问题聚类、候选 SOP 与周报演示系统。
 
 - 交互演示：<https://metratio.com/feedback>
