@@ -1,139 +1,76 @@
-# ruff: noqa: E501
-import csv
+﻿# ruff: noqa: E501
 import hashlib
-import json
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime
 from pathlib import Path
 
-from feedback_app.routing import derive_severity, needs_escalation, route_owner
-from feedback_app.schemas import ImpactSignals, ProblemType, ProductArea
-from tools.holdout_io import support_counts, write_manifest
+from tools.holdout_io import build_holdout_rows, support_counts, write_holdout_csv, write_manifest
 
 DATASET_VERSION = "v4-frozen-candidate-holdout-20260702"
 PROMPT_PATH = Path("dify-workflows/feedback-structuring-v2-candidate.yml")
 OUT_DIR = Path("data/candidate-evaluation")
 
-# This fixture is generated only after the v2 candidate prompt is frozen. Do not use it to
-# modify that prompt. Any prompt change invalidates this holdout and requires a new version.
 FAMILIES = [
-    ("V4-ISSUE-001", "Webhook 签名回调被拒", "integration", "open_api", "合作方收到的 Webhook 一直提示签名校验失败", "第三方回调端持续拒绝平台发送的 Webhook 签名"),
-    ("V4-ISSUE-002", "SCIM 用户组同步缺失", "integration", "member_permission", "SCIM 同步后新建用户组没有出现在成员目录", "身份平台中的用户组同步完成后成员目录仍然缺少该组"),
-    ("V4-ISSUE-003", "企业网盘附件链接失效", "integration", "file", "从企业网盘挂载的附件第二天就无法打开", "外部云盘同步进来的文件链接很快变成不可访问"),
-    ("V4-ISSUE-004", "OAuth Token 刷新失败", "integration", "open_api", "开放接口的 OAuth Token 到期后没有自动刷新", "API 授权令牌过期后刷新流程没有返回新的 Token"),
-    ("V4-ISSUE-005", "复制模板缺少自定义视图", "bug", "project", "用项目模板创建副本后自定义视图全部消失", "复制模板生成的新项目没有保留原来的自定义视图"),
-    ("V4-ISSUE-006", "重复任务日期偏移", "bug", "task", "每月重复任务生成后截止日期提前了一天", "周期任务的新实例日期比规则设定的时间早一天"),
-    ("V4-ISSUE-007", "文件批注保存后消失", "bug", "file", "预览文档时添加的批注保存后不见了", "文件预览中的批注提交成功但重新打开后消失"),
-    ("V4-ISSUE-008", "同一事件重复通知", "bug", "notification", "一次负责人变更触发了两封内容相同的邮件", "任务负责人只修改一次却收到重复的通知邮件"),
-    ("V4-ISSUE-009", "设置通知免打扰时段", "how_to", "notification", "如何设置晚上十点以后不再发送移动端通知", "想知道在哪里配置夜间免打扰时间"),
-    ("V4-ISSUE-010", "批量调整截止日期", "how_to", "task", "怎样一次修改一批任务的截止日期", "请问能否批量把选中任务的到期时间顺延一周"),
-    ("V4-ISSUE-011", "下载增值税发票", "how_to", "account_subscription", "在哪里下载本月订阅的增值税发票", "想查询并导出指定账期的电子发票"),
-    ("V4-ISSUE-012", "恢复已归档里程碑", "how_to", "project", "误归档的里程碑应该从哪里恢复", "请问如何把已归档里程碑重新放回项目时间线"),
-    ("V4-ISSUE-013", "默认项目隐私设置未应用", "configuration", "project", "组织默认设置为私有项目但新项目仍然公开", "默认项目可见范围已经设为私有，新建项目却没有继承"),
-    ("V4-ISSUE-014", "周报发送时间未生效", "configuration", "notification", "每周汇总邮件设为周五发送但仍在周一到达", "修改周报发送时间后邮件还是按照旧时间推送"),
-    ("V4-ISSUE-015", "新增席位未计入可用数", "configuration", "account_subscription", "刚购买的十个席位没有增加到可用席位中", "订阅扩容已经完成但后台可分配席位数量没变化"),
-    ("V4-ISSUE-016", "任务字段默认值未生效", "configuration", "task", "自定义字段设置了默认值，新任务中仍然为空", "任务字段的默认选项保存后没有应用到新建任务"),
-    ("V4-ISSUE-017", "大型看板加载缓慢", "performance", "project", "包含上千条任务的项目看板打开需要二十秒", "大型项目的看板首次加载非常慢"),
-    ("V4-ISSUE-018", "任务搜索输入卡顿", "performance", "task", "在任务搜索框输入文字时页面会连续卡顿", "搜索任务时每输入一个字都要等待很久"),
-    ("V4-ISSUE-019", "大文件预览缓慢", "performance", "file", "两百兆的设计文件预览一直停留在加载中", "较大的附件打开预览需要等待很长时间"),
-    ("V4-ISSUE-020", "API 查询响应过慢", "performance", "open_api", "批量查询任务的 API 平均要十几秒才返回", "开放接口查询项目列表时响应时间明显过长"),
-    ("V4-ISSUE-021", "访客可见私密项目", "permission", "member_permission", "访客账号可以看到标记为私密的项目", "只授予访客权限的成员看到了不应展示的私密项目"),
-    ("V4-ISSUE-022", "账单管理员无法改抬头", "permission", "account_subscription", "账单管理员没有权限修改发票抬头", "已分配财务角色的成员仍然不能维护开票信息"),
-    ("V4-ISSUE-023", "项目管理员无法邀请成员", "permission", "project", "项目管理员点击邀请成员时提示没有权限", "拥有项目管理角色的用户仍无法添加项目成员"),
-    ("V4-ISSUE-024", "导入日期整体偏移", "data_consistency", "import_export", "Excel 导入后所有任务日期都向后偏移一天", "导入表格中的截止日期进入系统后统一多了一天"),
-    ("V4-ISSUE-025", "成员数量统计不一致", "data_consistency", "member_permission", "团队首页显示的成员数与成员列表数量不同", "组织概览和成员管理页统计出的成员总数对不上"),
-    ("V4-ISSUE-026", "批量更新生成重复标签", "data_consistency", "task", "批量修改任务后同一个标签出现了两次", "任务批处理完成后生成了名称相同的重复标签"),
-    ("V4-ISSUE-027", "项目统计与列表不一致", "data_consistency", "project", "仪表盘显示的逾期任务数与任务列表不一致", "项目概览中的完成数量和筛选列表统计结果对不上"),
-    ("V4-ISSUE-028", "导出包含评论内容", "feature_request", "import_export", "希望导出任务时可以同时包含评论记录", "建议在任务导出文件中增加评论内容列"),
-    ("V4-ISSUE-029", "在线比较文件版本", "feature_request", "file", "希望文件模块支持在线比较两个版本的差异", "建议增加附件历史版本的并排对比功能"),
-    ("V4-ISSUE-030", "跨项目风险视图", "feature_request", "project", "希望增加汇总多个项目风险状态的视图", "建议提供跨项目查看风险和阻塞项的管理页面"),
+    ("V4-ISSUE-001", "Webhook \u7b7e\u540d\u56de\u8c03\u88ab\u62d2", "integration", "open_api", "\u5408\u4f5c\u65b9\u6536\u5230\u7684 Webhook \u4e00\u76f4\u63d0\u793a\u7b7e\u540d\u6821\u9a8c\u5931\u8d25", "\u7b2c\u4e09\u65b9\u56de\u8c03\u7aef\u6301\u7eed\u62d2\u7edd\u5e73\u53f0\u53d1\u9001\u7684 Webhook \u7b7e\u540d"),
+    ("V4-ISSUE-002", "SCIM \u7528\u6237\u7ec4\u540c\u6b65\u7f3a\u5931", "integration", "member_permission", "SCIM \u540c\u6b65\u540e\u65b0\u5efa\u7528\u6237\u7ec4\u6ca1\u6709\u51fa\u73b0\u5728\u6210\u5458\u76ee\u5f55", "\u8eab\u4efd\u5e73\u53f0\u4e2d\u7684\u7528\u6237\u7ec4\u540c\u6b65\u5b8c\u6210\u540e\u6210\u5458\u76ee\u5f55\u4ecd\u7136\u7f3a\u5c11\u8be5\u7ec4"),
+    ("V4-ISSUE-003", "\u4f01\u4e1a\u7f51\u76d8\u9644\u4ef6\u94fe\u63a5\u5931\u6548", "integration", "file", "\u4ece\u4f01\u4e1a\u7f51\u76d8\u6302\u8f7d\u7684\u9644\u4ef6\u7b2c\u4e8c\u5929\u5c31\u65e0\u6cd5\u6253\u5f00", "\u5916\u90e8\u4e91\u76d8\u540c\u6b65\u8fdb\u6765\u7684\u6587\u4ef6\u94fe\u63a5\u5f88\u5feb\u53d8\u6210\u4e0d\u53ef\u8bbf\u95ee"),
+    ("V4-ISSUE-004", "OAuth Token \u5237\u65b0\u5931\u8d25", "integration", "open_api", "\u5f00\u653e\u63a5\u53e3\u7684 OAuth Token \u5230\u671f\u540e\u6ca1\u6709\u81ea\u52a8\u5237\u65b0", "API \u6388\u6743\u4ee4\u724c\u8fc7\u671f\u540e\u5237\u65b0\u6d41\u7a0b\u6ca1\u6709\u8fd4\u56de\u65b0\u7684 Token"),
+    ("V4-ISSUE-005", "\u590d\u5236\u6a21\u677f\u7f3a\u5c11\u81ea\u5b9a\u4e49\u89c6\u56fe", "bug", "project", "\u7528\u9879\u76ee\u6a21\u677f\u521b\u5efa\u526f\u672c\u540e\u81ea\u5b9a\u4e49\u89c6\u56fe\u5168\u90e8\u6d88\u5931", "\u590d\u5236\u6a21\u677f\u751f\u6210\u7684\u65b0\u9879\u76ee\u6ca1\u6709\u4fdd\u7559\u539f\u6765\u7684\u81ea\u5b9a\u4e49\u89c6\u56fe"),
+    ("V4-ISSUE-006", "\u91cd\u590d\u4efb\u52a1\u65e5\u671f\u504f\u79fb", "bug", "task", "\u6bcf\u6708\u91cd\u590d\u4efb\u52a1\u751f\u6210\u540e\u622a\u6b62\u65e5\u671f\u63d0\u524d\u4e86\u4e00\u5929", "\u5468\u671f\u4efb\u52a1\u7684\u65b0\u5b9e\u4f8b\u65e5\u671f\u6bd4\u89c4\u5219\u8bbe\u5b9a\u7684\u65f6\u95f4\u65e9\u4e00\u5929"),
+    ("V4-ISSUE-007", "\u6587\u4ef6\u6279\u6ce8\u4fdd\u5b58\u540e\u6d88\u5931", "bug", "file", "\u9884\u89c8\u6587\u6863\u65f6\u6dfb\u52a0\u7684\u6279\u6ce8\u4fdd\u5b58\u540e\u4e0d\u89c1\u4e86", "\u6587\u4ef6\u9884\u89c8\u4e2d\u7684\u6279\u6ce8\u63d0\u4ea4\u6210\u529f\u4f46\u91cd\u65b0\u6253\u5f00\u540e\u6d88\u5931"),
+    ("V4-ISSUE-008", "\u540c\u4e00\u4e8b\u4ef6\u91cd\u590d\u901a\u77e5", "bug", "notification", "\u4e00\u6b21\u8d1f\u8d23\u4eba\u53d8\u66f4\u89e6\u53d1\u4e86\u4e24\u5c01\u5185\u5bb9\u76f8\u540c\u7684\u90ae\u4ef6", "\u4efb\u52a1\u8d1f\u8d23\u4eba\u53ea\u4fee\u6539\u4e00\u6b21\u5374\u6536\u5230\u91cd\u590d\u7684\u901a\u77e5\u90ae\u4ef6"),
+    ("V4-ISSUE-009", "\u8bbe\u7f6e\u901a\u77e5\u514d\u6253\u6270\u65f6\u6bb5", "how_to", "notification", "\u5982\u4f55\u8bbe\u7f6e\u665a\u4e0a\u5341\u70b9\u4ee5\u540e\u4e0d\u518d\u53d1\u9001\u79fb\u52a8\u7aef\u901a\u77e5", "\u60f3\u77e5\u9053\u5728\u54ea\u91cc\u914d\u7f6e\u591c\u95f4\u514d\u6253\u6270\u65f6\u95f4"),
+    ("V4-ISSUE-010", "\u6279\u91cf\u8c03\u6574\u622a\u6b62\u65e5\u671f", "how_to", "task", "\u600e\u6837\u4e00\u6b21\u4fee\u6539\u4e00\u6279\u4efb\u52a1\u7684\u622a\u6b62\u65e5\u671f", "\u8bf7\u95ee\u80fd\u5426\u6279\u91cf\u628a\u9009\u4e2d\u4efb\u52a1\u7684\u5230\u671f\u65f6\u95f4\u987a\u5ef6\u4e00\u5468"),
+    ("V4-ISSUE-011", "\u4e0b\u8f7d\u589e\u503c\u7a0e\u53d1\u7968", "how_to", "account_subscription", "\u5728\u54ea\u91cc\u4e0b\u8f7d\u672c\u6708\u8ba2\u9605\u7684\u589e\u503c\u7a0e\u53d1\u7968", "\u60f3\u67e5\u8be2\u5e76\u5bfc\u51fa\u6307\u5b9a\u8d26\u671f\u7684\u7535\u5b50\u53d1\u7968"),
+    ("V4-ISSUE-012", "\u6062\u590d\u5df2\u5f52\u6863\u91cc\u7a0b\u7891", "how_to", "project", "\u8bef\u5f52\u6863\u7684\u91cc\u7a0b\u7891\u5e94\u8be5\u4ece\u54ea\u91cc\u6062\u590d", "\u8bf7\u95ee\u5982\u4f55\u628a\u5df2\u5f52\u6863\u91cc\u7a0b\u7891\u91cd\u65b0\u653e\u56de\u9879\u76ee\u65f6\u95f4\u7ebf"),
+    ("V4-ISSUE-013", "\u9ed8\u8ba4\u9879\u76ee\u9690\u79c1\u8bbe\u7f6e\u672a\u5e94\u7528", "configuration", "project", "\u7ec4\u7ec7\u9ed8\u8ba4\u8bbe\u7f6e\u4e3a\u79c1\u6709\u9879\u76ee\u4f46\u65b0\u9879\u76ee\u4ecd\u7136\u516c\u5f00", "\u9ed8\u8ba4\u9879\u76ee\u53ef\u89c1\u8303\u56f4\u5df2\u7ecf\u8bbe\u4e3a\u79c1\u6709\uff0c\u65b0\u5efa\u9879\u76ee\u5374\u6ca1\u6709\u7ee7\u627f"),
+    ("V4-ISSUE-014", "\u5468\u62a5\u53d1\u9001\u65f6\u95f4\u672a\u751f\u6548", "configuration", "notification", "\u6bcf\u5468\u6c47\u603b\u90ae\u4ef6\u8bbe\u4e3a\u5468\u4e94\u53d1\u9001\u4f46\u4ecd\u5728\u5468\u4e00\u5230\u8fbe", "\u4fee\u6539\u5468\u62a5\u53d1\u9001\u65f6\u95f4\u540e\u90ae\u4ef6\u8fd8\u662f\u6309\u7167\u65e7\u65f6\u95f4\u63a8\u9001"),
+    ("V4-ISSUE-015", "\u65b0\u589e\u5e2d\u4f4d\u672a\u8ba1\u5165\u53ef\u7528\u6570", "configuration", "account_subscription", "\u521a\u8d2d\u4e70\u7684\u5341\u4e2a\u5e2d\u4f4d\u6ca1\u6709\u589e\u52a0\u5230\u53ef\u7528\u5e2d\u4f4d\u4e2d", "\u8ba2\u9605\u6269\u5bb9\u5df2\u7ecf\u5b8c\u6210\u4f46\u540e\u53f0\u53ef\u5206\u914d\u5e2d\u4f4d\u6570\u91cf\u6ca1\u53d8\u5316"),
+    ("V4-ISSUE-016", "\u4efb\u52a1\u5b57\u6bb5\u9ed8\u8ba4\u503c\u672a\u751f\u6548", "configuration", "task", "\u81ea\u5b9a\u4e49\u5b57\u6bb5\u8bbe\u7f6e\u4e86\u9ed8\u8ba4\u503c\uff0c\u65b0\u4efb\u52a1\u4e2d\u4ecd\u7136\u4e3a\u7a7a", "\u4efb\u52a1\u5b57\u6bb5\u7684\u9ed8\u8ba4\u9009\u9879\u4fdd\u5b58\u540e\u6ca1\u6709\u5e94\u7528\u5230\u65b0\u5efa\u4efb\u52a1"),
+    ("V4-ISSUE-017", "\u5927\u578b\u770b\u677f\u52a0\u8f7d\u7f13\u6162", "performance", "project", "\u5305\u542b\u4e0a\u5343\u6761\u4efb\u52a1\u7684\u9879\u76ee\u770b\u677f\u6253\u5f00\u9700\u8981\u4e8c\u5341\u79d2", "\u5927\u578b\u9879\u76ee\u7684\u770b\u677f\u9996\u6b21\u52a0\u8f7d\u975e\u5e38\u6162"),
+    ("V4-ISSUE-018", "\u4efb\u52a1\u641c\u7d22\u8f93\u5165\u5361\u987f", "performance", "task", "\u5728\u4efb\u52a1\u641c\u7d22\u6846\u8f93\u5165\u6587\u5b57\u65f6\u9875\u9762\u4f1a\u8fde\u7eed\u5361\u987f", "\u641c\u7d22\u4efb\u52a1\u65f6\u6bcf\u8f93\u5165\u4e00\u4e2a\u5b57\u90fd\u8981\u7b49\u5f85\u5f88\u4e45"),
+    ("V4-ISSUE-019", "\u5927\u6587\u4ef6\u9884\u89c8\u7f13\u6162", "performance", "file", "\u4e24\u767e\u5146\u7684\u8bbe\u8ba1\u6587\u4ef6\u9884\u89c8\u4e00\u76f4\u505c\u7559\u5728\u52a0\u8f7d\u4e2d", "\u8f83\u5927\u7684\u9644\u4ef6\u6253\u5f00\u9884\u89c8\u9700\u8981\u7b49\u5f85\u5f88\u957f\u65f6\u95f4"),
+    ("V4-ISSUE-020", "API \u67e5\u8be2\u54cd\u5e94\u8fc7\u6162", "performance", "open_api", "\u6279\u91cf\u67e5\u8be2\u4efb\u52a1\u7684 API \u5e73\u5747\u8981\u5341\u51e0\u79d2\u624d\u8fd4\u56de", "\u5f00\u653e\u63a5\u53e3\u67e5\u8be2\u9879\u76ee\u5217\u8868\u65f6\u54cd\u5e94\u65f6\u95f4\u660e\u663e\u8fc7\u957f"),
+    ("V4-ISSUE-021", "\u8bbf\u5ba2\u53ef\u89c1\u79c1\u5bc6\u9879\u76ee", "permission", "member_permission", "\u8bbf\u5ba2\u8d26\u53f7\u53ef\u4ee5\u770b\u5230\u6807\u8bb0\u4e3a\u79c1\u5bc6\u7684\u9879\u76ee", "\u53ea\u6388\u4e88\u8bbf\u5ba2\u6743\u9650\u7684\u6210\u5458\u770b\u5230\u4e86\u4e0d\u5e94\u5c55\u793a\u7684\u79c1\u5bc6\u9879\u76ee"),
+    ("V4-ISSUE-022", "\u8d26\u5355\u7ba1\u7406\u5458\u65e0\u6cd5\u6539\u62ac\u5934", "permission", "account_subscription", "\u8d26\u5355\u7ba1\u7406\u5458\u6ca1\u6709\u6743\u9650\u4fee\u6539\u53d1\u7968\u62ac\u5934", "\u5df2\u5206\u914d\u8d22\u52a1\u89d2\u8272\u7684\u6210\u5458\u4ecd\u7136\u4e0d\u80fd\u7ef4\u62a4\u5f00\u7968\u4fe1\u606f"),
+    ("V4-ISSUE-023", "\u9879\u76ee\u7ba1\u7406\u5458\u65e0\u6cd5\u9080\u8bf7\u6210\u5458", "permission", "project", "\u9879\u76ee\u7ba1\u7406\u5458\u70b9\u51fb\u9080\u8bf7\u6210\u5458\u65f6\u63d0\u793a\u6ca1\u6709\u6743\u9650", "\u62e5\u6709\u9879\u76ee\u7ba1\u7406\u89d2\u8272\u7684\u7528\u6237\u4ecd\u65e0\u6cd5\u6dfb\u52a0\u9879\u76ee\u6210\u5458"),
+    ("V4-ISSUE-024", "\u5bfc\u5165\u65e5\u671f\u6574\u4f53\u504f\u79fb", "data_consistency", "import_export", "Excel \u5bfc\u5165\u540e\u6240\u6709\u4efb\u52a1\u65e5\u671f\u90fd\u5411\u540e\u504f\u79fb\u4e00\u5929", "\u5bfc\u5165\u8868\u683c\u4e2d\u7684\u622a\u6b62\u65e5\u671f\u8fdb\u5165\u7cfb\u7edf\u540e\u7edf\u4e00\u591a\u4e86\u4e00\u5929"),
+    ("V4-ISSUE-025", "\u6210\u5458\u6570\u91cf\u7edf\u8ba1\u4e0d\u4e00\u81f4", "data_consistency", "member_permission", "\u56e2\u961f\u9996\u9875\u663e\u793a\u7684\u6210\u5458\u6570\u4e0e\u6210\u5458\u5217\u8868\u6570\u91cf\u4e0d\u540c", "\u7ec4\u7ec7\u6982\u89c8\u548c\u6210\u5458\u7ba1\u7406\u9875\u7edf\u8ba1\u51fa\u7684\u6210\u5458\u603b\u6570\u5bf9\u4e0d\u4e0a"),
+    ("V4-ISSUE-026", "\u6279\u91cf\u66f4\u65b0\u751f\u6210\u91cd\u590d\u6807\u7b7e", "data_consistency", "task", "\u6279\u91cf\u4fee\u6539\u4efb\u52a1\u540e\u540c\u4e00\u4e2a\u6807\u7b7e\u51fa\u73b0\u4e86\u4e24\u6b21", "\u4efb\u52a1\u6279\u5904\u7406\u5b8c\u6210\u540e\u751f\u6210\u4e86\u540d\u79f0\u76f8\u540c\u7684\u91cd\u590d\u6807\u7b7e"),
+    ("V4-ISSUE-027", "\u9879\u76ee\u7edf\u8ba1\u4e0e\u5217\u8868\u4e0d\u4e00\u81f4", "data_consistency", "project", "\u4eea\u8868\u76d8\u663e\u793a\u7684\u903e\u671f\u4efb\u52a1\u6570\u4e0e\u4efb\u52a1\u5217\u8868\u4e0d\u4e00\u81f4", "\u9879\u76ee\u6982\u89c8\u4e2d\u7684\u5b8c\u6210\u6570\u91cf\u548c\u7b5b\u9009\u5217\u8868\u7edf\u8ba1\u7ed3\u679c\u5bf9\u4e0d\u4e0a"),
+    ("V4-ISSUE-028", "\u5bfc\u51fa\u5305\u542b\u8bc4\u8bba\u5185\u5bb9", "feature_request", "import_export", "\u5e0c\u671b\u5bfc\u51fa\u4efb\u52a1\u65f6\u53ef\u4ee5\u540c\u65f6\u5305\u542b\u8bc4\u8bba\u8bb0\u5f55", "\u5efa\u8bae\u5728\u4efb\u52a1\u5bfc\u51fa\u6587\u4ef6\u4e2d\u589e\u52a0\u8bc4\u8bba\u5185\u5bb9\u5217"),
+    ("V4-ISSUE-029", "\u5728\u7ebf\u6bd4\u8f83\u6587\u4ef6\u7248\u672c", "feature_request", "file", "\u5e0c\u671b\u6587\u4ef6\u6a21\u5757\u652f\u6301\u5728\u7ebf\u6bd4\u8f83\u4e24\u4e2a\u7248\u672c\u7684\u5dee\u5f02", "\u5efa\u8bae\u589e\u52a0\u9644\u4ef6\u5386\u53f2\u7248\u672c\u7684\u5e76\u6392\u5bf9\u6bd4\u529f\u80fd"),
+    ("V4-ISSUE-030", "\u8de8\u9879\u76ee\u98ce\u9669\u89c6\u56fe", "feature_request", "project", "\u5e0c\u671b\u589e\u52a0\u6c47\u603b\u591a\u4e2a\u9879\u76ee\u98ce\u9669\u72b6\u6001\u7684\u89c6\u56fe", "\u5efa\u8bae\u63d0\u4f9b\u8de8\u9879\u76ee\u67e5\u770b\u98ce\u9669\u548c\u963b\u585e\u9879\u7684\u7ba1\u7406\u9875\u9762"),
 ]
+
+_CANDIDATE_CUES = (
+    "\u65e0\u6cd5", "\u5931\u8d25", "\u6d88\u5931", "\u62d2\u7edd",
+    "\u4e0d\u53ef\u8bbf\u95ee", "\u505c\u7559\u5728\u52a0\u8f7d\u4e2d",
+)
 
 
 def build_rows() -> list[dict]:
-    rows: list[dict] = []
-    start = datetime(2026, 7, 2, 9, tzinfo=UTC)
-    for family_index, (family, title, problem_type, product_area, first, second) in enumerate(
-        FAMILIES
-    ):
-        blocked = any(
-            cue in f"{first}{second}"
-            for cue in ("无法", "失败", "消失", "拒绝", "不可访问", "停留在加载中")
-        )
-        for variant, base in enumerate((first, second)):
-            team = variant == 1 and family_index % 3 == 0
-            repeat_contacts = 2 if variant == 1 else 0
-            suffixes = []
-            if team:
-                suffixes.append("该问题影响整个团队")
-            if repeat_contacts:
-                suffixes.append("已经联系客服两次")
-            message = f"{base}{'，' + '，'.join(suffixes) if suffixes else ''}。"
-            signals = {
-                "affected_scope": "team" if team else "individual",
-                "workflow_blocked": blocked,
-                "data_loss_claimed": False,
-                "repeat_contacts": repeat_contacts,
-            }
-            typed = ImpactSignals.model_validate(signals)
-            severity = derive_severity(typed)
-            number = family_index * 2 + variant + 1
-            rows.append(
-                {
-                    "ticket_id": f"V4-T{number:03d}",
-                    "user_type": "enterprise_admin" if variant == 0 else "member",
-                    "channel": "support_portal" if variant == 0 else "chat",
-                    "message": message,
-                    "created_at": (start + timedelta(hours=number * 3)).isoformat(),
-                    "current_status": "open",
-                    "gold_issue_family": family,
-                    "gold_issue_title": title,
-                    "gold_problem_type": problem_type,
-                    "gold_product_area": product_area,
-                    "gold_owner": route_owner(
-                        ProblemType(problem_type), ProductArea(product_area)
-                    ).value,
-                    "gold_severity": severity.value,
-                    "gold_escalation": str(needs_escalation(severity, typed)).lower(),
-                    "gold_impact_signals": json.dumps(signals, ensure_ascii=False),
-                    "split": "candidate_holdout",
-                }
-            )
-    return rows
+    return build_holdout_rows(
+        FAMILIES,
+        start_date=datetime(2026, 7, 2, 9, tzinfo=UTC),
+        ticket_prefix="V4",
+        split_label="candidate_holdout",
+        blocked_cues=_CANDIDATE_CUES,
+        team_mod=3,
+    )
 
 
 def write_csv(path: Path, rows: list[dict], include_audit: bool = False) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    if include_audit and path.exists():
-        with path.open(encoding="utf-8-sig", newline="") as handle:
-            existing = list(csv.DictReader(handle))
-        same_dataset = len(existing) == len(rows) and all(
-            old.get("ticket_id") == new["ticket_id"] and old.get("message") == new["message"]
-            for old, new in zip(existing, rows, strict=True)
-        )
-        reviewed = any(
-            row.get("audit_label_text_consistent") or row.get("audit_notes") or row.get("auditor")
-            for row in existing
-        )
-        if same_dataset and reviewed:
-            return
-    output = rows
-    if include_audit:
-        output = [
-            {
-                **row,
-                "audit_label_text_consistent": "",
-                "audit_notes": "",
-                "auditor": "",
-            }
-            for row in rows
-        ]
-    with path.open("w", encoding="utf-8-sig", newline="") as handle:
-        writer = csv.DictWriter(handle, fieldnames=list(output[0]), lineterminator="\n")
-        writer.writeheader()
-        writer.writerows(output)
+    audit_defaults: dict[str, str] | None = (
+        {"audit_label_text_consistent": "", "audit_notes": "", "auditor": ""}
+        if include_audit
+        else None
+    )
+    write_holdout_csv(
+        path, rows, audit_defaults=audit_defaults, skip_if_reviewed=include_audit,
+    )
 
 
-def main()-> None:  # noqa: S3776 (tool script - acceptable complexity)
+def main() -> None:
     prompt_bytes = PROMPT_PATH.read_bytes()
     prompt_sha256 = hashlib.sha256(prompt_bytes).hexdigest()
     rows = build_rows()

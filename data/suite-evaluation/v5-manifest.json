@@ -1,7 +1,7 @@
 {
   "dataset_version": "v5-frozen-suite-holdout-20260702",
   "state": "candidate_unscored",
-  "generated_at": "2026-07-02T03:43:03.720111+00:00",
+  "generated_at": "2026-07-06T14:48:26.460726+00:00",
   "row_count": 60,
   "family_count": 30,
   "candidate_prompt_path": "dify-workflows/feedback-structuring-v2-candidate.yml",
@@ -25,7 +25,7 @@
     },
     {
       "path": "feedback_app/clustering.py",
-      "sha256": "35ce5c34d6c136968971037efe816356d9fe878e4fa7d0b06f0bc02c71344511"
+      "sha256": "9b36e2511f292d8796122a4cd62f0d05d47a1c541c0e61571d0901e2697789ca"
     }
   ],
   "development_dataset": "data/candidate-evaluation/v4-holdout-locked.csv",

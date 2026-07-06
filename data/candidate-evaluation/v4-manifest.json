@@ -1,7 +1,7 @@
 {
   "dataset_version": "v4-frozen-candidate-holdout-20260702",
   "state": "candidate_unscored",
-  "generated_at": "2026-07-01T21:45:17.103208+00:00",
+  "generated_at": "2026-07-06T14:48:26.250014+00:00",
   "row_count": 60,
   "family_count": 30,
   "candidate_prompt_path": "dify-workflows/feedback-structuring-v2-candidate.yml",
