@@ -95,6 +95,8 @@ uv run python tools/evaluate.py --analyzer demo --embedding tfidf
 | [SonarQube Cloud](https://sonarcloud.io/dashboard?id=metratio_feedback-analysis-agent) | 持续代码质量 | 已接入 |
 | GitHub Actions CI | ruff + pytest + SonarQube | 已配置 |
 
+CI 约束：`portfolio/index.html` 是静态作品页契约测试输入，必须随仓库提交；不要让测试依赖只存在于本地 ignored 文件中。
+
 近期优化：重构 `rebuild_clusters`（164 行 7 函数）、提取 `_try_cache_hit` / `_perform_analysis` 降低 `process_job` 复杂度、提取 `_single_linkage_clusters` 专责聚类、修复前端 root-owned node_modules 环境。
 
 
