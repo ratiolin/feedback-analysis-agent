@@ -38,20 +38,56 @@ OWNER_ACTIONS = {
 }
 
 
+# ---------------------------------------------------------------------------
+# Cluster rebuilding pipeline
+# ---------------------------------------------------------------------------
+
 def rebuild_clusters(
     db: Session,
     embedder: Embedder,
     threshold: float,
     settings: Settings | None = None,
 ) -> list[IssueCluster]:
-    rows = db.execute(
-        select(Ticket, Analysis)
-        .join(Analysis, Analysis.ticket_id == Ticket.id)
-        .where(Ticket.session_id.is_(None))
-        .order_by(Ticket.external_id)
-    ).all()
+    """Rebuild all issue clusters from ungrouped tickets with analysis results."""
+    rows = _fetch_cluster_input(db)
     if not rows:
         return []
+
+    texts, summaries, product_areas, problem_types = _extract_cluster_features(rows)
+    vectors = blended_embeddings(
+        embedder, texts, summaries,
+        settings.cluster_raw_text_weight if settings else 1.0,
+    )
+    blocking_groups = _resolve_blocking_groups(settings, product_areas, problem_types)
+    labels = threshold_clusters(
+        vectors, threshold,
+        groups=blocking_groups,
+        linkage=settings.cluster_linkage if settings else "single",
+    )
+    grouped = _group_indices_by_label(labels)
+
+    _truncate_cluster_tables(db)
+    clusters = [
+        _build_single_cluster(db, rows, vectors, indexes, settings)
+        for indexes in grouped.values()
+    ]
+    db.commit()
+    return clusters
+
+
+def _fetch_cluster_input(db: Session) -> list:
+    return (
+        db.execute(
+            select(Ticket, Analysis)
+            .join(Analysis, Analysis.ticket_id == Ticket.id)
+            .where(Ticket.session_id.is_(None))
+            .order_by(Ticket.external_id)
+        )
+        .all()
+    )
+
+
+def _extract_cluster_features(rows):
     texts = [normalize_ticket_text(ticket.message) for ticket, _ in rows]
     summaries = [
         analysis.payload.get("issue_signature") or analysis.payload["summary"]
@@ -59,150 +95,156 @@ def rebuild_clusters(
     ]
     product_areas = [analysis.product_area for _, analysis in rows]
     problem_types = [analysis.problem_type for _, analysis in rows]
-    vectors = blended_embeddings(
-        embedder,
-        texts,
-        summaries,
-        settings.cluster_raw_text_weight if settings else 1.0,
-    )
-    blocking_groups = product_areas
-    if settings and settings.cluster_block_by_problem_type:
-        blocking_groups = [
-            f"{area}|{problem_type}"
-            for area, problem_type in zip(product_areas, problem_types, strict=True)
-        ]
-    labels = threshold_clusters(
-        vectors,
-        threshold,
-        groups=blocking_groups,
-        linkage=settings.cluster_linkage if settings else "single",
-    )
-    grouped: dict[int, list[int]] = defaultdict(list)
+    return texts, summaries, product_areas, problem_types
+
+
+def _resolve_blocking_groups(settings, product_areas, problem_types):
+    if settings is None or not settings.cluster_block_by_problem_type:
+        return product_areas
+    return [
+        f"{area}|{ptype}"
+        for area, ptype in zip(product_areas, problem_types, strict=True)
+    ]
+
+
+def _group_indices_by_label(labels):
+    grouped = defaultdict(list)
     for index, label in enumerate(labels):
         grouped[label].append(index)
+    return grouped
 
+
+def _truncate_cluster_tables(db):
     db.execute(delete(SOPCandidate))
     db.execute(delete(ClusterMember))
     db.execute(delete(IssueCluster))
     db.flush()
-    clusters: list[IssueCluster] = []
-    for indexes in grouped.values():
-        group = [rows[index] for index in indexes]
-        analyses = [analysis for _, analysis in group]
-        tickets = [ticket for ticket, _ in group]
-        owners = Counter(analysis.suggested_owner for analysis in analyses)
-        owner = owners.most_common(1)[0][0]
-        severity = max(
-            (analysis.severity for analysis in analyses), key=lambda item: SEVERITY_ORDER[item]
-        )
-        title = min((analysis.payload["summary"] for analysis in analyses), key=len)[:80]
-        representatives = [ticket.external_id for ticket in tickets[:3]]
-        evidence = [
-            {
-                "ticket_id": ticket.external_id,
-                "quote": analysis.payload["evidence_spans"][0]["quote"],
-            }
-            for ticket, analysis in group[:3]
-            if analysis.payload.get("evidence_spans")
-        ]
-        hypotheses = [
-            analysis.payload.get("root_cause_hypothesis")
-            for analysis in analyses
-            if analysis.payload.get("root_cause_hypothesis")
-        ]
-        centroid = vectors[indexes].mean(axis=0).tolist()
-        cluster = IssueCluster(
-            title=title,
-            summary=f"{len(group)} 条相似工单，建议责任方为 {owner}",
-            member_count=len(group),
-            severity=severity,
-            trend=trend_for_dates([ticket.created_at for ticket in tickets], datetime.now(UTC)),
-            suggested_owner=owner,
-            centroid=centroid,
-            representative_ticket_ids=representatives,
-            evidence=evidence,
-            narrative_source="deterministic",
-            narrative_workflow_version=None,
-        )
-        db.add(cluster)
-        db.flush()
-        pending_cause = hypotheses[0] if hypotheses else None
-        if settings and settings.dify_cluster_workflow_api_key and len(group) >= 2:
-            context = {
-                "member_count": len(group),
-                "trend": cluster.trend,
-                "severity": severity,
-                "suggested_owner": owner,
-                "representative_tickets": evidence,
-            }
-            try:
-                narrative = generate_cluster_narrative(settings, cluster.id, context)
-                cluster.title = narrative.title
-                cluster.summary = narrative.observation
-                pending_cause = narrative.pending_cause or pending_cause
-                cluster.narrative_source = "dify"
-                cluster.narrative_workflow_version = settings.cluster_workflow_version
-            except (WorkflowSuiteError, ValueError) as exc:
-                logger.warning("cluster narrative fallback for %s: %s", cluster.id, exc)
-        for ticket in tickets:
-            db.add(ClusterMember(cluster_id=cluster.id, ticket_id=ticket.id))
-        cluster_payload = {
-            "title": cluster.title,
-            "member_count": cluster.member_count,
-            "trend": cluster.trend,
-            "severity": cluster.severity,
-            "representative_ticket_ids": representatives,
-        }
-        candidate = build_sop_candidate(cluster_payload)
-        if candidate:
-            candidate["pending_cause"] = pending_cause
-            candidate["recommended_action"] = OWNER_ACTIONS.get(owner, "人工确认责任方")
-            generation_source = "deterministic"
-            workflow_version = None
-            if settings and settings.dify_sop_workflow_api_key:
-                try:
-                    draft = generate_sop_draft(
-                        settings,
-                        cluster.id,
-                        {
-                            "member_count": cluster.member_count,
-                            "trend": cluster.trend,
-                            "severity": cluster.severity,
-                            "suggested_owner": cluster.suggested_owner,
-                            "pending_cause": pending_cause,
-                            "evidence_ticket_ids": representatives,
-                        },
-                    )
-                    candidate.update(
-                        {
-                            "title": draft.title,
-                            "applicable_when": draft.applicable_when,
-                            "steps": draft.steps,
-                            "pending_cause": draft.pending_cause or pending_cause,
-                            "evidence_ticket_ids": draft.evidence_ticket_ids,
-                        }
-                    )
-                    generation_source = "dify"
-                    workflow_version = settings.sop_workflow_version
-                except (WorkflowSuiteError, ValueError) as exc:
-                    logger.warning("SOP draft fallback for %s: %s", cluster.id, exc)
-            candidate["_generation"] = {
-                "source": generation_source,
-                "workflow_version": workflow_version,
-            }
-            db.add(
-                SOPCandidate(
-                    cluster_id=cluster.id,
-                    title=candidate["title"],
-                    payload=candidate,
-                    generation_source=generation_source,
-                    workflow_version=workflow_version,
-                )
-            )
-        clusters.append(cluster)
-    db.commit()
-    return clusters
 
+
+def _build_single_cluster(db, rows, vectors, indexes, settings):
+    group = [rows[index] for index in indexes]
+    analyses = [analysis for _, analysis in group]
+    tickets = [ticket for ticket, _ in group]
+
+    owner = Counter(analysis.suggested_owner for analysis in analyses).most_common(1)[0][0]
+    severity = max(
+        (analysis.severity for analysis in analyses),
+        key=lambda item: SEVERITY_ORDER[item],
+    )
+    title = min((analysis.payload["summary"] for analysis in analyses), key=len)[:80]
+    representatives = [ticket.external_id for ticket in tickets[:3]]
+    evidence = [
+        {
+            "ticket_id": ticket.external_id,
+            "quote": analysis.payload["evidence_spans"][0]["quote"],
+        }
+        for ticket, analysis in group[:3]
+        if analysis.payload.get("evidence_spans")
+    ]
+    hypotheses = [
+        analysis.payload.get("root_cause_hypothesis")
+        for analysis in analyses
+        if analysis.payload.get("root_cause_hypothesis")
+    ]
+    centroid = vectors[indexes].mean(axis=0).tolist()
+
+    cluster = IssueCluster(
+        title=title,
+        summary=f"{len(group)} 条相似工单，建议责任方为 {owner}",
+        member_count=len(group),
+        severity=severity,
+        trend=trend_for_dates([ticket.created_at for ticket in tickets], datetime.now(UTC)),
+        suggested_owner=owner,
+        centroid=centroid,
+        representative_ticket_ids=representatives,
+        evidence=evidence,
+        narrative_source="deterministic",
+        narrative_workflow_version=None,
+    )
+    db.add(cluster)
+    db.flush()
+
+    pending_cause = hypotheses[0] if hypotheses else None
+    if settings and settings.dify_cluster_workflow_api_key and len(group) >= 2:
+        context = {
+            "member_count": len(group),
+            "trend": cluster.trend,
+            "severity": severity,
+            "suggested_owner": owner,
+            "representative_tickets": evidence,
+        }
+        try:
+            narrative = generate_cluster_narrative(settings, cluster.id, context)
+            cluster.title = narrative.title
+            cluster.summary = narrative.observation
+            pending_cause = narrative.pending_cause or pending_cause
+            cluster.narrative_source = "dify"
+            cluster.narrative_workflow_version = settings.cluster_workflow_version
+        except (WorkflowSuiteError, ValueError) as exc:
+            logger.warning("cluster narrative fallback for %s: %s", cluster.id, exc)
+
+    for ticket in tickets:
+        db.add(ClusterMember(cluster_id=cluster.id, ticket_id=ticket.id))
+
+    cluster_payload = {
+        "title": cluster.title,
+        "member_count": cluster.member_count,
+        "trend": cluster.trend,
+        "severity": cluster.severity,
+        "representative_ticket_ids": representatives,
+    }
+    candidate = build_sop_candidate(cluster_payload)
+    if candidate:
+        candidate["pending_cause"] = pending_cause
+        candidate["recommended_action"] = OWNER_ACTIONS.get(
+            owner, "人工确认责任方"
+        )
+        generation_source = "deterministic"
+        workflow_version = None
+        if settings and settings.dify_sop_workflow_api_key:
+            try:
+                draft = generate_sop_draft(
+                    settings, cluster.id,
+                    {
+                        "member_count": cluster.member_count,
+                        "trend": cluster.trend,
+                        "severity": cluster.severity,
+                        "suggested_owner": cluster.suggested_owner,
+                        "pending_cause": pending_cause,
+                        "evidence_ticket_ids": representatives,
+                    },
+                )
+                candidate.update({
+                    "title": draft.title,
+                    "applicable_when": draft.applicable_when,
+                    "steps": draft.steps,
+                    "pending_cause": draft.pending_cause or pending_cause,
+                    "evidence_ticket_ids": draft.evidence_ticket_ids,
+                })
+                generation_source = "dify"
+                workflow_version = settings.sop_workflow_version
+            except (WorkflowSuiteError, ValueError) as exc:
+                logger.warning("SOP draft fallback for %s: %s", cluster.id, exc)
+        candidate["_generation"] = {
+            "source": generation_source,
+            "workflow_version": workflow_version,
+        }
+        db.add(
+            SOPCandidate(
+                cluster_id=cluster.id,
+                title=candidate["title"],
+                payload=candidate,
+                generation_source=generation_source,
+                workflow_version=workflow_version,
+            )
+        )
+
+    return cluster
+
+
+# ---------------------------------------------------------------------------
+# Weekly report pipeline
+# ---------------------------------------------------------------------------
 
 def rebuild_weekly_report(
     db: Session,

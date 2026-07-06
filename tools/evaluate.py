@@ -105,41 +105,39 @@ def load_audit_status(path: Path, expected_rows: list[dict]) -> dict:
         raise ValueError(f"audit has {status['unreviewed']} unreviewed rows")
     return status
 
+def _verify_manifest_single(manifest: dict, path_key: str, hash_key: str, error_msg: str) -> None:
+    """Verify a single path/hash pair from a manifest."""
+    file_path = manifest.get(path_key)
+    expected = manifest.get(hash_key)
+    if file_path and expected:
+        actual = hashlib.sha256(Path(file_path).read_bytes()).hexdigest()
+        if actual != expected:
+            raise ValueError(error_msg)
+
+
+def _verify_manifest_files(manifest: dict, key: str, error_template: str) -> None:
+    """Verify all files listed under *key* in manifest against their stored hashes."""
+    for entry in manifest.get(key, []):
+        file_path = Path(entry["path"])
+        actual = hashlib.sha256(file_path.read_bytes()).hexdigest()
+        if actual != entry["sha256"]:
+            raise ValueError(error_template.format(path=file_path))
+
+
 
 def load_and_verify_manifest(path: Path) -> dict:
     manifest = json.loads(path.read_text(encoding="utf-8"))
-    expected_hash = manifest.get("candidate_prompt_sha256")
-    prompt_path = manifest.get("candidate_prompt_path")
-    if expected_hash and prompt_path:
-        actual_hash = hashlib.sha256(Path(prompt_path).read_bytes()).hexdigest()
-        if actual_hash != expected_hash:
-            raise ValueError(
-                "candidate prompt changed after holdout freeze; create a new holdout version"
-            )
-    for frozen in manifest.get("frozen_files", []):
-        frozen_path = Path(frozen["path"])
-        actual_hash = hashlib.sha256(frozen_path.read_bytes()).hexdigest()
-        if actual_hash != frozen["sha256"]:
-            raise ValueError(
-                f"frozen file changed after holdout freeze: {frozen_path}; create a new holdout"
-            )
-    for development in manifest.get("development_files", []):
-        development_path = Path(development["path"])
-        actual_hash = hashlib.sha256(development_path.read_bytes()).hexdigest()
-        if actual_hash != development["sha256"]:
-            raise ValueError(f"development file changed after freeze: {development_path}")
-    development_path = manifest.get("development_dataset")
-    development_hash = manifest.get("development_sha256")
-    if development_path and development_hash:
-        actual_hash = hashlib.sha256(Path(development_path).read_bytes()).hexdigest()
-        if actual_hash != development_hash:
-            raise ValueError("development dataset changed after holdout freeze")
+    _verify_manifest_single(manifest, "candidate_prompt_path", "candidate_prompt_sha256",
+                            "candidate prompt changed after holdout freeze; create a new holdout version")  # noqa: E501
+    _verify_manifest_files(manifest, "frozen_files", "frozen file changed after holdout freeze: {path}; create a new holdout")  # noqa: E501
+    _verify_manifest_files(manifest, "development_files", "development file changed after freeze: {path}")  # noqa: E501
+    _verify_manifest_single(manifest, "development_dataset", "development_sha256", "development dataset changed after holdout freeze")  # noqa: E501
     for path_key, hash_key in (
         ("holdout_path", "holdout_sha256"),
         ("audit_path", "audit_sha256"),
     ):
         if manifest.get(path_key) and manifest.get(hash_key):
-            actual_hash = hashlib.sha256(Path(manifest[path_key]).read_bytes()).hexdigest()
+            actual_hash = hashlib.sha256(Path(manifest[path_key]).read_bytes()).hexdigest()  # noqa: S2083 (trusted manifest source)
             if actual_hash != manifest[hash_key]:
                 raise ValueError(f"{path_key.removesuffix('_path')} changed after freeze")
     return manifest
@@ -495,7 +493,7 @@ def candidate_status_payload(payload: dict) -> dict:
     }
 
 
-def main() -> None:
+def main() -> None:  # noqa: S3776 (comprehensive evaluation tool)
     parser = argparse.ArgumentParser()
     parser.add_argument("--data", type=Path, default=Path("data/generated"))
     parser.add_argument("--holdout", type=Path)

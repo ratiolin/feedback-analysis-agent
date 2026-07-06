@@ -11,7 +11,7 @@ from tools.evaluate import (
 )
 
 
-def main() -> None:
+def main()-> None:  # noqa: S3776 (tool script - acceptable complexity)
     parser = argparse.ArgumentParser()
     parser.add_argument("--data", type=Path, required=True)
     parser.add_argument("--analysis-cache", type=Path, required=True)

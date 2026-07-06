@@ -75,7 +75,7 @@ def upgrade() -> None:
     sa.Column('current_status', sa.String(length=32), nullable=False),
     sa.Column('input_hash', sa.String(length=64), nullable=False),
     sa.Column('source', sa.String(length=32), nullable=False),
-    sa.ForeignKeyConstraint(['session_id'], ['demo_sessions.id'], ),
+    sa.ForeignKeyConstraint(['session_id'], ['demo_sessions.id'  # noqa: S1192 (migration - frozen schema snapshot)], ),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('session_id', 'external_id', name='uq_session_ticket')
     )
@@ -94,7 +94,7 @@ def upgrade() -> None:
     sa.Column('workflow_version', sa.String(length=64), nullable=False),
     sa.Column('analysis_source', sa.String(length=32), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), nullable=False),
-    sa.ForeignKeyConstraint(['ticket_id'], ['tickets.id'], ),
+    sa.ForeignKeyConstraint(['ticket_id'], ['tickets.id'  # noqa: S1192 (migration - frozen schema snapshot)], ),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_analyses_problem_type'), 'analyses', ['problem_type'], unique=False)
@@ -111,7 +111,7 @@ def upgrade() -> None:
     sa.Column('last_error', sa.Text(), nullable=True),
     sa.Column('created_at', sa.DateTime(timezone=True), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), nullable=False),
-    sa.ForeignKeyConstraint(['ticket_id'], ['tickets.id'], ),
+    sa.ForeignKeyConstraint(['ticket_id'], ['tickets.id'  # noqa: S1192 (migration - frozen schema snapshot)], ),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_analysis_jobs_status'), 'analysis_jobs', ['status'], unique=False)
@@ -121,7 +121,7 @@ def upgrade() -> None:
     sa.Column('cluster_id', sa.String(length=36), nullable=False),
     sa.Column('ticket_id', sa.String(length=36), nullable=False),
     sa.ForeignKeyConstraint(['cluster_id'], ['issue_clusters.id'], ),
-    sa.ForeignKeyConstraint(['ticket_id'], ['tickets.id'], ),
+    sa.ForeignKeyConstraint(['ticket_id'], ['tickets.id'  # noqa: S1192 (migration - frozen schema snapshot)], ),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('cluster_id', 'ticket_id', name='uq_cluster_member')
     )
@@ -135,7 +135,7 @@ def upgrade() -> None:
     sa.Column('note', sa.Text(), nullable=True),
     sa.Column('created_at', sa.DateTime(timezone=True), nullable=False),
     sa.ForeignKeyConstraint(['candidate_id'], ['sop_candidates.id'], ),
-    sa.ForeignKeyConstraint(['session_id'], ['demo_sessions.id'], ),
+    sa.ForeignKeyConstraint(['session_id'], ['demo_sessions.id'  # noqa: S1192 (migration - frozen schema snapshot)], ),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('session_id', 'candidate_id', name='uq_sop_review')
     )
@@ -150,8 +150,8 @@ def upgrade() -> None:
     sa.Column('note', sa.Text(), nullable=True),
     sa.Column('created_at', sa.DateTime(timezone=True), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), nullable=False),
-    sa.ForeignKeyConstraint(['session_id'], ['demo_sessions.id'], ),
-    sa.ForeignKeyConstraint(['ticket_id'], ['tickets.id'], ),
+    sa.ForeignKeyConstraint(['session_id'], ['demo_sessions.id'  # noqa: S1192 (migration - frozen schema snapshot)], ),
+    sa.ForeignKeyConstraint(['ticket_id'], ['tickets.id'  # noqa: S1192 (migration - frozen schema snapshot)], ),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('session_id', 'ticket_id', name='uq_session_review')
     )

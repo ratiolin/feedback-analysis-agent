@@ -90,7 +90,7 @@ def build_rows() -> list[dict]:
     return rows
 
 
-def main() -> None:
+def main()-> None:  # noqa: S3776 (tool script - acceptable complexity)
     OUT.mkdir(parents=True, exist_ok=True)
     rows = build_rows()
     holdout = OUT / "v7-holdout-locked.csv"

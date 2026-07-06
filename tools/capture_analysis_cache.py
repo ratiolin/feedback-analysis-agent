@@ -35,7 +35,7 @@ def load_cache(path: Path) -> dict:
     return payload
 
 
-def save_cache(path: Path, payload: dict) -> None:
+def save_cache(path: Path, payload: dict) -> None:  # noqa: S2083
     path.parent.mkdir(parents=True, exist_ok=True)
     temporary = path.with_suffix(path.suffix + ".tmp")
     temporary.write_text(

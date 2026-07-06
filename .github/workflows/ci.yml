@@ -33,3 +33,16 @@ jobs:
       - run: npm run lint
       - run: npm run build
 
+
+
+      - name: SonarQube Scan
+        uses: SonarSource/sonarqube-scan-action@v5
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          projectBaseDir: .
+          args: >
+            -Dsonar.organization=metratio
+            -Dsonar.projectKey=metratio_feedback-analysis-agent
+            -Dsonar.sources=feedback_app,tools,migrations
+            -Dsonar.tests=tests

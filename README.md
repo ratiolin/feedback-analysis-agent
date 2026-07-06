@@ -74,6 +74,9 @@ docker run --rm -v "$PWD/web:/app" -w /app node:22-alpine \
 ```bash
 uv run python tools/evaluate.py --analyzer demo --embedding tfidf
 
+# CI 自动化（PR 自动运行）
+# 见 .github/workflows/ci.yml
+
 # 历史 V5 套件可复现脚本
 ./tools/run_v5_suite_evaluation.sh
 
@@ -81,6 +84,19 @@ uv run python tools/evaluate.py --analyzer demo --embedding tfidf
 # data/v7-evaluation/
 # artifacts/evaluation-v7-candidate/
 ```
+
+
+## 代码质量
+
+| 工具 | 用途 | 状态 |
+|---|---|---|
+| [ruff](https://docs.astral.sh/ruff/) | Lint + 格式化 | 零警告 |
+| [pytest](https://docs.pytest.org/) | 单元 & 集成测试 | 73 通过 |
+| [SonarQube Cloud](https://sonarcloud.io/dashboard?id=metratio_feedback-analysis-agent) | 持续代码质量 | 已接入 |
+| GitHub Actions CI | ruff + pytest + SonarQube | 已配置 |
+
+近期优化：重构 `rebuild_clusters`（164 行 7 函数）、提取 `_try_cache_hit` / `_perform_analysis` 降低 `process_job` 复杂度、提取 `_single_linkage_clusters` 专责聚类、修复前端 root-owned node_modules 环境。
+
 
 ## 目录
 

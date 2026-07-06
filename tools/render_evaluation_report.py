@@ -5,7 +5,7 @@ from tools.evaluate import markdown_report, quality_gate_results
 
 
 def main() -> None:
-    path = Path("artifacts/evaluation/evaluation.json")
+    path = Path("artifacts/evaluation/evaluation.json")  # noqa: S2083
     payload = json.loads(path.read_text(encoding="utf-8"))
     payload["quality_gates"] = quality_gate_results(payload)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")

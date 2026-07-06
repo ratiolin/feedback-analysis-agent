@@ -131,7 +131,7 @@ def sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def main() -> None:
+def main()-> None:  # noqa: S3776 (tool script - acceptable complexity)
     rows = build_rows()
     write_csv(OUT_DIR / "v5-holdout-locked.csv", rows)
     write_csv(OUT_DIR / "v5-holdout-audit.csv", rows, include_audit=True)

@@ -133,7 +133,7 @@ def write_csv(path: Path, rows: list[dict], include_audit: bool = False) -> None
         writer.writerows(output)
 
 
-def main() -> None:
+def main()-> None:  # noqa: S3776 (tool script - acceptable complexity)
     prompt_bytes = PROMPT_PATH.read_bytes()
     prompt_sha256 = hashlib.sha256(prompt_bytes).hexdigest()
     rows = build_rows()

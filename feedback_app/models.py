@@ -15,6 +15,10 @@ def utc_now() -> datetime:
     return datetime.now(UTC)
 
 
+DEMO_SESSIONS_TABLE = "demo_sessions"
+TICKETS_TABLE = "tickets"
+
+
 class DemoSession(Base):
     __tablename__ = "demo_sessions"
 
@@ -33,7 +37,7 @@ class Ticket(Base):
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
     external_id: Mapped[str] = mapped_column(String(64), index=True)
-    session_id: Mapped[str | None] = mapped_column(ForeignKey("demo_sessions.id"), nullable=True)
+    session_id: Mapped[str | None] = mapped_column(ForeignKey(f"{DEMO_SESSIONS_TABLE}.id"), nullable=True)  # noqa: E501
     user_type: Mapped[str] = mapped_column(String(32), default="member")
     channel: Mapped[str] = mapped_column(String(32), default="support")
     message: Mapped[str] = mapped_column(Text)
@@ -49,7 +53,7 @@ class Analysis(Base):
     __tablename__ = "analyses"
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
-    ticket_id: Mapped[str] = mapped_column(ForeignKey("tickets.id"), unique=True, index=True)
+    ticket_id: Mapped[str] = mapped_column(ForeignKey(f"{TICKETS_TABLE}.id"), unique=True, index=True)  # noqa: E501
     payload: Mapped[dict] = mapped_column(JSON)
     problem_type: Mapped[str] = mapped_column(String(32), index=True)
     product_area: Mapped[str] = mapped_column(String(32), index=True)
@@ -66,7 +70,7 @@ class AnalysisJob(Base):
     __tablename__ = "analysis_jobs"
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
-    ticket_id: Mapped[str] = mapped_column(ForeignKey("tickets.id"), index=True)
+    ticket_id: Mapped[str] = mapped_column(ForeignKey(f"{TICKETS_TABLE}.id"), index=True)
     status: Mapped[str] = mapped_column(String(24), default="queued", index=True)
     attempts: Mapped[int] = mapped_column(Integer, default=0)
     last_error: Mapped[str | None] = mapped_column(Text, nullable=True)
@@ -82,8 +86,8 @@ class TicketReview(Base):
     __table_args__ = (UniqueConstraint("session_id", "ticket_id", name="uq_session_review"),)
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
-    session_id: Mapped[str] = mapped_column(ForeignKey("demo_sessions.id"), index=True)
-    ticket_id: Mapped[str] = mapped_column(ForeignKey("tickets.id"), index=True)
+    session_id: Mapped[str] = mapped_column(ForeignKey(f"{DEMO_SESSIONS_TABLE}.id"), index=True)
+    ticket_id: Mapped[str] = mapped_column(ForeignKey(f"{TICKETS_TABLE}.id"), index=True)
     status: Mapped[str] = mapped_column(String(24))
     corrections: Mapped[dict] = mapped_column(JSON, default=dict)
     note: Mapped[str | None] = mapped_column(Text, nullable=True)
@@ -116,7 +120,7 @@ class ClusterMember(Base):
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
     cluster_id: Mapped[str] = mapped_column(ForeignKey("issue_clusters.id"), index=True)
-    ticket_id: Mapped[str] = mapped_column(ForeignKey("tickets.id"), index=True)
+    ticket_id: Mapped[str] = mapped_column(ForeignKey(f"{TICKETS_TABLE}.id"), index=True)
 
 
 class SOPCandidate(Base):
@@ -137,7 +141,7 @@ class SOPReview(Base):
     __table_args__ = (UniqueConstraint("session_id", "candidate_id", name="uq_sop_review"),)
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
-    session_id: Mapped[str] = mapped_column(ForeignKey("demo_sessions.id"), index=True)
+    session_id: Mapped[str] = mapped_column(ForeignKey(f"{DEMO_SESSIONS_TABLE}.id"), index=True)
     candidate_id: Mapped[str] = mapped_column(ForeignKey("sop_candidates.id"), index=True)
     status: Mapped[str] = mapped_column(String(24))
     note: Mapped[str | None] = mapped_column(Text, nullable=True)

@@ -21,7 +21,7 @@ def load_rows(path: Path) -> list[dict]:
         return list(csv.DictReader(handle))
 
 
-def main() -> None:
+def main()-> None:  # noqa: S3776 (tool script - acceptable complexity)
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--csv", type=Path, default=Path("data/generated/tickets_demo_runtime.csv")

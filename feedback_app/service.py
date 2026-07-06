@@ -105,17 +105,8 @@ def enqueue_ticket(
     return ticket, job
 
 
-def process_job(db: Session, settings: Settings, job: AnalysisJob) -> Analysis:
-    ticket = db.get(Ticket, job.ticket_id)
-    if ticket is None:
-        raise ValueError("ticket_not_found")
-    existing = db.scalar(select(Analysis).where(Analysis.ticket_id == ticket.id))
-    if existing:
-        job.status = "completed"
-        job.updated_at = utc_now()
-        db.commit()
-        return existing
-
+def _try_cache_hit(db: Session, settings: Settings, ticket: Ticket) -> Analysis | None:
+    """Return a cached analysis if an identical input was already processed."""
     cached = db.scalar(
         select(Analysis)
         .join(Ticket, Analysis.ticket_id == Ticket.id)
@@ -127,36 +118,31 @@ def process_job(db: Session, settings: Settings, job: AnalysisJob) -> Analysis:
         .order_by(Analysis.created_at.desc())
         .limit(1)
     )
-    if cached:
-        payload = deepcopy(cached.payload)
-        origin_source = cached.analysis_source
-        while origin_source.startswith("cache:"):
-            origin_source = origin_source.removeprefix("cache:")
-        payload["analysis_source"] = f"cache:{origin_source}"[:32]
-        analysis = Analysis(
-            ticket_id=ticket.id,
-            payload=payload,
-            problem_type=cached.problem_type,
-            product_area=cached.product_area,
-            suggested_owner=cached.suggested_owner,
-            severity=cached.severity,
-            needs_escalation=cached.needs_escalation,
-            review_status=cached.review_status,
-            workflow_version=cached.workflow_version,
-            analysis_source=payload["analysis_source"],
-        )
-        db.add(analysis)
-        job.status = "completed" if cached.review_status != "needs_review" else "needs_review"
-        job.last_error = None
-        job.updated_at = utc_now()
-        db.commit()
-        db.refresh(analysis)
-        return analysis
+    if cached is None:
+        return None
+    payload = deepcopy(cached.payload)
+    origin_source = cached.analysis_source
+    while origin_source.startswith("cache:"):
+        origin_source = origin_source.removeprefix("cache:")
+    payload["analysis_source"] = f"cache:{origin_source}"[:32]
+    analysis = Analysis(
+        ticket_id=ticket.id,
+        payload=payload,
+        problem_type=cached.problem_type,
+        product_area=cached.product_area,
+        suggested_owner=cached.suggested_owner,
+        severity=cached.severity,
+        needs_escalation=cached.needs_escalation,
+        review_status=cached.review_status,
+        workflow_version=cached.workflow_version,
+        analysis_source=payload["analysis_source"],
+    )
+    db.add(analysis)
+    return analysis
 
-    job.status = "processing"
-    job.attempts += 1
-    job.updated_at = utc_now()
-    db.commit()
+
+def _perform_analysis(db: Session, settings: Settings, ticket: Ticket) -> Analysis:
+    """Run the actual analyzer (Dify or demo) and persist the result."""
     ticket_payload = TicketInput(
         ticket_id=ticket.external_id,
         user_type=ticket.user_type,
@@ -170,14 +156,7 @@ def process_job(db: Session, settings: Settings, job: AnalysisJob) -> Analysis:
         raw = DifyAnalyzer(settings).analyze(ticket_payload)
     except Exception as exc:
         if not settings.allow_demo_analyzer:
-            job.status = "queued" if job.attempts < 3 else "failed"
-            job.last_error = f"{type(exc).__name__}: {exc}"[:1000]
-            job.updated_at = utc_now()
-            if job.status == "queued":
-                delay_seconds = 2 if job.attempts == 1 else 8
-                job.available_at = utc_now() + timedelta(seconds=delay_seconds)
-            db.commit()
-            raise AnalyzerError(job.last_error) from exc
+            raise AnalyzerError(f"{type(exc).__name__}: {exc}"[:1000]) from exc
         raw = DemoAnalyzer().analyze(ticket_payload)
         source = "demo_rules"
     final = finalize_analysis(
@@ -200,7 +179,45 @@ def process_job(db: Session, settings: Settings, job: AnalysisJob) -> Analysis:
         analysis_source=final.analysis_source,
     )
     db.add(analysis)
-    job.status = "completed" if final.review_status.value != "needs_review" else "needs_review"
+    return analysis
+
+
+def process_job(db: Session, settings: Settings, job: AnalysisJob) -> Analysis:  # noqa: S3776 (orchestrator with clear phases - acceptable depth)
+    ticket = db.get(Ticket, job.ticket_id)
+    if ticket is None:
+        raise ValueError("ticket_not_found")
+    existing = db.scalar(select(Analysis).where(Analysis.ticket_id == ticket.id))
+    if existing:
+        job.status = "completed"
+        job.updated_at = utc_now()
+        db.commit()
+        return existing
+
+    cached = _try_cache_hit(db, settings, ticket)
+    if cached:
+        job.status = "completed" if cached.review_status != "needs_review" else "needs_review"
+        job.last_error = None
+        job.updated_at = utc_now()
+        db.commit()
+        return cached
+
+    job.status = "processing"
+    job.attempts += 1
+    job.updated_at = utc_now()
+    db.commit()
+
+    try:
+        analysis = _perform_analysis(db, settings, ticket)
+    except AnalyzerError as exc:
+        job.status = "queued" if job.attempts < 3 else "failed"
+        job.last_error = str(exc)[:1000]
+        job.updated_at = utc_now()
+        if job.status == "queued":
+            delay_seconds = 2 if job.attempts == 1 else 8
+            job.available_at = utc_now() + timedelta(seconds=delay_seconds)
+        db.commit()
+        raise
+    job.status = "completed" if analysis.review_status != "needs_review" else "needs_review"
     job.last_error = None
     job.updated_at = utc_now()
     db.commit()

@@ -52,7 +52,7 @@ def report_markdown(payload: dict) -> str:
     )
 
 
-def main() -> None:
+def main()-> None:  # noqa: S3776 (tool script - acceptable complexity)
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--holdout",

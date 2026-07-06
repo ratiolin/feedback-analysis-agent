@@ -41,30 +41,40 @@ def threshold_clusters(
         raise ValueError("linkage must be single or complete")
     if linkage == "complete":
         return _complete_linkage_clusters(vectors, threshold, groups)
-    parent = list(range(len(vectors)))
+    return _single_linkage_clusters(vectors, threshold, groups)
 
-    def find(item: int) -> int:
+
+def _single_linkage_clusters(
+    vectors: np.ndarray,
+    threshold: float,
+    groups: list[str] | None,
+) -> list[int]:
+    """Single-linkage clustering via union-find on the similarity matrix."""
+    parent = list(range(len(vectors)))
+    similarities = vectors @ vectors.T
+
+    def _find(item: int) -> int:
         while parent[item] != item:
             parent[item] = parent[parent[item]]
             item = parent[item]
         return item
 
-    def union(left: int, right: int) -> None:
-        left_root, right_root = find(left), find(right)
+    def _union(left: int, right: int) -> None:
+        left_root, right_root = _find(left), _find(right)
         if left_root != right_root:
             parent[right_root] = left_root
 
-    similarities = vectors @ vectors.T
     for left in range(len(vectors)):
         for right in range(left + 1, len(vectors)):
             if groups is not None and groups[left] != groups[right]:
                 continue
             if similarities[left, right] >= threshold:
-                union(left, right)
+                _union(left, right)
+
     roots: dict[int, int] = {}
     labels: list[int] = []
     for item in range(len(vectors)):
-        root = find(item)
+        root = _find(item)
         roots.setdefault(root, len(roots))
         labels.append(roots[root])
     return labels

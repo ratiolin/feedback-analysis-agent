@@ -252,7 +252,7 @@ def write_audit_sheet(path: Path, rows: list[dict]) -> None:
         writer.writerows(audit_rows)
 
 
-def main() -> None:
+def main()-> None:  # noqa: S3776 (tool script - acceptable complexity)
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", type=Path, default=Path("data/generated"))
     args = parser.parse_args()

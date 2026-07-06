@@ -6,7 +6,7 @@ from pydantic import BaseModel, Field
 from .config import Settings
 
 
-class WorkflowSuiteError(RuntimeError):
+class WorkflowSuiteError(RuntimeError):  # noqa: S5713 (intentional marker exception - caught and re-raised before generic handlers)
     pass
 
 
