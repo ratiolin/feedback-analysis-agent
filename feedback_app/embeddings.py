@@ -44,7 +44,7 @@ def blended_embeddings(
     if raw_weight == 1:
         return raw_vectors
     summary_vectors = _normalize(np.asarray(embedder.encode(summaries), dtype=float))
-    if raw_weight == 0:
+    if raw_weight == 0:  # NOSONAR - false positive: weight is [0,1) here, 0 legit
         return summary_vectors
     return np.concatenate(
         (
