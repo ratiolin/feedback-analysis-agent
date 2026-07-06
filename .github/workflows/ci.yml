@@ -11,7 +11,7 @@ jobs:
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0
-      - uses: astral-sh/setup-uv@v8
+      - uses: astral-sh/setup-uv@v8.3.0
       - run: uv sync --frozen --extra dev
       - run: uv run ruff check feedback_app tools tests migrations
       - run: uv run pytest
