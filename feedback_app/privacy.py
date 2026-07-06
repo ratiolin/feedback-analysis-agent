@@ -1,6 +1,10 @@
 import re
 
-EMAIL = re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}")
+EMAIL = re.compile(
+    r"\b[A-Za-z0-9._%+-]{1,64}@"
+    r"[A-Za-z0-9-]{1,63}(?:\.[A-Za-z0-9-]{1,63})*"
+    r"\.[A-Za-z]{2,63}\b"
+)
 PHONE = re.compile(r"(?<!\d)1[3-9]\d{9}(?!\d)")
 SECRET = re.compile(r"(?i)(api[_-]?key|token|secret)\s*[:=]\s*\S+")  # NOSONAR
 

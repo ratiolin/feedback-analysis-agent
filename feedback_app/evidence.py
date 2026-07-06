@@ -58,8 +58,6 @@ def locate_quote(message: str, quote: str) -> LocatedEvidence | None:
         return None
     normalized_start = normalized_positions[0]
     normalized_end = normalized_start + len(normalized_quote) - 1
-    if normalized_end >= len(message_map):
-        return None
     start = message_map[normalized_start]
     end = message_map[normalized_end] + 1
     return LocatedEvidence(
@@ -81,4 +79,3 @@ def locate_evidence(message: str, evidence: list[EvidenceQuote]) -> EvidenceLoca
         else:
             located.append(result)
     return EvidenceLocationResult(located=located, failures=failures)
-

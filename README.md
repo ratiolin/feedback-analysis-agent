@@ -91,13 +91,13 @@ uv run python tools/evaluate.py --analyzer demo --embedding tfidf
 | 工具 | 用途 | 状态 |
 |---|---|---|
 | [ruff](https://docs.astral.sh/ruff/) | Lint + 格式化 | 零警告 |
-| [pytest](https://docs.pytest.org/) | 单元 & 集成测试 | 84 通过 |
-| [SonarQube Cloud](https://sonarcloud.io/dashboard?id=metratio_feedback-analysis-agent) | 持续代码质量 | 已接入 |
+| [pytest](https://docs.pytest.org/) | 单元 & 集成测试 | 134 通过，总覆盖率 99% |
+| [SonarQube Cloud](https://sonarcloud.io/dashboard?id=metratio_feedback-analysis-agent) | 持续代码质量 | 质量门 OK，新代码覆盖率 100%，未解决问题 0 |
 | GitHub Actions CI | ruff + pytest + SonarQube | 已配置 |
 
 CI 约束：`portfolio/index.html` 是静态作品页契约测试输入，必须随仓库提交；不要让测试依赖只存在于本地 ignored 文件中。
 
-近期优化：重构 `rebuild_clusters`（164 行 7 函数）、提取 `_try_cache_hit` / `_perform_analysis` 降低 `process_job` 复杂度、提取 `_single_linkage_clusters` 专责聚类、修复前端 root-owned node_modules 环境。
+近期优化：重构 `rebuild_clusters`（164 行 7 函数）、提取 `_try_cache_hit` / `_perform_analysis` 降低 `process_job` 复杂度、提取 `_single_linkage_clusters` 专责聚类；补齐 API、Worker、分析器、数据库、pipeline、workflow suite 等边界测试；修复前端 root-owned node_modules 环境。
 
 
 ## 目录

@@ -2,12 +2,12 @@
 import csv
 import hashlib
 import json
-from collections import Counter
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 from feedback_app.routing import derive_severity, needs_escalation, route_owner
 from feedback_app.schemas import ImpactSignals, ProblemType, ProductArea
+from tools.holdout_io import support_counts, write_manifest
 
 DATASET_VERSION = "v4-frozen-candidate-holdout-20260702"
 PROMPT_PATH = Path("dify-workflows/feedback-structuring-v2-candidate.yml")
@@ -147,16 +147,13 @@ def main()-> None:  # noqa: S3776 (tool script - acceptable complexity)
         "family_count": len(FAMILIES),
         "candidate_prompt_path": str(PROMPT_PATH),
         "candidate_prompt_sha256": prompt_sha256,
-        "problem_type_support": Counter(row["gold_problem_type"] for row in rows),
-        "product_area_support": Counter(row["gold_product_area"] for row in rows),
+        **support_counts(rows),
         "boundary": (
             "Frozen synthetic candidate holdout. It must not be used to modify the v2 prompt. "
             "No model quality claim exists until the candidate workflow is imported and replayed."
         ),
     }
-    (OUT_DIR / "v4-manifest.json").write_text(
-        json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8"
-    )
+    write_manifest(OUT_DIR / "v4-manifest.json", manifest)
     print(f"generated candidate holdout rows={len(rows)} prompt_sha256={prompt_sha256}")
 
 

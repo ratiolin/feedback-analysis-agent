@@ -75,7 +75,7 @@ def _run_workflow(
         return raw
     except WorkflowSuiteError:
         raise
-    except (httpx.HTTPError, json.JSONDecodeError, ValueError, TypeError) as exc:
+    except (httpx.HTTPError, ValueError, TypeError) as exc:
         raise WorkflowSuiteError(f"{output_name} workflow request failed") from exc
 
 

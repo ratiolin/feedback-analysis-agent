@@ -2,12 +2,12 @@
 import csv
 import hashlib
 import json
-from collections import Counter
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 from feedback_app.routing import derive_severity, needs_escalation, route_owner
 from feedback_app.schemas import ImpactSignals, ProblemType, ProductArea
+from tools.holdout_io import support_counts, write_manifest
 
 DATASET_VERSION = "v5-frozen-suite-holdout-20260702"
 OUT_DIR = Path("data/suite-evaluation")
@@ -148,17 +148,14 @@ def main()-> None:  # noqa: S3776 (tool script - acceptable complexity)
         ],
         "development_dataset": str(DEVELOPMENT_PATH),
         "development_sha256": sha256(DEVELOPMENT_PATH),
-        "problem_type_support": Counter(row["gold_problem_type"] for row in rows),
-        "product_area_support": Counter(row["gold_product_area"] for row in rows),
+        **support_counts(rows),
         "boundary": (
             "Fresh synthetic v5 holdout generated after v4 was retired to development-only use. "
             "Do not tune prompts, product-area blocking, or the threshold on v5. "
             "AI-assisted review is not an independent human audit."
         ),
     }
-    (OUT_DIR / "v5-manifest.json").write_text(
-        json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8"
-    )
+    write_manifest(OUT_DIR / "v5-manifest.json", manifest)
     print(f"generated v5 rows={len(rows)} families={len(FAMILIES)}")
 
 
