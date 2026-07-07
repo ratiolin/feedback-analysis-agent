@@ -9,6 +9,7 @@ from pathlib import Path
 from feedback_app.analyzers import DifyAnalyzer
 from feedback_app.config import get_settings
 from feedback_app.schemas import TicketInput
+from tools import safe_path
 
 
 def load_rows(path: Path) -> list[dict]:
@@ -35,7 +36,7 @@ def load_cache(path: Path) -> dict:
     return payload
 
 
-def save_cache(path: Path, payload: dict) -> None:  # noqa: S2083
+def save_cache(path: Path, payload: dict) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     temporary = path.with_suffix(path.suffix + ".tmp")
     temporary.write_text(
@@ -86,6 +87,8 @@ def main() -> None:
     parser.add_argument("--workers", type=int, default=3)
     parser.add_argument("--max-attempts", type=int, default=3)
     args = parser.parse_args()
+    args.data = safe_path(args.data, must_exist=True)
+    args.out = safe_path(args.out)
     if args.workers < 1 or args.max_attempts < 1:
         raise ValueError("workers and max-attempts must be positive")
 

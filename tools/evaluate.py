@@ -18,6 +18,7 @@ from feedback_app.embeddings import (
     blended_embeddings,
 )
 from feedback_app.schemas import LLMAnalysis, ProblemType, ProductArea, TicketInput
+from tools import safe_path
 
 
 def load_rows(path: Path) -> list[dict]:
@@ -137,7 +138,7 @@ def load_and_verify_manifest(path: Path) -> dict:
         ("audit_path", "audit_sha256"),
     ):
         if manifest.get(path_key) and manifest.get(hash_key):
-            actual_hash = hashlib.sha256(Path(manifest[path_key]).read_bytes()).hexdigest()  # noqa: S2083 (trusted manifest source)
+            actual_hash = hashlib.sha256(safe_path(manifest[path_key]).read_bytes()).hexdigest()
             if actual_hash != manifest[hash_key]:
                 raise ValueError(f"{path_key.removesuffix('_path')} changed after freeze")
     return manifest

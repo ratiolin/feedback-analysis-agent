@@ -1,15 +1,15 @@
 import json
-from pathlib import Path
 
+from tools import safe_path
 from tools.evaluate import markdown_report, quality_gate_results
 
 
 def main() -> None:
-    path = Path("artifacts/evaluation/evaluation.json")  # noqa: S2083
+    path = safe_path("artifacts/evaluation/evaluation.json")
     payload = json.loads(path.read_text(encoding="utf-8"))
     payload["quality_gates"] = quality_gate_results(payload)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
-    Path("artifacts/evaluation/evaluation.md").write_text(
+    safe_path("artifacts/evaluation/evaluation.md").write_text(
         markdown_report(payload), encoding="utf-8"
     )
 
