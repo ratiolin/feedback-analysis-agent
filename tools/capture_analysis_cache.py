@@ -37,6 +37,7 @@ def load_cache(path: Path) -> dict:
 
 
 def save_cache(path: Path, payload: dict) -> None:
+    path = safe_path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
     temporary = path.with_suffix(path.suffix + ".tmp")
     temporary.write_text(

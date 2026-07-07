@@ -111,7 +111,7 @@ def _verify_manifest_single(manifest: dict, path_key: str, hash_key: str, error_
     file_path = manifest.get(path_key)
     expected = manifest.get(hash_key)
     if file_path and expected:
-        actual = hashlib.sha256(Path(file_path).read_bytes()).hexdigest()
+        actual = hashlib.sha256(Path(file_path).read_bytes()).hexdigest()  # NOSONAR (manifest)
         if actual != expected:
             raise ValueError(error_msg)
 
@@ -119,7 +119,7 @@ def _verify_manifest_single(manifest: dict, path_key: str, hash_key: str, error_
 def _verify_manifest_files(manifest: dict, key: str, error_template: str) -> None:
     """Verify all files listed under *key* in manifest against their stored hashes."""
     for entry in manifest.get(key, []):
-        file_path = Path(entry["path"])
+        file_path = Path(entry["path"])  # NOSONAR (manifest)
         actual = hashlib.sha256(file_path.read_bytes()).hexdigest()
         if actual != entry["sha256"]:
             raise ValueError(error_template.format(path=file_path))
@@ -372,8 +372,8 @@ def clustering_evaluation(
 def markdown_report(payload: dict) -> str:
     structure = payload["structure"]
     clustering = payload["clustering"]
-    problem_macro = structure["problem_type"]["report"]["macro avg"]["f1-score"]
-    area_macro = structure["product_area"]["report"]["macro avg"]["f1-score"]
+    problem_macro = structure["problem_type"]["report"][MACRO_KEY]["f1-score"]
+    area_macro = structure["product_area"]["report"][MACRO_KEY]["f1-score"]
     holdout = clustering["holdout_metrics"]
     audit = payload["audit"]
     gates = payload["quality_gates"]
@@ -433,6 +433,8 @@ def markdown_report(payload: dict) -> str:
     )
 
 
+MACRO_KEY = "macro avg"
+
 def quality_gate_results(payload: dict) -> dict:
     structure = payload["structure"]
     holdout = payload["clustering"]["holdout_metrics"]
@@ -440,12 +442,12 @@ def quality_gate_results(payload: dict) -> dict:
         ("Schema 契约有效率", structure["schema_contract_valid_rate"], 0.95),
         (
             "问题类型 Macro-F1",
-            structure["problem_type"]["report"]["macro avg"]["f1-score"],
+            structure["problem_type"]["report"][MACRO_KEY]["f1-score"],
             0.80,
         ),
         (
             "产品区域 Macro-F1",
-            structure["product_area"]["report"]["macro avg"]["f1-score"],
+            structure["product_area"]["report"][MACRO_KEY]["f1-score"],
             0.80,
         ),
         ("责任路由策略一致率", structure["owner_policy_consistency"], 0.85),

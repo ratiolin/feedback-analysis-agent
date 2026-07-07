@@ -14,6 +14,7 @@ from feedback_app.pipeline import rebuild_clusters, rebuild_weekly_report
 from feedback_app.privacy import sanitize_message
 from feedback_app.schemas import TicketInput
 from feedback_app.service import enqueue_ticket, input_hash, process_job
+from tools import safe_path
 
 
 def load_rows(path: Path) -> list[dict]:
@@ -31,6 +32,7 @@ def main()-> None:  # noqa: S3776 (tool script - acceptable complexity)
     args = parser.parse_args()
     settings = get_settings()
     init_db()
+    args.csv = safe_path(args.csv, must_exist=True)
     rows = load_rows(args.csv)
     with SessionLocal() as db:
         for row in rows:
