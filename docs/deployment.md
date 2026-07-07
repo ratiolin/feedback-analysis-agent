@@ -29,10 +29,10 @@ sudo tailscale serve --bg --yes --tcp=8100 tcp://127.0.0.1:18100
 静态作品页位于：
 
 ```text
-/srv/stack/nginx/metratio-static/index/feedback/index.html
+/srv/stack/nginx/metratio-static/feedback/index.html
 ```
 
-云端 Nginx 已为 `/index/feedback` 和 `/index/feedback/` 配置独立静态路由；必须放在通用 `/index` location 之前，否则请求会回落到站点总首页。
+云端 Nginx 已为 `/feedback` 和 `/feedback/` 配置静态作品页路由（/feedback, /catalog-ops）；必须放在通用 `/index` location 之前，否则请求会回落到站点总首页。
 
 ## 监控
 

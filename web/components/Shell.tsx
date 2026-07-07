@@ -14,7 +14,7 @@ const links = [
 
 const portfolioLinks = [
   ["/index", "作品首页"],
-  ["/index/catalog-ops", "商品自动化"],
+  ["/catalog-ops", "商品自动化"],
 ];
 
 export function Shell({ children }: { children: ReactNode }) {
