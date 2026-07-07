@@ -111,7 +111,7 @@ def _verify_manifest_single(manifest: dict, path_key: str, hash_key: str, error_
     file_path = manifest.get(path_key)
     expected = manifest.get(hash_key)
     if file_path and expected:
-        actual = hashlib.sha256(Path(file_path).read_bytes()).hexdigest()  # NOSONAR (manifest)
+        actual = hashlib.sha256(Path(file_path).read_bytes()).hexdigest()  # NOSONAR
         if actual != expected:
             raise ValueError(error_msg)
 
@@ -119,7 +119,7 @@ def _verify_manifest_single(manifest: dict, path_key: str, hash_key: str, error_
 def _verify_manifest_files(manifest: dict, key: str, error_template: str) -> None:
     """Verify all files listed under *key* in manifest against their stored hashes."""
     for entry in manifest.get(key, []):
-        file_path = Path(entry["path"])  # NOSONAR (manifest)
+        file_path = Path(entry["path"])  # NOSONAR
         actual = hashlib.sha256(file_path.read_bytes()).hexdigest()
         if actual != entry["sha256"]:
             raise ValueError(error_template.format(path=file_path))
