@@ -39,8 +39,8 @@ def load_cache(path: Path) -> dict:
 def save_cache(path: Path, payload: dict) -> None:
     path = safe_path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
-    temporary = path.with_suffix(path.suffix + ".tmp")
-    temporary.write_text(
+    temporary = safe_path(path.with_suffix(path.suffix + ".tmp"))
+    temporary.write_text(  # NOSONAR -- canonical project-bound path from safe_path above
         json.dumps(payload, ensure_ascii=False, indent=2),
         encoding="utf-8",
     )

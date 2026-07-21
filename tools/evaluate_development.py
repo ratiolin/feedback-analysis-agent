@@ -3,6 +3,7 @@ import json
 from datetime import UTC, datetime
 from pathlib import Path
 
+from tools import safe_path
 from tools.evaluate import (
     cached_cluster_texts,
     clustering_evaluation,
@@ -18,8 +19,11 @@ def main()-> None:  # noqa: S3776 (tool script - acceptable complexity)
     parser.add_argument("--out", type=Path, required=True)
     args = parser.parse_args()
 
-    rows = load_rows(args.data)
-    cache = json.loads(args.analysis_cache.read_text(encoding="utf-8"))
+    data_path = safe_path(args.data, must_exist=True)
+    cache_path = safe_path(args.analysis_cache, must_exist=True)
+    output_path = safe_path(args.out)
+    rows = load_rows(data_path)
+    cache = json.loads(cache_path.read_text(encoding="utf-8"))
     structure = structure_evaluation(
         rows,
         "dify",
@@ -54,17 +58,17 @@ def main()-> None:  # noqa: S3776 (tool script - acceptable complexity)
             "v5 is a seen development set. Metrics are resubstitution evidence for "
             "candidate selection and must not be presented as holdout performance."
         ),
-        "data": str(args.data),
-        "analysis_cache": str(args.analysis_cache),
+        "data": str(data_path),
+        "analysis_cache": str(cache_path),
         "structure": structure,
         "clustering": clustering,
     }
-    args.out.mkdir(parents=True, exist_ok=True)
-    (args.out / "development.json").write_text(
+    output_path.mkdir(parents=True, exist_ok=True)
+    (output_path / "development.json").write_text(
         json.dumps(payload, ensure_ascii=False, indent=2),
         encoding="utf-8",
     )
-    print(args.out / "development.json")
+    print(output_path / "development.json")
 
 
 if __name__ == "__main__":

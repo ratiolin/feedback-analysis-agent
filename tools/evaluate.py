@@ -520,20 +520,41 @@ def main() -> None:  # noqa: S3776 (comprehensive evaluation tool)
     parser.add_argument("--cluster-raw-text-weight", type=float, default=1.0)
     parser.add_argument("--cluster-block-by-problem-type", action="store_true")
     args = parser.parse_args()
-    development = load_rows(args.development or args.data / "tickets_development_with_gold.csv")
-    holdout_path = args.holdout or args.data / "tickets_holdout_locked.csv"
-    manifest_path = args.manifest or args.data / "dataset_manifest.json"
+    data_path = safe_path(args.data, must_exist=True)
+    development_path = safe_path(
+        args.development or data_path / "tickets_development_with_gold.csv",
+        must_exist=True,
+    )
+    holdout_path = safe_path(
+        args.holdout or data_path / "tickets_holdout_locked.csv",
+        must_exist=True,
+    )
+    manifest_path = safe_path(
+        args.manifest or data_path / "dataset_manifest.json",
+        must_exist=True,
+    )
+    audit_path = safe_path(args.audit, must_exist=True)
+    output_path = safe_path(args.out)
+    analysis_cache_path = (
+        safe_path(args.analysis_cache, must_exist=True) if args.analysis_cache else None
+    )
+    development_analysis_cache_path = (
+        safe_path(args.development_analysis_cache, must_exist=True)
+        if args.development_analysis_cache
+        else None
+    )
+    development = load_rows(development_path)
     holdout = load_rows(holdout_path)
     manifest = load_and_verify_manifest(manifest_path)
     is_candidate = str(manifest.get("state", "")).startswith("candidate_")
     analysis_cache = (
-        json.loads(args.analysis_cache.read_text(encoding="utf-8"))
-        if args.analysis_cache
+        json.loads(analysis_cache_path.read_text(encoding="utf-8"))
+        if analysis_cache_path
         else None
     )
     development_analysis_cache = (
-        json.loads(args.development_analysis_cache.read_text(encoding="utf-8"))
-        if args.development_analysis_cache
+        json.loads(development_analysis_cache_path.read_text(encoding="utf-8"))
+        if development_analysis_cache_path
         else None
     )
     structure = structure_evaluation(
@@ -548,7 +569,7 @@ def main() -> None:  # noqa: S3776 (comprehensive evaluation tool)
         "dataset_version": manifest["dataset_version"],
         "evaluation_state": "candidate_scored_unpromoted" if is_candidate else "official_baseline",
         "candidate_prompt_sha256": manifest.get("candidate_prompt_sha256"),
-        "audit": load_audit_status(args.audit, holdout),
+        "audit": load_audit_status(audit_path, holdout),
         "structure": structure,
         "clustering": clustering_evaluation(
             development,
@@ -594,13 +615,13 @@ def main() -> None:  # noqa: S3776 (comprehensive evaluation tool)
         },
     }
     payload["quality_gates"] = quality_gate_results(payload)
-    args.out.mkdir(parents=True, exist_ok=True)
-    (args.out / "evaluation.json").write_text(
+    output_path.mkdir(parents=True, exist_ok=True)
+    (output_path / "evaluation.json").write_text(
         json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8"
     )
-    (args.out / "evaluation.md").write_text(markdown_report(payload), encoding="utf-8")
+    (output_path / "evaluation.md").write_text(markdown_report(payload), encoding="utf-8")
     if is_candidate:
-        (args.out / "status.json").write_text(
+        (output_path / "status.json").write_text(
             json.dumps(candidate_status_payload(payload), ensure_ascii=False, indent=2),
             encoding="utf-8",
         )

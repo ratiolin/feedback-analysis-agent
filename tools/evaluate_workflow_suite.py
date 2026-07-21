@@ -11,6 +11,7 @@ from feedback_app.workflow_suite import (
     generate_report_narrative,
     generate_sop_draft,
 )
+from tools import safe_path
 
 
 def load_rows(path: Path) -> list[dict]:
@@ -70,9 +71,12 @@ def main()-> None:  # noqa: S3776 (tool script - acceptable complexity)
         default=Path("artifacts/workflow-suite-v1-candidate"),
     )
     args = parser.parse_args()
+    holdout_path = safe_path(args.holdout, must_exist=True)
+    manifest_path = safe_path(args.manifest, must_exist=True)
+    output_path = safe_path(args.out)
     settings = get_settings()
-    rows = load_rows(args.holdout)
-    manifest = json.loads(args.manifest.read_text(encoding="utf-8"))
+    rows = load_rows(holdout_path)
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     grouped: dict[str, list[dict]] = defaultdict(list)
     for row in rows:
         grouped[row["gold_issue_family"]].append(row)
@@ -206,11 +210,11 @@ def main()-> None:  # noqa: S3776 (tool script - acceptable complexity)
         },
         "errors": errors,
     }
-    args.out.mkdir(parents=True, exist_ok=True)
-    (args.out / "evaluation.json").write_text(
+    output_path.mkdir(parents=True, exist_ok=True)
+    (output_path / "evaluation.json").write_text(
         json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8"
     )
-    (args.out / "evaluation.md").write_text(report_markdown(payload), encoding="utf-8")
+    (output_path / "evaluation.md").write_text(report_markdown(payload), encoding="utf-8")
     print(report_markdown(payload))
 
 
