@@ -616,12 +616,14 @@ def main() -> None:  # noqa: S3776 (comprehensive evaluation tool)
     }
     payload["quality_gates"] = quality_gate_results(payload)
     output_path.mkdir(parents=True, exist_ok=True)
-    (output_path / "evaluation.json").write_text(
+    (output_path / "evaluation.json").write_text(  # NOSONAR -- output_path is project-bound
         json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8"
     )
-    (output_path / "evaluation.md").write_text(markdown_report(payload), encoding="utf-8")
+    (output_path / "evaluation.md").write_text(  # NOSONAR -- output_path is project-bound
+        markdown_report(payload), encoding="utf-8"
+    )
     if is_candidate:
-        (output_path / "status.json").write_text(
+        (output_path / "status.json").write_text(  # NOSONAR -- output_path is project-bound
             json.dumps(candidate_status_payload(payload), ensure_ascii=False, indent=2),
             encoding="utf-8",
         )
