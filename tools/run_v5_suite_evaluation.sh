@@ -17,7 +17,7 @@ done
 
 docker compose up -d --force-recreate feedback-api feedback-worker
 
-docker compose exec -T feedback-worker python tools/evaluate.py \
+docker compose exec -T feedback-worker python -m tools.evaluate \
   --analyzer dify \
   --embedding bge \
   --development data/candidate-evaluation/v4-holdout-locked.csv \
@@ -26,7 +26,7 @@ docker compose exec -T feedback-worker python tools/evaluate.py \
   --audit data/suite-evaluation/v5-holdout-audit.csv \
   --out artifacts/evaluation-v5-suite-candidate
 
-docker compose exec -T feedback-worker python tools/evaluate_workflow_suite.py \
+docker compose exec -T feedback-worker python -m tools.evaluate_workflow_suite \
   --holdout data/suite-evaluation/v5-holdout-locked.csv \
   --manifest data/suite-evaluation/v5-manifest.json \
   --out artifacts/workflow-suite-v1-candidate

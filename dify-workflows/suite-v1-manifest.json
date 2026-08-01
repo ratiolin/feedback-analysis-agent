@@ -23,14 +23,14 @@
       "file": "sop-draft-v1-candidate.yml",
       "app_name": "候选SOP草案-v1-candidate",
       "state": "published_pending_revalidation",
-      "sha256": "a44871b2fe1c9f0f7874d196bf83fd5d458bee5b6bb25d62115a98699be3a4d2",
+      "sha256": "681451764ff9e63d402522774f40c2f2a90013acd07c7233e56b255ad2d9613e",
       "api_key_env": "DIFY_SOP_WORKFLOW_API_KEY"
     },
     {
       "file": "weekly-report-narrative-v1-candidate.yml",
       "app_name": "运营周报叙事-v1-candidate",
       "state": "published_pending_revalidation",
-      "sha256": "7ff90a0298127dd1f99afbb77e754afdd56dd86732703cf9dc1c063463999ed0",
+      "sha256": "68b01b533ded34d57135fdd688210c99901290fe9219853dd811bb191312b2e0",
       "api_key_env": "DIFY_REPORT_WORKFLOW_API_KEY"
     }
   ],

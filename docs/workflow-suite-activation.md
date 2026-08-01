@@ -1,6 +1,6 @@
 # 四工作流套件状态记录
 
-当前状态为 `published_pending_revalidation`。四个 Dify 应用已导入、发布并配置独立 API Key；2026-07-19 控制台与仓库 DSL 已同步为 `deepseek-v4-flash`；2026-08-01 完成 flash 真实回放与冻结评测：结构化工作流九项质量门全部通过，内容套件因周报叙事未达门槛保持未晋升。模型切换前的晋级结论不转移给当前 flash 配置。
+当前状态为 `published_pending_revalidation`。四个 Dify 应用已导入、发布并配置独立 API Key；2026-07-19 控制台与仓库 DSL 已同步为 `deepseek-v4-flash`；2026-08-01 完成 flash 真实回放与冻结评测：结构化工作流九项质量门全部通过；内容套件两次回放均存在偶发不合规输出（SOP 或周报各失败一项），保持未晋升。2026-08-01 已强化 SOP 与周报提示词（禁词逐字显式化），待 Dify 控制台重新导入后复测。模型切换前的晋级结论不转移给当前 flash 配置。
 
 ## 应用与 Key
 
@@ -8,8 +8,8 @@
 |---|---|---|---|
 | `feedback-structuring-v3-candidate.yml` | `客户反馈结构化-v3-candidate` | `DIFY_FEEDBACK_WORKFLOW_API_KEY` | 已发布；flash 冻结回放九门全过 |
 | `issue-cluster-narrative-v1-candidate.yml` | `问题簇命名与解释-v1-candidate` | `DIFY_CLUSTER_WORKFLOW_API_KEY` | 已发布；flash 回放 30/30 通过 |
-| `sop-draft-v1-candidate.yml` | `候选SOP草案-v1-candidate` | `DIFY_SOP_WORKFLOW_API_KEY` | 已发布；flash 回放 5/5 通过 |
-| `weekly-report-narrative-v1-candidate.yml` | `运营周报叙事-v1-candidate` | `DIFY_REPORT_WORKFLOW_API_KEY` | 已发布；flash 回放 5/6，未达门槛 |
+| `sop-draft-v1-candidate.yml` | `候选SOP草案-v1-candidate` | `DIFY_SOP_WORKFLOW_API_KEY` | 已发布；flash 回放 5/5 与 4/5，偶发失败；提示词已强化 |
+| `weekly-report-narrative-v1-candidate.yml` | `运营周报叙事-v1-candidate` | `DIFY_REPORT_WORKFLOW_API_KEY` | 已发布；flash 回放 5/6 与 6/6，偶发失败；提示词已强化 |
 
 ## flash 回放结果（2026-08-01）
 
@@ -31,15 +31,19 @@
 
 首次依赖成功率为 100%（V7 为 88.3%），聚类纯度为 100%（V7 为 96.7%）。评测状态 `candidate_scored_unpromoted`，`eligible_for_manual_promotion`。
 
-### 内容工作流套件（未达晋升门槛）
+### 内容工作流套件（未达晋升门槛，存在偶发不合规输出）
 
-| 工作流 | flash 实测 | 历史 |
-|---|---:|---:|
-| 问题簇叙事 | 30/30 | 30/30 |
-| 候选 SOP | 5/5 | 5/5 |
-| 周报叙事 | 5/6 | 6/6 |
+两次回放（2026-08-01 08:35 宿主 / 08:48 容器内新镜像）：
 
-周报叙事 batch-5 失败原因为工作流内安全门禁拦截（`ValueError: forbidden_irreversible_action`，Dify sandbox 拒绝），即模型输出触发“不可逆动作”校验被拒绝，不是网络或基础设施故障。按门槛 100%，内容套件不得晋升，套件整体保持 `published_pending_revalidation`；修复或重新冻结周报工作流后需再次回放与复核。
+| 工作流 | 第一次 | 第二次 | 历史 |
+|---|---:|---:|---:|
+| 问题簇叙事 | 30/30 | 30/30 | 30/30 |
+| 候选 SOP | 5/5 | 4/5 | 5/5 |
+| 周报叙事 | 5/6 | 6/6 | 6/6 |
+
+两次失败均为工作流内安全门禁拦截（`ValueError: forbidden_irreversible_action`，Dify sandbox 拒绝），即 flash 偶发在 recommended_action 或步骤中出现“退款/补偿/删除数据/修改权限/自动执行/直接发布”等不可逆动作表述，被门禁按设计拦截；不是网络或基础设施故障。同一冻结输入、temperature=0 下失败点不固定，说明 flash 对内容工作流提示词的合规输出存在波动。
+
+处置（2026-08-01）：SOP 与周报提示词已把禁词逐字写入约束并给出合规改写指引；门禁（代码节点 FORBIDDEN 列表）保持不变。DSL 哈希已更新：SOP `68145176…`、周报 `68b01b53…`。**Dify 控制台重新导入这两个工作流后需再次回放**；按门槛 100%，内容套件不得晋升，套件整体保持 `published_pending_revalidation`。
 
 权威文件（flash）：
 

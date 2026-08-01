@@ -128,8 +128,7 @@ workflow:
             - observation 和 executive_summary 不得把 pending_cause 写成已证实原因。
             - 不得编造 cluster_id、ticket_id、数量、比例、环比或责任方。
             - 每条 observation 的证据必须属于同一 cluster_id。
-            - recommended_action 只能建议核查、确认、更新提示/话术或升级人工处理。
-            - 不得承诺退款、补偿、删除数据、修改权限或自动发布 SOP。
+            - recommended_action 只能建议核查、确认、更新提示/话术或升级人工处理；禁止出现以下任何字样：退款、补偿、删除数据、修改权限、自动执行、直接发布。若原本想建议这类动作，改写为“建议人工核查并升级处理”。
         - edition_type: basic
           id: report-user
           role: user
