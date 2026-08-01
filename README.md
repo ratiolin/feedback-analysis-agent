@@ -40,7 +40,7 @@ CSV / 在线工单
 工作流：4 个已发布；flash 回放完成（2026-08-01）
 ```
 
-四个工作流均已发布并晋升为作品集演示基线（2026-08-01，记录见 `artifacts/evaluation-v7-flash-candidate/promotion-record-flash.json`）；2026-07-19 控制台与仓库 DSL 已同步为 `deepseek-v4-flash`，2026-08-01 完成 flash 真实回放与冻结评测：结构化工作流九项质量门全部通过（B³ F1 0.857、重复识别精确率 100%、首轮依赖成功率 100%）；内容工作流经提示词强化（禁词逐字显式化）与控制台重新导入后回放全部通过（问题簇 30/30、候选 SOP 5/5、周报叙事 6/6、证据引用与安全动作 100%）。2026-08-01 晚四工作流全部开启思考模式（`thinking: true` + `reasoning_format: separated`，下游 text 不含思考内容；超时调至 60 秒），开启思考后的内容套件回放五项质量门全部通过。下述 V7 数据来自模型切换前的冻结版本，只作历史基线。
+四个工作流均已发布并晋升为作品集演示基线。当前基线为 **thinking v2**（2026-08-01 晋升，记录见 `artifacts/evaluation-v7-thinking-v2-candidate/promotion-record-thinking-v2.json`）：`deepseek-v4-flash` + `thinking: true` + `reasoning_format: separated` + `min_pairwise_precision: 0.90`；结构化工作流九项质量门全部通过（问题类型 Macro-F1 0.875、重复识别精确率 100%、召回 60%、B³ F1 0.889、聚类纯度 100%），内容工作流问题簇 30/30、候选 SOP 5/5、周报叙事 6/6、证据引用与安全动作 100%。历史基线：flash 无思考（B³ F1 0.857，`promotion-record-flash.json`）与 V7 pro（2026-07-02），均只作历史记录。下述 V7 数据来自模型切换前的冻结版本，只作历史基线。
 
 V5、V6 失败结果继续保留。V7 使用全新 `v7-frozen-signature-clustering-holdout-20260702`（N=60）评分，曾在 2026-07-02 由独立 promotion record 晋级为作品集演示基线，2026-08-01 被 flash 配置取代后转为历史基线：Schema 契约有效率 100%、quote 自动定位 100%、问题类型 Macro-F1 0.846、产品区域 Macro-F1 0.963、责任路由一致率 85.0%、升级召回 100%、重复识别精确率 84.2%、召回率 53.3%、聚类纯度 96.7%、B³ F1 0.853。首次依赖成功率 88.3% 是独立信息项，不与 Schema 契约有效率混写。
 

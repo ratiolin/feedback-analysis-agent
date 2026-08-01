@@ -40,6 +40,10 @@
 
 重复误合并 0 例、聚类纯度 100%。**thinking v2 在所有已测配置中 B³ F1 最高（0.889），九项门禁全部通过**。权威文件：`artifacts/evaluation-v7-thinking-v2-candidate/`、`data/v7-evaluation/v7-thinking-frozen-20260801-manifest.json`（v2 版本）。
 
+### 晋升（2026-08-01）
+
+thinking v2 经明确晋升记录（`artifacts/evaluation-v7-thinking-v2-candidate/promotion-record-thinking-v2.json`）晋级为当前作品集演示基线，正式取代 flash 无思考基线（`promotion-record-flash.json`，转为历史）。当前状态：`promoted_for_portfolio_demo_thinking_v2`；配置：`thinking: true` + `reasoning_format: separated` + `min_pairwise_precision: 0.90`。内容套件与结构化工作流在 thinking 模式下均已通过全部已测门禁。
+
 ## 应用与 Key
 
 | DSL 文件 | 应用 | API Key 环境变量 | 当前 flash 状态 |

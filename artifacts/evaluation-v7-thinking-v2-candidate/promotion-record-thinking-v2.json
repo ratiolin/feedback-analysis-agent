@@ -1,0 +1,52 @@
+{
+  "decision": "promoted_for_portfolio_demo",
+  "decided_at": "2026-08-01T12:00:00+08:00",
+  "candidate": "customer-feedback-four-workflow-suite-v1",
+  "model": "deepseek-v4-flash",
+  "model_config": {
+    "thinking": true,
+    "reasoning_format": "separated",
+    "min_pairwise_precision": 0.90
+  },
+  "dataset_version": "v7-thinking-v2-frozen-signature-clustering-holdout-20260801",
+  "thinking_frozen_manifest_sha256": "6b76b1db7ac6c5ba4d57210677412044a95d7a823adf78afe1e7a1442d6ff79a",
+  "structural_evaluation_sha256": "2fd4fa064be6e873e9c74e94e6502d675298474d50792a3d232b811e44cbd087",
+  "structural_status_sha256": "135c447eb383c84541786472fdb6f512963342c2f94490a75f4b26285a8a84dd",
+  "structural_analysis_cache_sha256": "7dd3bb68d584882c871b6ccfd6391dfea365d213fb16481bdf4f5d9e9d784951",
+  "development_analysis_cache_sha256": "687529be1d770f59ad0ccfb7fc85b8e688362b598196c9858d2cf9a611dea90a",
+  "content_suite_evaluation_sha256": "1ffaeea1fbb6d46b97264a3028577e376085c0ff295e3be1b0da4f8cf29df80b",
+  "workflow_dsl_sha256": {
+    "feedback-structuring-v3-candidate.yml": "56c8a2773bc4347277b59b131581b4d53998ff51271524629d7e84759c57547d",
+    "issue-cluster-narrative-v1-candidate.yml": "a2d4fdf5f987d3891be9090a77fd3bb1ea8803f2f9a45ad414ca7fe8af04a217",
+    "sop-draft-v1-candidate.yml": "0b164deb5f4cf66be3dbbdcdfeafcebb9e29653d91d4a0f0a1b341579a04a080",
+    "weekly-report-narrative-v1-candidate.yml": "c7f87a3890fb5a8e00b64a693b21f0ce6b06f27b2084bba25802fc163ad344a1"
+  },
+  "structural_quality_gates_all_passed": true,
+  "structural_metrics": {
+    "schema_contract_valid_rate": 1.0,
+    "problem_type_macro_f1": 0.875,
+    "product_area_macro_f1": 0.961,
+    "owner_policy_consistency": 0.867,
+    "escalation_recall": 1.0,
+    "evidence_auto_location_rate": 1.0,
+    "duplicate_precision": 1.0,
+    "duplicate_recall": 0.6,
+    "b_cubed_f1": 0.889,
+    "first_attempt_dependency_success_rate": 0.983,
+    "cluster_purity": 1.0
+  },
+  "content_suite_gates_all_passed": true,
+  "content_suite_metrics": {
+    "cluster_success_rate": 1.0,
+    "sop_success_rate": 1.0,
+    "report_success_rate": 1.0,
+    "evidence_valid_rate": 1.0,
+    "safe_action_rate": 1.0
+  },
+  "supersedes": {
+    "record": "artifacts/evaluation-v7-flash-candidate/promotion-record-flash.json",
+    "note": "Flash without thinking remains as historical baseline; thinking v2 supersedes it as the current portfolio-demo baseline."
+  },
+  "scope": "Synthetic portfolio demo only; not evidence of real-business distribution, production SLA, or efficiency gains.",
+  "audit_boundary": "Holdout labels received AI-assisted consistency review, not independent human audit."
+}

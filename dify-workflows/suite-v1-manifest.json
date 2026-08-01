@@ -7,7 +7,8 @@
   "model_config": {
     "thinking": true,
     "reasoning_format": "separated",
-    "note": "Thinking mode enabled on all four workflows on 2026-08-01; reasoning_format=separated keeps downstream text free of <think> content."
+    "min_pairwise_precision": 0.9,
+    "note": "Thinking mode enabled on all four workflows on 2026-08-01; reasoning_format=separated keeps downstream text free of <think> content. Promoted as thinking v2 baseline on 2026-08-01."
   },
   "workflows": [
     {
@@ -40,13 +41,19 @@
     }
   ],
   "evaluation": {
-    "status": "promoted_for_portfolio_demo",
+    "status": "promoted_for_portfolio_demo_thinking_v2",
     "current_model_results_available": true,
+    "thinking_v2_frozen_dataset_version": "v7-thinking-v2-frozen-signature-clustering-holdout-20260801",
+    "thinking_v2_structural_evaluation": "artifacts/evaluation-v7-thinking-v2-candidate/evaluation.json",
+    "thinking_v2_structural_status": "artifacts/evaluation-v7-thinking-v2-candidate/status.json",
+    "thinking_v2_content_suite_evaluation": "artifacts/workflow-suite-v1-thinking-candidate/evaluation.json",
+    "thinking_v2_promotion_record": "artifacts/evaluation-v7-thinking-v2-candidate/promotion-record-thinking-v2.json",
+    "structural_gates_all_passed": true,
+    "content_suite_gates_all_passed": true,
     "flash_frozen_dataset_version": "v7-flash-frozen-signature-clustering-holdout-20260719",
     "flash_structural_evaluation": "artifacts/evaluation-v7-flash-candidate/evaluation.json",
     "flash_content_suite_evaluation": "artifacts/workflow-suite-v1-flash-candidate/evaluation.json",
-    "structural_gates_all_passed": true,
-    "content_suite_gates_all_passed": true,
+    "flash_promotion_record": "artifacts/evaluation-v7-flash-candidate/promotion-record-flash.json",
     "content_suite_success_rates": {
       "cluster": 1.0,
       "sop": 1.0,
@@ -54,15 +61,14 @@
       "evidence_valid": 1.0,
       "safe_action": 1.0
     },
-    "content_suite_replay_note": "Third replay after prompt hardening (forbidden terms made explicit) and console re-import; earlier two replays had one intermittent forbidden_irreversible_action each.",
-    "promotion_record": "artifacts/evaluation-v7-flash-candidate/promotion-record-flash.json",
     "previous_frozen_dataset_version": "v7-frozen-signature-clustering-holdout-20260702",
     "previous_results_apply_to_current_model": false,
     "historical_artifacts": [
       "artifacts/evaluation-v7-candidate/evaluation.json",
       "artifacts/evaluation-v7-candidate/promotion-record.json",
-      "artifacts/workflow-suite-v1-candidate/evaluation.json"
+      "artifacts/workflow-suite-v1-candidate/evaluation.json",
+      "artifacts/evaluation-v7-flash-candidate/promotion-record-flash.json"
     ]
   },
-  "boundary": "Promoted to portfolio-demo baseline on 2026-08-01 via promotion-record-flash.json. Flash configuration passed all measured gates (structural nine gates; content suite 30/30, 5/5, 6/6 after prompt hardening). Historical results remain evidence for the prior frozen DSL only; AI-assisted review is not an independent human audit and does not establish real-business validity."
+  "boundary": "Promoted to portfolio-demo baseline on 2026-08-01 via promotion-record-thinking-v2.json (thinking: true, reasoning_format separated, min_pairwise_precision 0.90). Structural nine gates passed (B3 F1 0.889, duplicate precision 1.0); content suite 30/30, 5/5, 6/6. Supersedes the flash-without-thinking baseline (promotion-record-flash.json, historical). AI-assisted review is not an independent human audit and does not establish real-business validity."
 }
