@@ -1,15 +1,15 @@
 # 四工作流套件状态记录
 
-当前状态为 `published_pending_revalidation`。四个 Dify 应用已导入、发布并配置独立 API Key；2026-07-19 控制台与仓库 DSL 已同步为 `deepseek-v4-flash`；2026-08-01 完成 flash 真实回放与冻结评测：结构化工作流九项质量门全部通过；内容套件经提示词强化后第三次回放五项质量门全部通过（问题簇 30/30、候选 SOP 5/5、周报叙事 6/6、证据引用 100%、安全动作 100%）。模型切换前的晋级结论不转移给当前 flash 配置；套件是否晋升由明确 promotion record 决定。
+当前状态为 `promoted_for_portfolio_demo`（2026-08-01 晋升）。四个 Dify 应用已导入、发布并配置独立 API Key；2026-07-19 控制台与仓库 DSL 已同步为 `deepseek-v4-flash`；2026-08-01 完成 flash 真实回放与冻结评测：结构化工作流九项质量门全部通过；内容套件经提示词强化后第三次回放五项质量门全部通过（问题簇 30/30、候选 SOP 5/5、周报叙事 6/6、证据引用 100%、安全动作 100%）。晋升记录：`artifacts/evaluation-v7-flash-candidate/promotion-record-flash.json`。模型切换前的 V7 结论保留为历史基线，不适用于当前 flash 配置。
 
 ## 应用与 Key
 
 | DSL 文件 | 应用 | API Key 环境变量 | 当前 flash 状态 |
 |---|---|---|---|
-| `feedback-structuring-v3-candidate.yml` | `客户反馈结构化-v3-candidate` | `DIFY_FEEDBACK_WORKFLOW_API_KEY` | 已发布；flash 冻结回放九门全过 |
-| `issue-cluster-narrative-v1-candidate.yml` | `问题簇命名与解释-v1-candidate` | `DIFY_CLUSTER_WORKFLOW_API_KEY` | 已发布；flash 回放 30/30 通过 |
-| `sop-draft-v1-candidate.yml` | `候选SOP草案-v1-candidate` | `DIFY_SOP_WORKFLOW_API_KEY` | 已发布；flash 回放 5/5（强化后） |
-| `weekly-report-narrative-v1-candidate.yml` | `运营周报叙事-v1-candidate` | `DIFY_REPORT_WORKFLOW_API_KEY` | 已发布；flash 回放 6/6（强化后） |
+| `feedback-structuring-v3-candidate.yml` | `客户反馈结构化-v3-candidate` | `DIFY_FEEDBACK_WORKFLOW_API_KEY` | 已晋升；flash 冻结回放九门全过 |
+| `issue-cluster-narrative-v1-candidate.yml` | `问题簇命名与解释-v1-candidate` | `DIFY_CLUSTER_WORKFLOW_API_KEY` | 已晋升；flash 回放 30/30 通过 |
+| `sop-draft-v1-candidate.yml` | `候选SOP草案-v1-candidate` | `DIFY_SOP_WORKFLOW_API_KEY` | 已晋升；flash 回放 5/5（强化后） |
+| `weekly-report-narrative-v1-candidate.yml` | `运营周报叙事-v1-candidate` | `DIFY_REPORT_WORKFLOW_API_KEY` | 已晋升；flash 回放 6/6（强化后） |
 
 ## flash 回放结果（2026-08-01）
 
@@ -43,7 +43,7 @@
 
 前两次失败均为工作流内安全门禁拦截（`ValueError: forbidden_irreversible_action`，Dify sandbox 拒绝），即 flash 偶发在 recommended_action 或步骤中出现“退款/补偿/删除数据/修改权限/自动执行/直接发布”等不可逆动作表述，被门禁按设计拦截；不是网络或基础设施故障。同一冻结输入、temperature=0 下失败点不固定，说明 flash 对内容工作流提示词的合规输出存在波动。
 
-处置（2026-08-01）：SOP 与周报提示词把禁词逐字写入约束并给出合规改写指引（DSL 哈希：SOP `68145176…`、周报 `68b01b53…`）；门禁（代码节点 FORBIDDEN 列表）保持不变；Dify 控制台重新导入两个工作流并更换 Key 后第三次回放五项质量门全部通过。套件当前满足晋升所需已测门禁，但保持 `published_pending_revalidation`，是否晋升由明确 promotion record 决定。
+处置（2026-08-01）：SOP 与周报提示词把禁词逐字写入约束并给出合规改写指引（DSL 哈希：SOP `68145176…`、周报 `68b01b53…`）；门禁（代码节点 FORBIDDEN 列表）保持不变；Dify 控制台重新导入两个工作流并更换 Key 后第三次回放五项质量门全部通过。同日经明确晋升记录（`promotion-record-flash.json`）晋级为作品集演示基线 `promoted_for_portfolio_demo`。
 
 权威文件（flash）：
 

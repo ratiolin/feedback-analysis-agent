@@ -1,0 +1,67 @@
+{
+  "decision": "promoted_for_portfolio_demo",
+  "decided_at": "2026-08-01T09:20:00+08:00",
+  "candidate": "customer-feedback-four-workflow-suite-v1",
+  "model": "deepseek-v4-flash",
+  "dataset_version": "v7-flash-frozen-signature-clustering-holdout-20260719",
+  "flash_frozen_manifest_sha256": "814ae6ae78c03c93f64b53db24af8975bd797a76e76646197da74e08f111ea8c",
+  "structural_evaluation_sha256": "3540ddc0f97e4a1028157445498549f95fd8969c20e8b1bee5fb0102e8effb67",
+  "structural_status_sha256": "2b5932d34e5168e69c29beda05b444a2596ebc6a85bab0c4009d8756cb1d2cfd",
+  "structural_analysis_cache_sha256": "d4e3b338069d251a2ab082cdeccd0b61205fd333006a477fd77a41951e7007b9",
+  "content_suite_evaluation_sha256": "c854e13f2c5104bf39b065c7ae5a108ab2963b95afb775b662721d09b6e31139",
+  "workflow_dsl_sha256": {
+    "feedback-structuring-v3-candidate.yml": "ce4ac150c2f0f84770866ca4384d1a3996527ebcb09115b7dc308d46cc51fa40",
+    "issue-cluster-narrative-v1-candidate.yml": "026441ff55992be3c65efce8a4aa9a28d28f836cd3a77fa89c882cfacd900d2a",
+    "sop-draft-v1-candidate.yml": "681451764ff9e63d402522774f40c2f2a90013acd07c7233e56b255ad2d9613e",
+    "weekly-report-narrative-v1-candidate.yml": "68b01b533ded34d57135fdd688210c99901290fe9219853dd811bb191312b2e0"
+  },
+  "structural_quality_gates_all_passed": true,
+  "structural_metrics": {
+    "schema_contract_valid_rate": 1.0,
+    "problem_type_macro_f1": 0.828,
+    "product_area_macro_f1": 0.984,
+    "owner_policy_consistency": 0.85,
+    "escalation_recall": 1.0,
+    "evidence_auto_location_rate": 1.0,
+    "duplicate_precision": 1.0,
+    "duplicate_recall": 0.5,
+    "b_cubed_f1": 0.857,
+    "first_attempt_dependency_success_rate": 1.0,
+    "cluster_purity": 1.0
+  },
+  "content_suite_gates_all_passed": true,
+  "content_suite_metrics": {
+    "cluster_success_rate": 1.0,
+    "sop_success_rate": 1.0,
+    "report_success_rate": 1.0,
+    "evidence_valid_rate": 1.0,
+    "safe_action_rate": 1.0
+  },
+  "approved_runtime_config": {
+    "workflow_version": "feedback-structuring-v3-candidate",
+    "cluster_workflow_version": "issue-cluster-narrative-v1-candidate",
+    "sop_workflow_version": "sop-draft-v1-candidate",
+    "report_workflow_version": "weekly-report-narrative-v1-candidate",
+    "routing_policy_version": "feedback-routing-v3-candidate",
+    "embedding_model": "BAAI/bge-small-zh-v1.5",
+    "cluster_linkage": "complete",
+    "cluster_raw_text_weight": 0.2,
+    "cluster_block_by_problem_type": true
+  },
+  "replay_history": [
+    {
+      "time": "2026-08-01T08:35:00+08:00",
+      "note": "Structural gates passed; content suite report 5/6 (forbidden_irreversible_action), not promoted."
+    },
+    {
+      "time": "2026-08-01T08:48:00+08:00",
+      "note": "After container image rebuild; content suite sop 4/5 (forbidden_irreversible_action), not promoted."
+    },
+    {
+      "time": "2026-08-01T09:12:00+08:00",
+      "note": "After SOP/report prompt hardening and console re-import; all measured gates passed."
+    }
+  ],
+  "scope": "Synthetic portfolio demo only; not evidence of real-business distribution, production SLA, or efficiency gains.",
+  "audit_boundary": "Holdout labels received AI-assisted consistency review, not independent human audit."
+}
