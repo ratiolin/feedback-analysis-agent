@@ -1,0 +1,58 @@
+{
+  "dataset_version": "v7-thinking-frozen-signature-clustering-holdout-20260801",
+  "state": "candidate_unscored",
+  "generated_at": "2026-08-01T11:20:00+08:00",
+  "row_count": 60,
+  "family_count": 30,
+  "boundary": "Same synthetic locked holdout as V7, re-frozen for deepseek-v4-flash with thinking mode enabled (thinking: true, reasoning_format: separated). Previous results do not transfer to this configuration; AI-assisted review is not an independent human audit.",
+  "candidate_config": {
+    "workflow_version": "feedback-structuring-v3-candidate",
+    "routing_policy_version": "feedback-routing-v3-candidate",
+    "embedding_model": "BAAI/bge-small-zh-v1.5",
+    "cluster_linkage": "complete",
+    "cluster_raw_text_weight": 0.2,
+    "cluster_block_by_problem_type": true,
+    "thinking": true,
+    "reasoning_format": "separated"
+  },
+  "holdout_path": "data/v7-evaluation/v7-holdout-locked.csv",
+  "holdout_sha256": "33efff97118fb740cb1fa517dd912085419da0e2f9aecf889750836c69df6dc1",
+  "audit_path": "data/v7-evaluation/v7-holdout-audit.csv",
+  "audit_sha256": "5e1921eb526cc4720b7088828f2622197cff729f779abcf82b1898ac4791013a",
+  "frozen_files": [
+    {
+      "path": "dify-workflows/feedback-structuring-v3-candidate.yml",
+      "sha256": "56c8a2773bc4347277b59b131581b4d53998ff51271524629d7e84759c57547d"
+    },
+    {
+      "path": "feedback_app/routing.py",
+      "sha256": "391bc17c196eca9d45222face670012319cb2f20ff35a948e1b3d1a39f603ee6"
+    },
+    {
+      "path": "feedback_app/clustering.py",
+      "sha256": "9b36e2511f292d8796122a4cd62f0d05d47a1c541c0e61571d0901e2697789ca"
+    },
+    {
+      "path": "feedback_app/embeddings.py",
+      "sha256": "4faf3c24287de494bfe0f311cc4b520cb35b99ca90b39b2f5cbea8e63005594c"
+    },
+    {
+      "path": "tools/evaluate.py",
+      "sha256": "16df94888e7bbcc17ba56c353e9ef8a2ffa41ae1f56d402c6f86ace71a6bb367"
+    },
+    {
+      "path": "tools/generate_v7_holdout.py",
+      "sha256": "d149c2ffe87a47577b417ab50d85a30a213eee845fb1c4adf8b983dde7eec743"
+    }
+  ],
+  "development_files": [
+    {
+      "path": "data/v6-evaluation/v6-holdout-locked.csv",
+      "sha256": "68ec9d3deb6bdc5b59ea05c9385f49ed1105a8a8d043272ff6cecb125e685da7"
+    },
+    {
+      "path": "artifacts/evaluation-v7-thinking-candidate/v6-development-analysis-cache.json",
+      "sha256": "687529be1d770f59ad0ccfb7fc85b8e688362b598196c9858d2cf9a611dea90a"
+    }
+  ]
+}
