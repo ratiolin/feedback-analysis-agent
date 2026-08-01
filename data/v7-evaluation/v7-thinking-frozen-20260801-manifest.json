@@ -1,5 +1,5 @@
 {
-  "dataset_version": "v7-thinking-frozen-signature-clustering-holdout-20260801",
+  "dataset_version": "v7-thinking-v2-frozen-signature-clustering-holdout-20260801",
   "state": "candidate_unscored",
   "generated_at": "2026-08-01T11:20:00+08:00",
   "row_count": 60,
@@ -13,7 +13,8 @@
     "cluster_raw_text_weight": 0.2,
     "cluster_block_by_problem_type": true,
     "thinking": true,
-    "reasoning_format": "separated"
+    "reasoning_format": "separated",
+    "min_pairwise_precision": 0.90
   },
   "holdout_path": "data/v7-evaluation/v7-holdout-locked.csv",
   "holdout_sha256": "33efff97118fb740cb1fa517dd912085419da0e2f9aecf889750836c69df6dc1",
@@ -38,7 +39,7 @@
     },
     {
       "path": "tools/evaluate.py",
-      "sha256": "16df94888e7bbcc17ba56c353e9ef8a2ffa41ae1f56d402c6f86ace71a6bb367"
+      "sha256": "4aa369bf58cb99265ca62d55238e3c5f953bbf5e2819e3c2d845b52a330c70ac"
     },
     {
       "path": "tools/generate_v7_holdout.py",

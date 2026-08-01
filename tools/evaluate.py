@@ -270,6 +270,7 @@ def clustering_evaluation(
     holdout_cluster_texts: list[str] | None = None,
     raw_text_weight: float = 1.0,
     block_by_problem_type: bool = False,
+    min_pairwise_precision: float = 0.80,
 ) -> dict:
     all_rows = development + holdout
     texts = [normalize_ticket_text(row["message"]) for row in all_rows]
@@ -299,6 +300,7 @@ def clustering_evaluation(
         development_gold,
         groups=development_groups,
         linkage=linkage,
+        minimum_pairwise_precision=min_pairwise_precision,
         thresholds=(
             [round(value / 100, 2) for value in range(30, 91)]
             if linkage == "complete"
@@ -519,6 +521,12 @@ def main() -> None:  # noqa: S3776 (comprehensive evaluation tool)
     parser.add_argument("--development-analysis-cache", type=Path)
     parser.add_argument("--cluster-raw-text-weight", type=float, default=1.0)
     parser.add_argument("--cluster-block-by-problem-type", action="store_true")
+    parser.add_argument(
+        "--min-pairwise-precision",
+        type=float,
+        default=0.80,
+        help="Minimum pairwise precision for development-set threshold selection.",
+    )
     args = parser.parse_args()
     data_path = safe_path(args.data, must_exist=True)
     development_path = safe_path(
@@ -598,6 +606,7 @@ def main() -> None:  # noqa: S3776 (comprehensive evaluation tool)
                 )
             ],
             linkage=args.linkage,
+            min_pairwise_precision=args.min_pairwise_precision,
             development_cluster_texts=(
                 cached_cluster_texts(development, development_analysis_cache)
                 if development_analysis_cache

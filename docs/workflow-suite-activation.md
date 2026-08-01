@@ -22,6 +22,24 @@
 
 首次依赖成功率 98.3%（2 条重试）。**九项门禁中八项通过，重复识别精确率 76.0% 未达 80% 门槛**——thinking 模式提升了召回（63.3% vs 50%）但显著降低精确率（76% vs 100%），B³ F1 略升。按纪律，thinking 配置保持 `candidate_scored_unpromoted`，不取代当前已晋升的 flash 无思考基线；如需以 thinking 作为作品集基线，必须先解决重复误合并（精确率）问题。权威文件：`artifacts/evaluation-v7-thinking-candidate/`。
 
+### 结构化工作流 thinking v2 冻结评测（2026-08-01，九项门禁全部通过）
+
+根因：thinking 模式下 `issue_signature` 更概括（如"Webhook…""权限"），在 dev 集调出的阈值（0.61）上把相邻问题误合并。改进：`select_threshold` 的 pairwise 精度约束从 0.80 提高到 0.90（dev 集上 B³ 仅 0.938→0.923，代价最小），冻结集更新为 `v7-thinking-v2-frozen-signature-clustering-holdout-20260801`，dev 调出阈值 0.64。
+
+| 指标 | thinking v2 实测 | 门槛 | thinking v1 | flash 无思考 |
+|---|---:|---:|---:|---:|
+| Schema 契约有效率 | 100% | 95% | 100% | 100% |
+| 问题类型 Macro-F1 | 0.875 | 0.80 | 0.875 | 0.828 |
+| 产品区域 Macro-F1 | 0.961 | 0.80 | 0.961 | 0.984 |
+| 责任路由一致率 | 86.7% | 85% | 86.7% | 85.0% |
+| 高风险升级召回率 | 100% | 100% | 100% | 100% |
+| quote 自动定位 | 100% | 95% | 100% | 100% |
+| 重复识别精确率 | **100%** | 80% | 76.0% | 100% |
+| 重复识别召回率 | 60.0% | 50% | 63.3% | 50.0% |
+| B³ F1 | **0.889** | 0.75 | 0.871 | 0.857 |
+
+重复误合并 0 例、聚类纯度 100%。**thinking v2 在所有已测配置中 B³ F1 最高（0.889），九项门禁全部通过**。权威文件：`artifacts/evaluation-v7-thinking-v2-candidate/`、`data/v7-evaluation/v7-thinking-frozen-20260801-manifest.json`（v2 版本）。
+
 ## 应用与 Key
 
 | DSL 文件 | 应用 | API Key 环境变量 | 当前 flash 状态 |
