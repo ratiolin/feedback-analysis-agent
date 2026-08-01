@@ -93,11 +93,11 @@ workflow:
           variable_selector: []
         model:
           completion_params:
-            temperature: 0
-            thinking: false
+            thinking: true
           mode: chat
           name: deepseek-v4-flash
           provider: langgenius/deepseek/deepseek
+        reasoning_format: separated
         prompt_config:
           jinja2_variables: []
         prompt_template:

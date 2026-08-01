@@ -93,11 +93,11 @@ workflow:
           variable_selector: []
         model:
           completion_params:
-            temperature: 0
-            thinking: false
+            thinking: true
           mode: chat
           name: deepseek-v4-flash
           provider: langgenius/deepseek/deepseek
+        reasoning_format: separated
         prompt_config:
           jinja2_variables: []
         prompt_template:
@@ -109,7 +109,7 @@ workflow:
 
             总工单数、严重度分布、问题簇数量、趋势、责任方和证据 ID 已由确定性服务生成。你不得重新计算或输出替代数字。你只把输入整理为可审核叙事，并严格区分观察、证据、待确认原因和建议动作。
 
-            只输出一个 JSON 对象，不要 markdown，不要解释，且只能包含：
+            最终回答必须输出一个完整的 JSON 对象（思考内容放在思考过程中，最终 content 必须包含完整 JSON，不能为空、不能只有思考）。不要 markdown，不要解释，且只能包含：
             {
               "title": "不超过50字的周报标题",
               "executive_summary": "不超过240字；只概括输入事实，不添加新数字或根因",

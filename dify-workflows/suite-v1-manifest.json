@@ -4,33 +4,38 @@
   "generated_at": "2026-07-19",
   "dify_dsl_version": "0.6.0",
   "model": "deepseek-v4-flash",
+  "model_config": {
+    "thinking": true,
+    "reasoning_format": "separated",
+    "note": "Thinking mode enabled on all four workflows on 2026-08-01; reasoning_format=separated keeps downstream text free of <think> content."
+  },
   "workflows": [
     {
       "file": "feedback-structuring-v3-candidate.yml",
       "app_name": "客户反馈结构化-v3-candidate",
       "state": "promoted_for_portfolio_demo",
-      "sha256": "ce4ac150c2f0f84770866ca4384d1a3996527ebcb09115b7dc308d46cc51fa40",
+      "sha256": "56c8a2773bc4347277b59b131581b4d53998ff51271524629d7e84759c57547d",
       "api_key_env": "DIFY_FEEDBACK_WORKFLOW_API_KEY"
     },
     {
       "file": "issue-cluster-narrative-v1-candidate.yml",
       "app_name": "问题簇命名与解释-v1-candidate",
       "state": "promoted_for_portfolio_demo",
-      "sha256": "026441ff55992be3c65efce8a4aa9a28d28f836cd3a77fa89c882cfacd900d2a",
+      "sha256": "a2d4fdf5f987d3891be9090a77fd3bb1ea8803f2f9a45ad414ca7fe8af04a217",
       "api_key_env": "DIFY_CLUSTER_WORKFLOW_API_KEY"
     },
     {
       "file": "sop-draft-v1-candidate.yml",
       "app_name": "候选SOP草案-v1-candidate",
       "state": "promoted_for_portfolio_demo",
-      "sha256": "681451764ff9e63d402522774f40c2f2a90013acd07c7233e56b255ad2d9613e",
+      "sha256": "0b164deb5f4cf66be3dbbdcdfeafcebb9e29653d91d4a0f0a1b341579a04a080",
       "api_key_env": "DIFY_SOP_WORKFLOW_API_KEY"
     },
     {
       "file": "weekly-report-narrative-v1-candidate.yml",
       "app_name": "运营周报叙事-v1-candidate",
       "state": "promoted_for_portfolio_demo",
-      "sha256": "68b01b533ded34d57135fdd688210c99901290fe9219853dd811bb191312b2e0",
+      "sha256": "c7f87a3890fb5a8e00b64a693b21f0ce6b06f27b2084bba25802fc163ad344a1",
       "api_key_env": "DIFY_REPORT_WORKFLOW_API_KEY"
     }
   ],

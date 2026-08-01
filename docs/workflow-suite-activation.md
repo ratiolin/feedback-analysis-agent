@@ -2,6 +2,8 @@
 
 当前状态为 `promoted_for_portfolio_demo`（2026-08-01 晋升）。四个 Dify 应用已导入、发布并配置独立 API Key；2026-07-19 控制台与仓库 DSL 已同步为 `deepseek-v4-flash`；2026-08-01 完成 flash 真实回放与冻结评测：结构化工作流九项质量门全部通过；内容套件经提示词强化后第三次回放五项质量门全部通过（问题簇 30/30、候选 SOP 5/5、周报叙事 6/6、证据引用 100%、安全动作 100%）。晋升记录：`artifacts/evaluation-v7-flash-candidate/promotion-record-flash.json`。模型切换前的 V7 结论保留为历史基线，不适用于当前 flash 配置。
 
+2026-08-01 晚：四个工作流全部开启 `deepseek-v4-flash` 思考模式（`thinking: true`）并采用 `reasoning_format: separated`（下游节点收到剥离思考的纯净 text，思考内容独立存放）。配套调整：`DIFY_TIMEOUT_SECONDS` 20 → 60（思考模式单次周报调用实测约 17 秒）；周报提示词强化"最终回答必须输出完整 JSON"。开启思考后的内容套件回放（2026-08-01 02:49 UTC）五项质量门全部通过：问题簇 30/30、候选 SOP 5/5、周报叙事 6/6、证据引用 100%、安全动作 100%。结构化工作流的 thinking 模式冻结评测待完成。
+
 ## 应用与 Key
 
 | DSL 文件 | 应用 | API Key 环境变量 | 当前 flash 状态 |
@@ -10,6 +12,8 @@
 | `issue-cluster-narrative-v1-candidate.yml` | `问题簇命名与解释-v1-candidate` | `DIFY_CLUSTER_WORKFLOW_API_KEY` | 已晋升；flash 回放 30/30 通过 |
 | `sop-draft-v1-candidate.yml` | `候选SOP草案-v1-candidate` | `DIFY_SOP_WORKFLOW_API_KEY` | 已晋升；flash 回放 5/5（强化后） |
 | `weekly-report-narrative-v1-candidate.yml` | `运营周报叙事-v1-candidate` | `DIFY_REPORT_WORKFLOW_API_KEY` | 已晋升；flash 回放 6/6（强化后） |
+
+（五个工作流的模型配置均为 `deepseek-v4-flash` + `thinking: true` + `reasoning_format: separated`。）
 
 ## flash 回放结果（2026-08-01）
 
