@@ -35,14 +35,21 @@
     }
   ],
   "evaluation": {
-    "status": "flash_replayed_structural_gates_passed_content_suite_not_promoted",
+    "status": "flash_replayed_all_measured_gates_passed_promotion_pending",
     "current_model_results_available": true,
     "flash_frozen_dataset_version": "v7-flash-frozen-signature-clustering-holdout-20260719",
     "flash_structural_evaluation": "artifacts/evaluation-v7-flash-candidate/evaluation.json",
     "flash_content_suite_evaluation": "artifacts/workflow-suite-v1-flash-candidate/evaluation.json",
     "structural_gates_all_passed": true,
-    "content_suite_gates_all_passed": false,
-    "content_suite_report_success_rate": 0.8333,
+    "content_suite_gates_all_passed": true,
+    "content_suite_success_rates": {
+      "cluster": 1.0,
+      "sop": 1.0,
+      "report": 1.0,
+      "evidence_valid": 1.0,
+      "safe_action": 1.0
+    },
+    "content_suite_replay_note": "Third replay after prompt hardening (forbidden terms made explicit) and console re-import; earlier two replays had one intermittent forbidden_irreversible_action each.",
     "previous_frozen_dataset_version": "v7-frozen-signature-clustering-holdout-20260702",
     "previous_results_apply_to_current_model": false,
     "historical_artifacts": [
@@ -51,5 +58,5 @@
       "artifacts/workflow-suite-v1-candidate/evaluation.json"
     ]
   },
-  "boundary": "The current flash configuration was replayed on 2026-08-01: structural workflow passed all measured gates; content suite did not pass (report narrative 5/6, one batch blocked by forbidden_irreversible_action) and remains unpromoted. Historical results remain evidence for the prior frozen DSL only; AI-assisted review is not an independent human audit and does not establish real-business validity."
+  "boundary": "The current flash configuration passed all measured gates on 2026-08-01 (structural nine gates; content suite 30/30, 5/5, 6/6 after prompt hardening). Promotion to portfolio-demo baseline still requires an explicit promotion record; historical results remain evidence for the prior frozen DSL only; AI-assisted review is not an independent human audit and does not establish real-business validity."
 }
