@@ -37,14 +37,14 @@ CSV / 在线工单
 产品区域：8
 当前问题簇：40（20 个重复簇 + 20 个单例）
 候选 SOP：20
-工作流：4 个已发布并完成真实 API 回放
+工作流：4 个已发布；flash 回放完成（2026-08-01）
 ```
 
-四个工作流均已发布、配置 Key 并完成真实 API 回放。内容工作流在锁定回放中实现问题簇叙事 30/30、候选 SOP 5/5、周报叙事 6/6 成功，证据 ID 有效率与安全动作契约均为 100%。
+四个工作流均已发布；2026-07-19 控制台与仓库 DSL 已同步为 `deepseek-v4-flash`，2026-08-01 完成 flash 真实回放与冻结评测：结构化工作流九项质量门全部通过（B³ F1 0.857、重复识别精确率 100%、首轮依赖成功率 100%）；内容工作流问题簇 30/30、候选 SOP 5/5，但周报叙事 5/6 未达门槛，内容套件保持未晋升。下述 V7 数据来自模型切换前的冻结版本，只作历史基线。
 
 V5、V6 失败结果继续保留。V7 使用全新 `v7-frozen-signature-clustering-holdout-20260702`（N=60）评分，并由独立 promotion record 晋级为作品集演示基线：Schema 契约有效率 100%、quote 自动定位 100%、问题类型 Macro-F1 0.846、产品区域 Macro-F1 0.963、责任路由一致率 85.0%、升级召回 100%、重复识别精确率 84.2%、召回率 53.3%、聚类纯度 96.7%、B³ F1 0.853。首次依赖成功率 88.3% 是独立信息项，不与 Schema 契约有效率混写。
 
-V7 只证明合成机制门禁通过。60 条标签经过 AI 辅助一致性复核，不是独立人工审计，也不代表真实业务分布、生产 SLA 或效率收益。
+V7 只证明模型切换前的合成机制门禁通过。60 条标签经过 AI 辅助一致性复核，不是独立人工审计，也不代表当前 flash、真实业务分布、生产 SLA 或效率收益。flash 回放明细见 `docs/workflow-suite-activation.md` 与 `dify-workflows/suite-v1-manifest.json`。
 
 ## 快速开始
 
@@ -91,7 +91,7 @@ uv run python tools/evaluate.py --analyzer demo --embedding tfidf
 | 工具 | 用途 | 状态 |
 |---|---|---|
 | [ruff](https://docs.astral.sh/ruff/) | Lint + 格式化 | 零警告 |
-| [pytest](https://docs.pytest.org/) | 单元 & 集成测试 | 134 通过，总覆盖率 99% |
+| [pytest](https://docs.pytest.org/) | 单元 & 集成测试 | 140 通过，总覆盖率 99% |
 | [SonarQube Cloud](https://sonarcloud.io/dashboard?id=metratio_feedback-analysis-agent) | 持续代码质量 | 质量门 OK，新代码覆盖率 98.9%，未解决问题 0 |
 | GitHub Actions CI | ruff + pytest + SonarQube | 已配置 |
 
@@ -126,6 +126,6 @@ docs/               架构、部署、评测边界与人工审核说明
 
 详见 `docs/architecture.md`、`docs/evaluation-boundary.md` 和 `docs/deployment.md`。
 
-候选激活与历史记录见 `docs/activation-checklist.md`；真实密钥不得进入仓库。AI 辅助复核不等于独立人工审计。
+真实密钥不得进入仓库。AI 辅助复核不等于独立人工审计。
 
 四工作流套件的导入、真实回放和 V7 晋级记录见 `docs/workflow-suite-activation.md`。晋级范围仅为合成作品集演示。

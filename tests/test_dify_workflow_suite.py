@@ -60,7 +60,7 @@ def test_latest_suite_has_four_importable_single_responsibility_workflows() -> N
         start = node_by_type(workflow, "start")
         assert {item["variable"] for item in start["data"]["variables"]} == contract["inputs"]
         llm = node_by_type(workflow, "llm")
-        assert llm["data"]["model"]["name"] == "deepseek-v4-pro"
+        assert llm["data"]["model"]["name"] == "deepseek-v4-flash"
         assert llm["data"]["model"]["completion_params"]["temperature"] == 0
         end = node_by_type(workflow, "end")
         assert end["data"]["outputs"] == [

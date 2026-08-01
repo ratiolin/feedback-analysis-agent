@@ -1,48 +1,55 @@
 {
   "suite": "customer-feedback-four-workflow-suite-v1",
-  "state": "promoted_for_portfolio_demo",
-  "generated_at": "2026-07-02",
+  "state": "published_pending_revalidation",
+  "generated_at": "2026-07-19",
   "dify_dsl_version": "0.6.0",
-  "model": "deepseek-v4-pro",
+  "model": "deepseek-v4-flash",
   "workflows": [
     {
       "file": "feedback-structuring-v3-candidate.yml",
       "app_name": "客户反馈结构化-v3-candidate",
-      "state": "promoted_for_portfolio_demo",
-      "sha256": "6fb0f287b081d5e09256e881ed24a8710e7c7db087ed1675879e2e72f467c447",
+      "state": "published_pending_revalidation",
+      "sha256": "ce4ac150c2f0f84770866ca4384d1a3996527ebcb09115b7dc308d46cc51fa40",
       "api_key_env": "DIFY_FEEDBACK_WORKFLOW_API_KEY"
     },
     {
       "file": "issue-cluster-narrative-v1-candidate.yml",
       "app_name": "问题簇命名与解释-v1-candidate",
-      "state": "published_replayed",
-      "sha256": "1de4f77112023b2d22cbf83099fe9c490bbd2847ffcc4ccc631dceb04a108c78",
+      "state": "published_pending_revalidation",
+      "sha256": "026441ff55992be3c65efce8a4aa9a28d28f836cd3a77fa89c882cfacd900d2a",
       "api_key_env": "DIFY_CLUSTER_WORKFLOW_API_KEY"
     },
     {
       "file": "sop-draft-v1-candidate.yml",
       "app_name": "候选SOP草案-v1-candidate",
-      "state": "published_replayed",
-      "sha256": "fa12e2a1501e8122740d81d75540137191670b91ce6abf8b3a7b3f7e7852a22c",
+      "state": "published_pending_revalidation",
+      "sha256": "a44871b2fe1c9f0f7874d196bf83fd5d458bee5b6bb25d62115a98699be3a4d2",
       "api_key_env": "DIFY_SOP_WORKFLOW_API_KEY"
     },
     {
       "file": "weekly-report-narrative-v1-candidate.yml",
       "app_name": "运营周报叙事-v1-candidate",
-      "state": "published_replayed",
-      "sha256": "f92918e54119d340fbd2aa2b6a4ae1615c88e28e0096f951b89cdd68680beb9b",
+      "state": "published_pending_revalidation",
+      "sha256": "7ff90a0298127dd1f99afbb77e754afdd56dd86732703cf9dc1c063463999ed0",
       "api_key_env": "DIFY_REPORT_WORKFLOW_API_KEY"
     }
   ],
   "evaluation": {
-    "dataset_version": "v7-frozen-signature-clustering-holdout-20260702",
-    "content_workflow_gates_passed": true,
-    "overall_quality_gates_passed": true,
-    "artifacts": [
+    "status": "flash_replayed_structural_gates_passed_content_suite_not_promoted",
+    "current_model_results_available": true,
+    "flash_frozen_dataset_version": "v7-flash-frozen-signature-clustering-holdout-20260719",
+    "flash_structural_evaluation": "artifacts/evaluation-v7-flash-candidate/evaluation.json",
+    "flash_content_suite_evaluation": "artifacts/workflow-suite-v1-flash-candidate/evaluation.json",
+    "structural_gates_all_passed": true,
+    "content_suite_gates_all_passed": false,
+    "content_suite_report_success_rate": 0.8333,
+    "previous_frozen_dataset_version": "v7-frozen-signature-clustering-holdout-20260702",
+    "previous_results_apply_to_current_model": false,
+    "historical_artifacts": [
       "artifacts/evaluation-v7-candidate/evaluation.json",
       "artifacts/evaluation-v7-candidate/promotion-record.json",
       "artifacts/workflow-suite-v1-candidate/evaluation.json"
     ]
   },
-  "boundary": "Promotion is limited to the synthetic portfolio demo. AI-assisted review is not an independent human audit and results do not establish real-business validity."
+  "boundary": "The current flash configuration was replayed on 2026-08-01: structural workflow passed all measured gates; content suite did not pass (report narrative 5/6, one batch blocked by forbidden_irreversible_action) and remains unpromoted. Historical results remain evidence for the prior frozen DSL only; AI-assisted review is not an independent human audit and does not establish real-business validity."
 }

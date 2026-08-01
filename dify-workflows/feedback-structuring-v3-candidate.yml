@@ -120,7 +120,7 @@ workflow:
             temperature: 0
             thinking: false
           mode: chat
-          name: deepseek-v4-pro
+          name: deepseek-v4-flash
           provider: langgenius/deepseek/deepseek
         prompt_config:
           jinja2_variables: []
